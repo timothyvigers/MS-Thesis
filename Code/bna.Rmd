@@ -1,0 +1,54 @@
+---
+title: "Bayesian Network Analysis"
+author: "Tim Vigers"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(bnlearn)
+library(tidyverse)
+load("/Users/timvigers/Documents/GitHub/MS-Thesis/Data_Raw/forTestingBNA.Rdata")
+```
+
+```{r data cleaning,echo=FALSE}
+# Convert to factor
+factor_vars <- c("key","Array","fincat","NHW","dr34")
+forTim[,factor_vars] <- lapply(forTim[,factor_vars], as.factor)
+# Remove unnecessary columns, complete cases
+df <- forTim %>% select(key,T1Dgroup,fincat,NHW,dr34,SEX,clinage,cohortgrp2,
+                        cg19309499,cg25705717,hilic_397,lipid_593)
+df <- df[complete.cases(df),]
+```
+
+# BN Structure
+
+## Hill-climbing
+
+```{r hc structure, echo=FALSE,fig.height=8,fig.width=8}
+# Hill climbing structure learning
+struct <- hc(df)
+plot(struct)
+```
+
+\pagebreak
+
+## Tabu search
+
+```{r tabu structure, echo=FALSE,fig.height=8,fig.width=8}
+# Tabu search
+struct_tabu <- tabu(df)
+plot(struct_tabu)
+```
+
+# Model
+
+```{r echo=FALSE}
+# Use HC for now 
+hc_bn <- bn.fit(struct, data = df)
+```
+
+### Questions for the group
+1. What is the best structure learning algorithm? Hill climbing? Tabu search? Both are greedy algorithms.
+2. What sort of imputation?
