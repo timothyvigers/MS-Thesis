@@ -47,6 +47,7 @@ plot(struct_tabu)
 ```{r echo=FALSE}
 # Use HC for now 
 hc_bn <- bn.fit(struct, data = df)
+hc_bn$dr34
 ```
 
 ### Questions for the group
