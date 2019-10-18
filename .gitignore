@@ -10,3 +10,5 @@ Data_Raw
 *.pdf
 
 MS-Thesis.Rproj
+
+.RData
