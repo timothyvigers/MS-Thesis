@@ -2,54 +2,61 @@
 title: "Bayesian Network Analysis"
 author: "Tim Vigers"
 date: "`r format(Sys.time(), '%d %B %Y')`"
-output: pdf_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(bnlearn)
+library(gridExtra)
 library(tidyverse)
 load("/Users/timvigers/Documents/GitHub/MS-Thesis/Data_Raw/forTestingBNA.Rdata")
 ```
 
 ```{r data cleaning,echo=FALSE}
 # Convert to factor
-factor_vars <- c("key","Array","fincat","NHW","dr34")
+factor_vars <- c("key","Array","fincat","NHW","dr34","T1Dgroup","SEX","IAgroup2",
+                 "platform")
 forTim[,factor_vars] <- lapply(forTim[,factor_vars], as.factor)
 # Remove unnecessary columns, complete cases
-df <- forTim %>% select(key,T1Dgroup,fincat,NHW,dr34,SEX,clinage,cohortgrp2,
-                        cg19309499,cg25705717,hilic_397,lipid_593)
-df <- df[complete.cases(df),]
+df <- forTim %>% select(ID,Visit_Type,fincat,SEX,dr34,clinage,IAgroup2,
+                        Array:lipid_593)
+# Split by visit type
+ev <- df %>% filter(Visit_Type == "EV") %>% na.omit
+psv <- df %>% filter(Visit_Type == "PSV") %>% na.omit
+sv <- df %>% filter(Visit_Type == "SV") %>% na.omit
+pret1d <- df %>% filter(Visit_Type == "T1Dpre") %>% na.omit
 ```
 
 # BN Structure
 
 ## Hill-climbing
 
-```{r hc structure, echo=FALSE,fig.height=8,fig.width=8}
+```{r hc structure,echo=FALSE,fig.height=6}
 # Hill climbing structure learning
-struct <- hc(df)
-plot(struct)
+struct_ev <- hc(ev)
+struct_psv <- hc(psv)
+struct_sv <- hc(sv)
+struct_pret1d <- hc(pret1d)
+# Constraint-based (grow-shrink)
+struct_ev_cb <- gs(ev)
+struct_psv_cb <- gs(psv)
+struct_sv_cb <- gs(sv)
+struct_pret1d_cb <- gs(pret1d)
+# Plot
+plot(struct_ev,main = "EV")
+plot(struct_ev_cb,main = "EV (Grow-Shrink)")
+plot(struct_psv,main = "PSV")
+plot(struct_psv_cb,main = "PSV (Grow-Shrink)")
+plot(struct_sv,main = "SV")
+plot(struct_sv_cb,main = "SV (Grow-Shrink)")
+plot(struct_pret1d,main = "Pre-T1D")
+plot(struct_pret1d_cb,main = "Pre-T1D (Grow-Shrink)")
 ```
 
-\pagebreak
 
-## Tabu search
-
-```{r tabu structure, echo=FALSE,fig.height=8,fig.width=8}
-# Tabu search
-struct_tabu <- tabu(df)
-plot(struct_tabu)
-```
-
-# Model
-
-```{r echo=FALSE}
-# Use HC for now 
-hc_bn <- bn.fit(struct, data = df)
-hc_bn$dr34
-```
 
 ### Questions for the group
-1. What is the best structure learning algorithm? Hill climbing? Tabu search? Both are greedy algorithms.
-2. What sort of imputation?
+1. What is the best structure learning algorithm? Hill climbing? Tabu search? Both are greedy algorithms. Or is a score based algorithm better?
+2. What sort of imputation if any?
+3. Are there any arcs that should be whitelisted or blacklisted based on prior knowledge?
