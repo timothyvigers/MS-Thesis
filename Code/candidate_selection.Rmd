@@ -1,0 +1,21 @@
+---
+title: "Candidate Selection"
+author: "Tim Vigers"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "/Volumes/Tim/thesis/data")
+```
+
+```{r data import and clean,echo=FALSE,cache=TRUE}
+# Clinical data
+pheno <- read.csv("./phenotype/ivyomicssample.csv",na.strings = "")
+# Methylation
+sesame <- as.data.frame(load("/Volumes/Tim/thesis/data/methylation/sesame450K.batchAdj.Mmatrix.Rdata"))
+# Metabolomics
+lipids <- read.csv("./metabolomics/lipid.bc.csv")
+lipids_anno <- read.csv("./metabolomics/lipid.featureAnno.csv")
+```
