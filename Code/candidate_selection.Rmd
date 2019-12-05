@@ -8,14 +8,27 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir = "/Volumes/Tim/thesis/data")
+library(tidyverse)
 ```
 
-```{r data import and clean,echo=FALSE,cache=TRUE}
-# Clinical data
-pheno <- read.csv("./phenotype/ivyomicssample.csv",na.strings = "")
+```{r data import write csv,echo=FALSE,eval=FALSE}
 # Methylation
-sesame <- as.data.frame(load("/Volumes/Tim/thesis/data/methylation/sesame450K.batchAdj.Mmatrix.Rdata"))
-# Metabolomics
-lipids <- read.csv("./metabolomics/lipid.bc.csv")
-lipids_anno <- read.csv("./metabolomics/lipid.featureAnno.csv")
+# 450K
+load("/Volumes/Tim/thesis/data/methylation/probesFromPipeline.Rdata")
+load("/Volumes/Tim/thesis/data/methylation/sesame450K.batchAdj.Mmatrix.Rdata")
+k450 <- as.data.frame(M.sesame.batch)
+key_450k <- read.csv("/Volumes/Tim/thesis/data/methylation/key.450K.csv",stringsAsFactors = F)
+colnames(k450)[match(key_450k$array,colnames(k450))] <- key_450k$samplekey
+# EPIC
+load("/Volumes/Tim/thesis/data/methylation/sesameEPIC.batchAdj.Mmatrix.Rdata")
+epic <- as.data.frame(M.sesame.batch)
+key_epic <- read.csv("/Volumes/Tim/thesis/data/methylation/key.EPIC.csv",stringsAsFactors = F)
+colnames(epic)[match(key_epic$array,colnames(epic))] <- key_epic$samplekey
+# CSV
+write.csv(as.data.frame(probesFromPipeline),
+          file = "/Volumes/Tim/thesis/data/methylation/probes.csv",row.names = F,na = "")
+write.csv(k450,
+          file = "/Volumes/Tim/thesis/data/methylation/450k.csv",row.names = F,na = "")
+write.csv(epic,
+          file = "/Volumes/Tim/thesis/data/methylation/epic.csv",row.names = F,na = "")
 ```
