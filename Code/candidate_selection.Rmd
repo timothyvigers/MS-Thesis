@@ -14,21 +14,21 @@ library(tidyverse)
 ```{r data import write csv,echo=FALSE,eval=FALSE}
 # Methylation
 # 450K
-load("/Volumes/Tim/thesis/data/methylation/probesFromPipeline.Rdata")
 load("/Volumes/Tim/thesis/data/methylation/sesame450K.batchAdj.Mmatrix.Rdata")
 k450 <- as.data.frame(M.sesame.batch)
-key_450k <- read.csv("/Volumes/Tim/thesis/data/methylation/key.450K.csv",stringsAsFactors = F)
-colnames(k450)[match(key_450k$array,colnames(k450))] <- key_450k$samplekey
+# CSV
+write.csv(k450[1:5000,],
+          file = "/Volumes/Tim/thesis/data/methylation/450k_test.csv",na = "")
+rm(list=ls())
 # EPIC
 load("/Volumes/Tim/thesis/data/methylation/sesameEPIC.batchAdj.Mmatrix.Rdata")
 epic <- as.data.frame(M.sesame.batch)
-key_epic <- read.csv("/Volumes/Tim/thesis/data/methylation/key.EPIC.csv",stringsAsFactors = F)
-colnames(epic)[match(key_epic$array,colnames(epic))] <- key_epic$samplekey
 # CSV
-write.csv(as.data.frame(probesFromPipeline),
-          file = "/Volumes/Tim/thesis/data/methylation/probes.csv",row.names = F,na = "")
-write.csv(k450,
-          file = "/Volumes/Tim/thesis/data/methylation/450k.csv",row.names = F,na = "")
-write.csv(epic,
-          file = "/Volumes/Tim/thesis/data/methylation/epic.csv",row.names = F,na = "")
+write.csv(epic[1:5000,],
+          file = "/Volumes/Tim/thesis/data/methylation/epic_test.csv",na = "")
+rm(list=ls())
+```
+
+```{r echo=FALSE}
+
 ```
