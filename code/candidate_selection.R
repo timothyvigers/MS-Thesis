@@ -88,3 +88,195 @@ out <- out[order(as.numeric(as.character(out$`p-value`))),]
 write.csv(out[1:100,],
           file = "/home/vigerst/MS-Thesis/candidate_selection/gctof_epic_results.csv",
           row.names = F)
+
+# hilic
+## 450K
+temp <- merge(hilic,k450,by = "samplekey")
+# Linear models
+out <- lapply(names(k450)[1:(ncol(k450)-3)], function(x){
+  base_form <- paste0(x,"~sex+age")
+  metabs <- lapply(names(hilic)[2:ncol(hilic)], function(y) {
+    form <- as.formula(paste0(base_form,"+",y))
+    mod <- lme(form,random = ~1|samplekey,data = temp,na.action = na.omit)
+    results <- as.data.frame(summary(mod)$tTable)
+    results$term <- rownames(results)
+    results[4,"term"] <- paste0(x,"_",y)
+    results[4,c("term","Value","p-value")]
+  })
+  df <- do.call(rbind,metabs)
+  df
+})
+# Combine list of DFs into large DF
+out <- do.call(rbind,out)
+colnames(out) <- c("term","Value","p-value")
+out <- out[order(as.numeric(as.character(out$`p-value`))),]
+write.csv(out[1:100,],
+          file = "/home/vigerst/MS-Thesis/candidate_selection/hilic_450k_results.csv",
+          row.names = F)
+## Epic
+temp <- merge(hilic,epic,by = "samplekey")
+# Linear models
+out <- lapply(names(epic)[1:(ncol(epic)-3)], function(x){
+  base_form <- paste0(x,"~sex+age")
+  metabs <- lapply(names(hilic)[2:ncol(hilic)], function(y) {
+    form <- as.formula(paste0(base_form,"+",y))
+    mod <- lme(form,random = ~1|samplekey,data = temp,na.action = na.omit)
+    results <- as.data.frame(summary(mod)$tTable)
+    results$term <- rownames(results)
+    results[4,"term"] <- paste0(x,"_",y)
+    results[4,c("term","Value","p-value")]
+  })
+  df <- do.call(rbind,metabs)
+  df
+})
+# Combine list of DFs into large DF
+out <- do.call(rbind,out)
+colnames(out) <- c("term","Value","p-value")
+out <- out[order(as.numeric(as.character(out$`p-value`))),]
+write.csv(out[1:100,],
+          file = "/home/vigerst/MS-Thesis/candidate_selection/hilic_epic_results.csv",
+          row.names = F)
+
+# lipid
+## 450K
+temp <- merge(lipid,k450,by = "samplekey")
+# Linear models
+out <- lapply(names(k450)[1:(ncol(k450)-3)], function(x){
+  base_form <- paste0(x,"~sex+age")
+  metabs <- lapply(names(lipid)[2:ncol(lipid)], function(y) {
+    form <- as.formula(paste0(base_form,"+",y))
+    mod <- lme(form,random = ~1|samplekey,data = temp,na.action = na.omit)
+    results <- as.data.frame(summary(mod)$tTable)
+    results$term <- rownames(results)
+    results[4,"term"] <- paste0(x,"_",y)
+    results[4,c("term","Value","p-value")]
+  })
+  df <- do.call(rbind,metabs)
+  df
+})
+# Combine list of DFs into large DF
+out <- do.call(rbind,out)
+colnames(out) <- c("term","Value","p-value")
+out <- out[order(as.numeric(as.character(out$`p-value`))),]
+write.csv(out[1:100,],
+          file = "/home/vigerst/MS-Thesis/candidate_selection/lipid_450k_results.csv",
+          row.names = F)
+## Epic
+temp <- merge(lipid,epic,by = "samplekey")
+# Linear models
+out <- lapply(names(epic)[1:(ncol(epic)-3)], function(x){
+  base_form <- paste0(x,"~sex+age")
+  metabs <- lapply(names(lipid)[2:ncol(lipid)], function(y) {
+    form <- as.formula(paste0(base_form,"+",y))
+    mod <- lme(form,random = ~1|samplekey,data = temp,na.action = na.omit)
+    results <- as.data.frame(summary(mod)$tTable)
+    results$term <- rownames(results)
+    results[4,"term"] <- paste0(x,"_",y)
+    results[4,c("term","Value","p-value")]
+  })
+  df <- do.call(rbind,metabs)
+  df
+})
+# Combine list of DFs into large DF
+out <- do.call(rbind,out)
+colnames(out) <- c("term","Value","p-value")
+out <- out[order(as.numeric(as.character(out$`p-value`))),]
+write.csv(out[1:100,],
+          file = "/home/vigerst/MS-Thesis/candidate_selection/lipid_epic_results.csv",
+          row.names = F)
+
+# oxylipin
+## 450K
+temp <- merge(oxylipin,k450,by = "samplekey")
+# Linear models
+out <- lapply(names(k450)[1:(ncol(k450)-3)], function(x){
+  base_form <- paste0(x,"~sex+age")
+  metabs <- lapply(names(oxylipin)[2:ncol(oxylipin)], function(y) {
+    form <- as.formula(paste0(base_form,"+",y))
+    mod <- lme(form,random = ~1|samplekey,data = temp,na.action = na.omit)
+    results <- as.data.frame(summary(mod)$tTable)
+    results$term <- rownames(results)
+    results[4,"term"] <- paste0(x,"_",y)
+    results[4,c("term","Value","p-value")]
+  })
+  df <- do.call(rbind,metabs)
+  df
+})
+# Combine list of DFs into large DF
+out <- do.call(rbind,out)
+colnames(out) <- c("term","Value","p-value")
+out <- out[order(as.numeric(as.character(out$`p-value`))),]
+write.csv(out[1:100,],
+          file = "/home/vigerst/MS-Thesis/candidate_selection/oxylipin_450k_results.csv",
+          row.names = F)
+## Epic
+temp <- merge(oxylipin,epic,by = "samplekey")
+# Linear models
+out <- lapply(names(epic)[1:(ncol(epic)-3)], function(x){
+  base_form <- paste0(x,"~sex+age")
+  metabs <- lapply(names(oxylipin)[2:ncol(oxylipin)], function(y) {
+    form <- as.formula(paste0(base_form,"+",y))
+    mod <- lme(form,random = ~1|samplekey,data = temp,na.action = na.omit)
+    results <- as.data.frame(summary(mod)$tTable)
+    results$term <- rownames(results)
+    results[4,"term"] <- paste0(x,"_",y)
+    results[4,c("term","Value","p-value")]
+  })
+  df <- do.call(rbind,metabs)
+  df
+})
+# Combine list of DFs into large DF
+out <- do.call(rbind,out)
+colnames(out) <- c("term","Value","p-value")
+out <- out[order(as.numeric(as.character(out$`p-value`))),]
+write.csv(out[1:100,],
+          file = "/home/vigerst/MS-Thesis/candidate_selection/oxylipin_epic_results.csv",
+          row.names = F)
+
+# vitd
+## 450K
+temp <- merge(vitd,k450,by = "samplekey")
+# Linear models
+out <- lapply(names(k450)[1:(ncol(k450)-3)], function(x){
+  base_form <- paste0(x,"~sex+age")
+  metabs <- lapply(names(vitd)[2:ncol(vitd)], function(y) {
+    form <- as.formula(paste0(base_form,"+",y))
+    mod <- lme(form,random = ~1|samplekey,data = temp,na.action = na.omit)
+    results <- as.data.frame(summary(mod)$tTable)
+    results$term <- rownames(results)
+    results[4,"term"] <- paste0(x,"_",y)
+    results[4,c("term","Value","p-value")]
+  })
+  df <- do.call(rbind,metabs)
+  df
+})
+# Combine list of DFs into large DF
+out <- do.call(rbind,out)
+colnames(out) <- c("term","Value","p-value")
+out <- out[order(as.numeric(as.character(out$`p-value`))),]
+write.csv(out[1:100,],
+          file = "/home/vigerst/MS-Thesis/candidate_selection/vitd_450k_results.csv",
+          row.names = F)
+## Epic
+temp <- merge(vitd,epic,by = "samplekey")
+# Linear models
+out <- lapply(names(epic)[1:(ncol(epic)-3)], function(x){
+  base_form <- paste0(x,"~sex+age")
+  metabs <- lapply(names(vitd)[2:ncol(vitd)], function(y) {
+    form <- as.formula(paste0(base_form,"+",y))
+    mod <- lme(form,random = ~1|samplekey,data = temp,na.action = na.omit)
+    results <- as.data.frame(summary(mod)$tTable)
+    results$term <- rownames(results)
+    results[4,"term"] <- paste0(x,"_",y)
+    results[4,c("term","Value","p-value")]
+  })
+  df <- do.call(rbind,metabs)
+  df
+})
+# Combine list of DFs into large DF
+out <- do.call(rbind,out)
+colnames(out) <- c("term","Value","p-value")
+out <- out[order(as.numeric(as.character(out$`p-value`))),]
+write.csv(out[1:100,],
+          file = "/home/vigerst/MS-Thesis/candidate_selection/vitd_epic_results.csv",
+          row.names = F)
