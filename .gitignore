@@ -13,3 +13,4 @@ MS-Thesis.Rproj
 
 .RData
 .RDataTmp
+*nohup.out*
