@@ -1,17 +1,17 @@
 library(nlme)
 # Data import
 # Phenotype
-pheno <- read.csv("/Volumes/Tim/thesis/data/phenotype/ivyomicssample.csv",
+pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample.csv",
                   stringsAsFactors = F,
                   na.strings = "")
 # Probes
-load("/Volumes/Tim/thesis/data/methylation/probesFromPipeline.Rdata")
+load("/home/biostats_share/Norris/data/methylation/probesFromPipeline.Rdata")
 probes <- as.data.frame(probesFromPipeline)
 # Methylation
 # 450K
-load("/Volumes/Tim/thesis/data/methylation/sesame450K.batchAdj.Mmatrix.Rdata")
+load("/home/biostats_share/Norris/data/methylation/sesame450K.batchAdj.Mmatrix.Rdata")
 k450 <- as.data.frame(t(M.sesame.batch))
-key_450k <- read.csv("/Volumes/Tim/thesis/data/methylation/key.450K.csv",
+key_450k <- read.csv("/home/biostats_share/Norris/data/methylation/key.450K.csv",
                      stringsAsFactors = F)
 key_450k$samplekey[duplicated(key_450k$samplekey)] <- 
   paste0(key_450k$samplekey[duplicated(key_450k$samplekey)],".2")
@@ -19,27 +19,27 @@ k450$samplekey <- key_450k$samplekey[match(rownames(k450),key_450k$array)]
 k450$age <- pheno$clinage[match(k450$samplekey,pheno$samplekey)]
 k450$sex <- factor(pheno$SEX[match(k450$samplekey,pheno$samplekey)])
 # EPIC
-load("/Volumes/Tim/thesis/data/methylation/sesameEPIC.batchAdj.Mmatrix.Rdata")
+load("/home/biostats_share/Norris/data/methylation/sesameEPIC.batchAdj.Mmatrix.Rdata")
 epic <- as.data.frame(t(M.sesame.batch))
-key_epic <- read.csv("/Volumes/Tim/thesis/data/methylation/key.EPIC.csv",
+key_epic <- read.csv("/home/biostats_share/Norris/data/methylation/key.EPIC.csv",
                      stringsAsFactors = F)
 epic$samplekey <- key_epic$samplekey[match(rownames(epic),key_epic$array)]
 epic$age <- pheno$clinage[match(epic$samplekey,pheno$samplekey)]
 epic$sex <- factor(pheno$SEX[match(epic$samplekey,pheno$samplekey)]) 
 rm(M.sesame.batch,probesFromPipeline)
 # Metabolites
-gctof <- read.csv("/Volumes/Tim/thesis/data/metabolomics/gctof.bc.csv")
-hilic <- read.csv("/Volumes/Tim/thesis/data/metabolomics/hilic.bc.csv")
-lipid <- read.csv("/Volumes/Tim/thesis/data/metabolomics/lipid.bc.csv")
-oxylipin <- read.csv("/Volumes/Tim/thesis/data/metabolomics/oxylipin.bc.csv")
-vitd <- read.csv("/Volumes/Tim/thesis/data/metabolomics/vitD.bc.csv")
+gctof <- read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.bc.csv")
+hilic <- read.csv("/home/biostats_share/Norris/data/metabolomics/hilic.bc.csv")
+lipid <- read.csv("/home/biostats_share/Norris/data/metabolomics/lipid.bc.csv")
+oxylipin <- read.csv("/home/biostats_share/Norris/data/metabolomics/oxylipin.bc.csv")
+vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
 # Annotations
-anno_gctof <- read.csv("/Volumes/Tim/thesis/data/metabolomics/gctof.featureAnno.csv")
-anno_hilic <- read.csv("/Volumes/Tim/thesis/data/metabolomics/hilic.featureAnno.csv")
-anno_lipid <- read.csv("/Volumes/Tim/thesis/data/metabolomics/lipid.featureAnno.csv")
+anno_gctof <- read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.featureAnno.csv")
+anno_hilic <- read.csv("/home/biostats_share/Norris/data/metabolomics/hilic.featureAnno.csv")
+anno_lipid <- read.csv("/home/biostats_share/Norris/data/metabolomics/lipid.featureAnno.csv")
 anno_oxylipin <- 
-  read.csv("/Volumes/Tim/thesis/data/metabolomics/oxylipin.featureAnno.csv")
-anno_vitd <- read.csv("/Volumes/Tim/thesis/data/metabolomics/vitD.featureAnno.csv")
+  read.csv("/home/biostats_share/Norris/data/metabolomics/oxylipin.featureAnno.csv")
+anno_vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.featureAnno.csv")
 
 # gctof
 ## 450K
@@ -63,7 +63,7 @@ out <- do.call(rbind,out)
 colnames(out) <- c("term","Value","p-value")
 out <- out[order(as.numeric(as.character(out$`p-value`))),]
 write.csv(out[1:100,],
-          file = "/Volumes/Tim/thesis/results/gctof_450k_results.csv",
+          file = "/home/vigerst/MS-Thesis/candidate_selection/gctof_450k_results.csv",
           row.names = F)
 ## Epic
 temp <- merge(gctof,epic,by = "samplekey")
@@ -86,5 +86,5 @@ out <- do.call(rbind,out)
 colnames(out) <- c("term","Value","p-value")
 out <- out[order(as.numeric(as.character(out$`p-value`))),]
 write.csv(out[1:100,],
-          file = "/Volumes/Tim/thesis/results/gctof_epic_results.csv",
+          file = "/home/vigerst/MS-Thesis/candidate_selection/gctof_epic_results.csv",
           row.names = F)
