@@ -1,17 +1,5 @@
----
-title: "Candidate Selection"
-author: "Tim Vigers"
-date: "`r format(Sys.time(), '%d %B %Y')`"
-output: html_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 library(nlme)
-# No tidyverse on network drive! Too slow.
-```
-
-```{r data import write csv,echo=FALSE,eval=FALSE}
+# Data import
 # Phenotype
 pheno <- read.csv("/Volumes/Tim/thesis/data/phenotype/ivyomicssample.csv",
                   stringsAsFactors = F,
@@ -52,13 +40,9 @@ anno_lipid <- read.csv("/Volumes/Tim/thesis/data/metabolomics/lipid.featureAnno.
 anno_oxylipin <- 
   read.csv("/Volumes/Tim/thesis/data/metabolomics/oxylipin.featureAnno.csv")
 anno_vitd <- read.csv("/Volumes/Tim/thesis/data/metabolomics/vitD.featureAnno.csv")
-```
 
 # gctof
-
 ## 450K
-
-```{r echo=FALSE}
 temp <- merge(gctof,k450,by = "samplekey")
 # Linear models
 out <- lapply(names(k450)[1:(ncol(k450)-3)], function(x){
@@ -71,16 +55,36 @@ out <- lapply(names(k450)[1:(ncol(k450)-3)], function(x){
     results[4,"term"] <- paste0(x,"_",y)
     results[4,c("term","Value","p-value")]
   })
-  df <- data.frame(matrix(unlist(metabs), nrow=length(metabs), byrow=T))
+  df <- do.call(rbind,metabs)
   df
 })
 # Combine list of DFs into large DF
 out <- do.call(rbind,out)
 colnames(out) <- c("term","Value","p-value")
 out <- out[order(as.numeric(as.character(out$`p-value`))),]
-write.csv(out[100,],
-          file = "/Volumes/Tim/thesis/results/gctof_results.csv",
+write.csv(out[1:100,],
+          file = "/Volumes/Tim/thesis/results/gctof_450k_results.csv",
           row.names = F)
-```
-
-## EPIC
+## Epic
+temp <- merge(gctof,epic,by = "samplekey")
+# Linear models
+out <- lapply(names(epic)[1:(ncol(epic)-3)], function(x){
+  base_form <- paste0(x,"~sex+age")
+  metabs <- lapply(names(gctof)[2:ncol(gctof)], function(y) {
+    form <- as.formula(paste0(base_form,"+",y))
+    mod <- lme(form,random = ~1|samplekey,data = temp,na.action = na.omit)
+    results <- as.data.frame(summary(mod)$tTable)
+    results$term <- rownames(results)
+    results[4,"term"] <- paste0(x,"_",y)
+    results[4,c("term","Value","p-value")]
+  })
+  df <- do.call(rbind,metabs)
+  df
+})
+# Combine list of DFs into large DF
+out <- do.call(rbind,out)
+colnames(out) <- c("term","Value","p-value")
+out <- out[order(as.numeric(as.character(out$`p-value`))),]
+write.csv(out[1:100,],
+          file = "/Volumes/Tim/thesis/results/gctof_epic_results.csv",
+          row.names = F)
