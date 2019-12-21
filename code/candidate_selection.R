@@ -38,9 +38,9 @@ vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
 metab_methyl_lin_mod <- function(metabolomics,methylation,metab_name,methyl_name){
   temp <- merge(metabolomics,methylation,by = "samplekey")
   # Linear models
-  out <- lapply(names(methylation)[1:5], function(x){
+  out <- lapply(names(methylation)[1:(ncol(methylation)-3)], function(x){
     base_form <- paste0(x,"~sex+age")
-    metabs <- lapply(names(metabolomics)[2:6], function(y) {
+    metabs <- lapply(names(metabolomics)[2:ncol(metabolomics)], function(y) {
       form <- as.formula(paste0(base_form,"+",y))
       mod <- tryCatch(lme(form,random = ~1|samplekey,data = temp,na.action = na.omit),
                       message = function(m) NULL,warning = function(m) NULL,error = function(m) NULL)
