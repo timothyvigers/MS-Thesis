@@ -62,7 +62,7 @@ out <- lapply(names(k450)[1:(ncol(k450)-3)], function(x){
 out <- do.call(rbind,out)
 colnames(out) <- c("term","Value","p-value")
 out <- out[order(as.numeric(as.character(out$`p-value`))),]
-write.csv(out[1:100,],
+write.csv(out,
           file = "/home/vigerst/MS-Thesis/candidate_selection/gctof_450k_results.csv",
           row.names = F)
 ## Epic
@@ -85,7 +85,7 @@ out <- lapply(names(epic)[1:(ncol(epic)-3)], function(x){
 out <- do.call(rbind,out)
 colnames(out) <- c("term","Value","p-value")
 out <- out[order(as.numeric(as.character(out$`p-value`))),]
-write.csv(out[1:100,],
+write.csv(out,
           file = "/home/vigerst/MS-Thesis/candidate_selection/gctof_epic_results.csv",
           row.names = F)
 
@@ -110,7 +110,7 @@ out <- lapply(names(k450)[1:(ncol(k450)-3)], function(x){
 out <- do.call(rbind,out)
 colnames(out) <- c("term","Value","p-value")
 out <- out[order(as.numeric(as.character(out$`p-value`))),]
-write.csv(out[1:100,],
+write.csv(out,
           file = "/home/vigerst/MS-Thesis/candidate_selection/hilic_450k_results.csv",
           row.names = F)
 ## Epic
@@ -133,7 +133,7 @@ out <- lapply(names(epic)[1:(ncol(epic)-3)], function(x){
 out <- do.call(rbind,out)
 colnames(out) <- c("term","Value","p-value")
 out <- out[order(as.numeric(as.character(out$`p-value`))),]
-write.csv(out[1:100,],
+write.csv(out,
           file = "/home/vigerst/MS-Thesis/candidate_selection/hilic_epic_results.csv",
           row.names = F)
 
@@ -158,7 +158,7 @@ out <- lapply(names(k450)[1:(ncol(k450)-3)], function(x){
 out <- do.call(rbind,out)
 colnames(out) <- c("term","Value","p-value")
 out <- out[order(as.numeric(as.character(out$`p-value`))),]
-write.csv(out[1:100,],
+write.csv(out,
           file = "/home/vigerst/MS-Thesis/candidate_selection/lipid_450k_results.csv",
           row.names = F)
 ## Epic
@@ -181,7 +181,7 @@ out <- lapply(names(epic)[1:(ncol(epic)-3)], function(x){
 out <- do.call(rbind,out)
 colnames(out) <- c("term","Value","p-value")
 out <- out[order(as.numeric(as.character(out$`p-value`))),]
-write.csv(out[1:100,],
+write.csv(out,
           file = "/home/vigerst/MS-Thesis/candidate_selection/lipid_epic_results.csv",
           row.names = F)
 
@@ -206,7 +206,7 @@ out <- lapply(names(k450)[1:(ncol(k450)-3)], function(x){
 out <- do.call(rbind,out)
 colnames(out) <- c("term","Value","p-value")
 out <- out[order(as.numeric(as.character(out$`p-value`))),]
-write.csv(out[1:100,],
+write.csv(out,
           file = "/home/vigerst/MS-Thesis/candidate_selection/oxylipin_450k_results.csv",
           row.names = F)
 ## Epic
@@ -229,7 +229,7 @@ out <- lapply(names(epic)[1:(ncol(epic)-3)], function(x){
 out <- do.call(rbind,out)
 colnames(out) <- c("term","Value","p-value")
 out <- out[order(as.numeric(as.character(out$`p-value`))),]
-write.csv(out[1:100,],
+write.csv(out,
           file = "/home/vigerst/MS-Thesis/candidate_selection/oxylipin_epic_results.csv",
           row.names = F)
 
@@ -254,7 +254,7 @@ out <- lapply(names(k450)[1:(ncol(k450)-3)], function(x){
 out <- do.call(rbind,out)
 colnames(out) <- c("term","Value","p-value")
 out <- out[order(as.numeric(as.character(out$`p-value`))),]
-write.csv(out[1:100,],
+write.csv(out,
           file = "/home/vigerst/MS-Thesis/candidate_selection/vitd_450k_results.csv",
           row.names = F)
 ## Epic
@@ -277,6 +277,6 @@ out <- lapply(names(epic)[1:(ncol(epic)-3)], function(x){
 out <- do.call(rbind,out)
 colnames(out) <- c("term","Value","p-value")
 out <- out[order(as.numeric(as.character(out$`p-value`))),]
-write.csv(out[1:100,],
+write.csv(out,
           file = "/home/vigerst/MS-Thesis/candidate_selection/vitd_epic_results.csv",
           row.names = F)
