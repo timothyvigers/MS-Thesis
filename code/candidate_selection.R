@@ -65,30 +65,29 @@ out <- out[order(as.numeric(as.character(out$`p-value`))),]
 write.csv(out,
           file = "/home/vigerst/MS-Thesis/candidate_selection/gctof_450k_results.csv",
           row.names = F)
-# ## Epic
-# temp <- merge(gctof,epic,by = "samplekey")
-# # Linear models
-# out <- lapply(names(epic)[1:(ncol(epic)-3)], function(x){
-#   base_form <- paste0(x,"~sex+age")
-#   metabs <- lapply(names(gctof)[2:ncol(gctof)], function(y) {
-#     form <- as.formula(paste0(base_form,"+",y))
-#     mod <- lme(form,random = ~1|samplekey,data = temp,na.action = na.omit)
-#     results <- as.data.frame(summary(mod)$tTable)
-#     results$term <- rownames(results)
-#     results[4,"term"] <- paste0(x,"_",y)
-#     results[4,c("term","Value","p-value")]
-#   })
-#   df <- do.call(rbind,metabs)
-#   df
-# })
-# # Combine list of DFs into large DF
-# out <- do.call(rbind,out)
-# colnames(out) <- c("term","Value","p-value")
-# out <- out[order(as.numeric(as.character(out$`p-value`))),]
-# write.csv(out,
-#           file = "/home/vigerst/MS-Thesis/candidate_selection/gctof_epic_results.csv",
-#           row.names = F)
-# 
+## Epic
+temp <- merge(gctof,epic,by = "samplekey")
+# Linear models
+out <- lapply(names(epic)[1:5], function(x){
+  base_form <- paste0(x,"~sex+age")
+  metabs <- lapply(names(gctof)[2:6], function(y) {
+    form <- as.formula(paste0(base_form,"+",y))
+    mod <- lme(form,random = ~1|samplekey,data = temp,na.action = na.omit)
+    results <- as.data.frame(summary(mod)$tTable)
+    results$term <- rownames(results)
+    results[4,"term"] <- paste0(x,"_",y)
+    results[4,c("term","Value","p-value")]
+  })
+  df <- do.call(rbind,metabs)
+  df
+})
+# Combine list of DFs into large DF
+out <- do.call(rbind,out)
+colnames(out) <- c("term","Value","p-value")
+out <- out[order(as.numeric(as.character(out$`p-value`))),]
+write.csv(out,
+          file = "/home/vigerst/MS-Thesis/candidate_selection/gctof_epic_results.csv",
+          row.names = F)
 # # hilic
 # ## 450K
 # temp <- merge(hilic,k450,by = "samplekey")
