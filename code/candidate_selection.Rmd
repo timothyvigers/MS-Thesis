@@ -61,9 +61,9 @@ anno_vitd <- read.csv("/Volumes/Tim/thesis/data/metabolomics/vitD.featureAnno.cs
 ```{r echo=FALSE}
 temp <- merge(gctof,k450,by = "samplekey")
 # Linear models
-out <- lapply(names(k450)[1:(ncol(k450)-3)], function(x){
+out <- lapply(names(k450)[1:5], function(x){
   base_form <- paste0(x,"~sex+age")
-  metabs <- lapply(names(gctof)[2:ncol(gctof)], function(y) {
+  metabs <- lapply(names(gctof)[2:6], function(y) {
     form <- as.formula(paste0(base_form,"+",y))
     mod <- lme(form,random = ~1|samplekey,data = temp,na.action = na.omit)
     results <- as.data.frame(summary(mod)$tTable)
@@ -77,10 +77,7 @@ out <- lapply(names(k450)[1:(ncol(k450)-3)], function(x){
 # Combine list of DFs into large DF
 out <- do.call(rbind,out)
 colnames(out) <- c("term","Value","p-value")
-out <- out[order(as.numeric(as.character(out$`p-value`))),]
-write.csv(out[100,],
-          file = "/Volumes/Tim/thesis/results/gctof_results.csv",
+write.csv(out[1:100,],
+          file = "/Volumes/Tim/thesis/results/gctof_450k_results.csv",
           row.names = F)
 ```
-
-## EPIC
