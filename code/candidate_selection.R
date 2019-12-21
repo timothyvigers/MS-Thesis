@@ -61,7 +61,8 @@ metab_methyl_lin_mod <- function(metabolomics,methylation,metab_name,methyl_name
   # Combine list of DFs into large DF
   out <- do.call(rbind,out)
   out <- out[order(as.numeric(as.character(out$`p-value`))),]
-  file <- paste0("/Volumes/Tim/thesis/results/",metab_name,"_",methyl_name,"_results.csv")
+  file <- paste0("/home/vigerst/MS-Thesis/candidate_selection/",metab_name,"_",
+                 methyl_name,"_results.csv")
   write.csv(out[complete.cases(out),],file = file,row.names = F)
 }
 
