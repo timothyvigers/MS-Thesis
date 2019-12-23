@@ -12,7 +12,7 @@ methyl <- as.data.frame(t(M.adj))
 key_450k <- read.csv("/home/biostats_share/Norris/data/methylation/key.450K.csv",
                      stringsAsFactors = F)
 key_450k$platform <- "450K"
-key_epic <- read.csv("/home/biostats_share/Norris/data/methylation/key.epic.csv",
+key_epic <- read.csv("/home/biostats_share/Norris/data/methylation/key.EPIC.csv",
                      stringsAsFactors = F)
 key_epic$platform <- "EPIC"
 key <- rbind(key_450k,key_epic)
