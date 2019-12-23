@@ -8,6 +8,7 @@ pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample.csv
 # Combined dataset
 load("/home/biostats_share/Norris/data/methylation/Mmatrix.platformAdj.Rdata")
 methyl <- as.data.frame(t(M.adj))
+
 key_450k <- read.csv("/home/biostats_share/Norris/data/methylation/key.450K.csv",
                      stringsAsFactors = F)
 key_450k$platform <- "450K"
