@@ -4,7 +4,7 @@ Data_Raw
 .Rproj.user
 /data
 .Rhistory
-
+/candidate_selection
 *.html
 
 *.pdf
