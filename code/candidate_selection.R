@@ -67,7 +67,7 @@ metab_methyl_lin_mod <- function(metabolomics,methylation,metab_name,methyl_name
   out <- do.call(rbind,out)
   out <- out[order(as.numeric(as.character(out$`p-value`))),]
   file <- paste0("/home/vigerst/MS-Thesis/candidate_selection/",metab_name,"_",
-                 methyl_name,"_results.csv")
+                 methyl_name,"_parallel_results.csv")
   write.csv(out[complete.cases(out),],file = file,row.names = F)
 }
 
