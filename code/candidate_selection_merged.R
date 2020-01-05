@@ -1,4 +1,9 @@
 library(nlme)
+library(parallel)
+# Parallel package cores
+no_cores <- 80
+# Initiate cluster
+cl <- makeCluster(no_cores)
 # Data import
 # Phenotype
 pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample.csv",
@@ -31,9 +36,9 @@ vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
 metab_methyl_lin_mod <- function(metabolomics,methylation,metab_name,methyl_name){
   temp <- merge(metabolomics,methylation,by = "samplekey")
   # Linear models
-  out <- lapply(names(methylation)[1:(ncol(methylation)-4)], function(x){
+  out <- parLapply(cl,names(methylation)[1:(ncol(methylation)-4)], function(x){
     base_form <- paste0(x,"~sex+age+platform")
-    metabs <- lapply(names(metabolomics)[2:ncol(metabolomics)], function(y) {
+    metabs <- parLapply(cl,names(metabolomics)[2:ncol(metabolomics)], function(y) {
       form <- as.formula(paste0(base_form,"+",y))
       mod <- tryCatch(lme(form,random = ~1|samplekey,data = temp,na.action = na.omit),
                       message = function(m) NULL,warning = function(m) NULL,error = function(m) NULL)
