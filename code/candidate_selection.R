@@ -74,29 +74,29 @@ metab_methyl_lin_mod <- function(metabolomics,methylation,metab_name,methyl_name
 # gctof
 ## 450K
 metab_methyl_lin_mod(gctof,k450,"gctof","450K")
-## Epic
-metab_methyl_lin_mod(gctof,epic,"gctof","EPIC")
-
-# hilic
-## 450K
-metab_methyl_lin_mod(hilic,k450,"hilic","450K")
-## Epic
-metab_methyl_lin_mod(hilic,epic,"hilic","EPIC")
-
-# lipid
-## 450K
-metab_methyl_lin_mod(lipid,k450,"lipid","450K")
-## Epic
-metab_methyl_lin_mod(lipid,epic,"lipid","EPIC")
-
-# oxylipin
-## 450K
-metab_methyl_lin_mod(oxylipin,k450,"oxylipin","450K")
-## Epic
-metab_methyl_lin_mod(oxylipin,epic,"oxylipin","EPIC")
-
-# vitd
-## 450K
-metab_methyl_lin_mod(vitd,k450,"vitd","450K")
-## Epic
-metab_methyl_lin_mod(vitd,epic,"vitd","EPIC")
+# ## Epic
+# metab_methyl_lin_mod(gctof,epic,"gctof","EPIC")
+# 
+# # hilic
+# ## 450K
+# metab_methyl_lin_mod(hilic,k450,"hilic","450K")
+# ## Epic
+# metab_methyl_lin_mod(hilic,epic,"hilic","EPIC")
+# 
+# # lipid
+# ## 450K
+# metab_methyl_lin_mod(lipid,k450,"lipid","450K")
+# ## Epic
+# metab_methyl_lin_mod(lipid,epic,"lipid","EPIC")
+# 
+# # oxylipin
+# ## 450K
+# metab_methyl_lin_mod(oxylipin,k450,"oxylipin","450K")
+# ## Epic
+# metab_methyl_lin_mod(oxylipin,epic,"oxylipin","EPIC")
+# 
+# # vitd
+# ## 450K
+# metab_methyl_lin_mod(vitd,k450,"vitd","450K")
+# ## Epic
+# metab_methyl_lin_mod(vitd,epic,"vitd","EPIC")
