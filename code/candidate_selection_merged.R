@@ -78,3 +78,6 @@ metab_methyl_lin_mod(oxylipin,methyl,"oxylipin","merged")
 
 # vitd
 metab_methyl_lin_mod(vitd,methyl,"vitd","merged")
+
+# Stop
+stopCluster(cl)
