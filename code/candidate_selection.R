@@ -1,8 +1,6 @@
 library(parallel)
 # Parallel package cores
 no_cores <- 80
-cl <- makeCluster(no_cores)
-clusterEvalQ(cl, library(nlme))
 # Data import
 # Phenotype
 pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample.csv",
@@ -40,6 +38,8 @@ vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
 
 # Model function with tryCatch
 metab_methyl_lin_mod <- function(metabolomics,methylation,metab_name,methyl_name){
+  cl <- makeCluster(no_cores)
+  clusterEvalQ(cl, library(nlme))
   temp <- merge(metabolomics,methylation,by = "samplekey")
   # Linear models
   methyl <- names(methylation)[1:(ncol(methylation)-3)]
@@ -63,40 +63,37 @@ metab_methyl_lin_mod <- function(metabolomics,methylation,metab_name,methyl_name
       return(results)
     }
   })
+  df <- do.call(rbind,result_list)
+  return(df)
   stopCluster(cl)
-    df <- do.call(rbind,result_list)
-    df
 }
 
 # gctof
 ## 450K
 metab_methyl_lin_mod(gctof,k450,"gctof","450K")
 # ## Epic
-metab_methyl_lin_mod(gctof,epic,"gctof","EPIC")
-
-# hilic
-## 450K
-metab_methyl_lin_mod(hilic,k450,"hilic","450K")
-## Epic
-metab_methyl_lin_mod(hilic,epic,"hilic","EPIC")
-
-# lipid
-## 450K
-metab_methyl_lin_mod(lipid,k450,"lipid","450K")
-## Epic
-metab_methyl_lin_mod(lipid,epic,"lipid","EPIC")
-
-# oxylipin
-## 450K
-metab_methyl_lin_mod(oxylipin,k450,"oxylipin","450K")
-## Epic
-metab_methyl_lin_mod(oxylipin,epic,"oxylipin","EPIC")
-
-# vitd
-## 450K
-metab_methyl_lin_mod(vitd,k450,"vitd","450K")
-## Epic
-metab_methyl_lin_mod(vitd,epic,"vitd","EPIC")
-
-# Stop
-stopCluster(cl)
+# metab_methyl_lin_mod(gctof,epic,"gctof","EPIC")
+# 
+# # hilic
+# ## 450K
+# metab_methyl_lin_mod(hilic,k450,"hilic","450K")
+# ## Epic
+# metab_methyl_lin_mod(hilic,epic,"hilic","EPIC")
+# 
+# # lipid
+# ## 450K
+# metab_methyl_lin_mod(lipid,k450,"lipid","450K")
+# ## Epic
+# metab_methyl_lin_mod(lipid,epic,"lipid","EPIC")
+# 
+# # oxylipin
+# ## 450K
+# metab_methyl_lin_mod(oxylipin,k450,"oxylipin","450K")
+# ## Epic
+# metab_methyl_lin_mod(oxylipin,epic,"oxylipin","EPIC")
+# 
+# # vitd
+# ## 450K
+# metab_methyl_lin_mod(vitd,k450,"vitd","450K")
+# ## Epic
+# metab_methyl_lin_mod(vitd,epic,"vitd","EPIC")
