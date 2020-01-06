@@ -1,9 +1,8 @@
-library(nlme)
 library(parallel)
 # Parallel package cores
 no_cores <- 80
-# Initiate cluster
-cl <- makeCluster(no_cores,type="FORK")
+cl <- makeCluster(no_cores)
+clusterEvalQ(cl, library(nlme))
 # Data import
 # Phenotype
 pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample.csv",
@@ -43,32 +42,30 @@ vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
 metab_methyl_lin_mod <- function(metabolomics,methylation,metab_name,methyl_name){
   temp <- merge(metabolomics,methylation,by = "samplekey")
   # Linear models
-  out <- parLapply(cl,names(methylation)[1:(ncol(methylation)-3)], function(x){
-    base_form <- paste0(x,"~sex+age")
-    metabs <- parLapply(cl,names(metabolomics)[2:ncol(metabolomics)], function(y) {
-      form <- as.formula(paste0(base_form,"+",y))
-      mod <- tryCatch(lme(form,random = ~1|samplekey,data = temp,na.action = na.omit),
-                      message = function(m) NULL,warning = function(m) NULL,error = function(m) NULL)
-      if (!is.null(mod)) {
-        results <- as.data.frame(summary(mod)$tTable)
-        results$term <- rownames(results)
-        results[4,"term"] <- paste0(x,"_",y)
-        return(results[4,c("term","Value","p-value")])
-      } else {
-        results <- as.data.frame(matrix(c(NA,NA,NA),nrow = 1))
-        colnames(results) <- c("term","Value","p-value")
-        return(results)
-      }
-    })
-    df <- do.call(rbind,metabs)
-    df
+  methyl <- names(methylation)[1:(ncol(methylation)-3)]
+  metab <- names(metabolomics)[2:ncol(metabolomics)]
+  mods <- paste0(methyl,"~sex+age")
+  mods <- paste(rep(mods, each = length(metab)), metab, sep = "+")
+  clusterExport(cl,c("temp","mods"))
+  result_list <- parLapply(cl,mods[1:100],function(x){
+    form <- as.formula(x)
+    mod <- lme(form,random = ~1|samplekey,data = temp,
+                        na.action = na.omit)
+    if (!is.null(mod)) {
+      results <- as.data.frame(summary(mod)$tTable)
+      results$term <- rownames(results)
+      results[4,"methyl"] <- strsplit(x,"~")[[1]][1]
+      results[4,"metab"] <- strsplit(x,"\\+")[[1]][3]
+      return(results[4,c("methyl","metab","Value","p-value")])
+    } else {
+      results <- as.data.frame(matrix(c(NA,NA,NA,NA),nrow = 1))
+      colnames(results) <- c("methyl","metab","Value","p-value")
+      return(results)
+    }
   })
-  # Combine list of DFs into large DF
-  out <- do.call(rbind,out)
-  out <- out[order(as.numeric(as.character(out$`p-value`))),]
-  file <- paste0("/home/vigerst/MS-Thesis/candidate_selection/",metab_name,"_",
-                 methyl_name,"_parallel_results.csv")
-  write.csv(out[complete.cases(out),],file = file,row.names = F)
+  stopCluster(cl)
+    df <- do.call(rbind,result_list)
+    df
 }
 
 # gctof
