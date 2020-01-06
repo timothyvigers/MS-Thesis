@@ -3,7 +3,7 @@ library(parallel)
 # Parallel package cores
 no_cores <- 80
 # Initiate cluster
-cl <- makeCluster(no_cores)
+cl <- makeCluster(no_cores,type="FORK")
 # Data import
 # Phenotype
 pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample.csv",
@@ -100,3 +100,6 @@ metab_methyl_lin_mod(oxylipin,epic,"oxylipin","EPIC")
 metab_methyl_lin_mod(vitd,k450,"vitd","450K")
 ## Epic
 metab_methyl_lin_mod(vitd,epic,"vitd","EPIC")
+
+# Stop
+stopCluster(cl)
