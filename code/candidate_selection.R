@@ -36,7 +36,7 @@ lipid <- read.csv("/home/biostats_share/Norris/data/metabolomics/lipid.bc.csv")
 oxylipin <- read.csv("/home/biostats_share/Norris/data/metabolomics/oxylipin.bc.csv")
 vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
 
-450k
+# 450k 
 # gctof
 temp <- merge(gctof,k450,by = "samplekey")
 methyl <- names(k450)[1:(ncol(k450)-3)]
