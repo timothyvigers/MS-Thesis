@@ -46,7 +46,7 @@ mods <- paste(rep(mods, each = length(metab)), metab, sep = "+")
 # Make cluster
 cl <- makeCluster(no_cores,type = "FORK")
 # Linear models
-result_list <- parLapply(cl,mods,function(x){
+result_list <- parLapply(cl,mods[1:100],function(x){
   form <- as.formula(x)
   mod <- lme(form,random = ~1|samplekey,data = temp,
              na.action = na.omit)
