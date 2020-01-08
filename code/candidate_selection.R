@@ -1,4 +1,5 @@
 library(parallel)
+library(nlme)
 # Parallel package cores
 no_cores <- 80
 # Data import
@@ -36,8 +37,15 @@ lipid <- read.csv("/home/biostats_share/Norris/data/metabolomics/lipid.bc.csv")
 oxylipin <- read.csv("/home/biostats_share/Norris/data/metabolomics/oxylipin.bc.csv")
 vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
 
+# Testing
+metabolomics <- gctof
+methylation <- k450
+metab_name <- "gctof"
+methyl_name <- "450k"
+
 # Model function with tryCatch
-metab_methyl_lin_mod <- function(metabolomics,methylation,metab_name,methyl_name){
+metab_methyl_lin_mod <- function(metabolomics,methylation,metab_name,methyl_name,
+                                 out_dir = "/home/vigerst/MS-Thesis/candidate_selection"){
   # Model 
   temp <- merge(metabolomics,methylation,by = "samplekey")
   methyl <- names(methylation)[1:(ncol(methylation)-3)]
@@ -46,7 +54,7 @@ metab_methyl_lin_mod <- function(metabolomics,methylation,metab_name,methyl_name
   mods <- paste(rep(mods, each = length(metab)), metab, sep = "+")
   cl <- makeCluster(no_cores,type = "FORK")
   # Linear models
-  result_list <- parLapply(cl,mods[1:100],function(x){
+  result_list <- parLapply(cl,mods[1:1000],function(x){
     form <- as.formula(x)
     mod <- lme(form,random = ~1|samplekey,data = temp,
                         na.action = na.omit)
@@ -63,7 +71,8 @@ metab_methyl_lin_mod <- function(metabolomics,methylation,metab_name,methyl_name
     }
   })
   df <- do.call(rbind,result_list)
-  return(df)
+  filename <- paste0(out_dir,"/",metab_name,"_",methyl_name,"_parallel.csv")
+  write.csv(df,file = filename,row.names = F)
   stopCluster(cl)
 }
 
