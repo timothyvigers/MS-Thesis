@@ -7,57 +7,31 @@ no_cores <- 80
 pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample.csv",
                   stringsAsFactors = F,
                   na.strings = "")
-# Probes
-load("/home/biostats_share/Norris/data/methylation/probesFromPipeline.Rdata")
-probes <- as.data.frame(probesFromPipeline)
-# Methylation
-# 450K
-load("/home/biostats_share/Norris/data/methylation/sesame450K.batchAdj.Mmatrix.Rdata")
-k450 <- as.data.frame(t(M.sesame.batch))
-key_450k <- read.csv("/home/biostats_share/Norris/data/methylation/key.450K.csv",
-                     stringsAsFactors = F)
-key_450k$samplekey[duplicated(key_450k$samplekey)] <- 
-  paste0(key_450k$samplekey[duplicated(key_450k$samplekey)],".2")
-k450$samplekey <- key_450k$samplekey[match(rownames(k450),key_450k$array)]
-k450$age <- pheno$clinage[match(k450$samplekey,pheno$samplekey)]
-k450$sex <- factor(pheno$SEX[match(k450$samplekey,pheno$samplekey)])
 # EPIC
-load("/home/biostats_share/Norris/data/methylation/sesameEPIC.batchAdj.Mmatrix.Rdata")
-epic <- as.data.frame(t(M.sesame.batch))
-key_epic <- read.csv("/home/biostats_share/Norris/data/methylation/key.EPIC.csv",
-                     stringsAsFactors = F)
-epic$samplekey <- key_epic$samplekey[match(rownames(epic),key_epic$array)]
-epic$age <- pheno$clinage[match(epic$samplekey,pheno$samplekey)]
-epic$sex <- factor(pheno$SEX[match(epic$samplekey,pheno$samplekey)]) 
-rm(M.sesame.batch,probesFromPipeline)
+# load("/home/biostats_share/Norris/data/methylation/sesameEPIC.batchAdj.Mmatrix.Rdata")
+# epic <- as.data.frame(t(M.sesame.batch))
+# key_epic <- read.csv("/home/biostats_share/Norris/data/methylation/key.EPIC.csv",
+#                      stringsAsFactors = F)
+# epic$samplekey <- key_epic$samplekey[match(rownames(epic),key_epic$array)]
+# epic$age <- pheno$clinage[match(epic$samplekey,pheno$samplekey)]
+# epic$sex <- factor(pheno$SEX[match(epic$samplekey,pheno$samplekey)]) 
+# rm(M.sesame.batch,probesFromPipeline)
 # Metabolites
-gctof <- read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.bc.csv")
-hilic <- read.csv("/home/biostats_share/Norris/data/metabolomics/hilic.bc.csv")
-lipid <- read.csv("/home/biostats_share/Norris/data/metabolomics/lipid.bc.csv")
-oxylipin <- read.csv("/home/biostats_share/Norris/data/metabolomics/oxylipin.bc.csv")
-vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
-
-# Testing
-metabolomics <- gctof
-methylation <- k450
-metab_name <- "gctof"
-methyl_name <- "450k"
+# hilic <- read.csv("/home/biostats_share/Norris/data/metabolomics/hilic.bc.csv")
+# lipid <- read.csv("/home/biostats_share/Norris/data/metabolomics/lipid.bc.csv")
+# oxylipin <- read.csv("/home/biostats_share/Norris/data/metabolomics/oxylipin.bc.csv")
+# vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
 
 # Model function with tryCatch
 metab_methyl_lin_mod <- function(metabolomics,methylation,metab_name,methyl_name,
                                  out_dir = "/home/vigerst/MS-Thesis/candidate_selection"){
-  # Cluster
-  cl <- makeCluster(no_cores)
-  # Variables
-  filename <- paste0(out_dir,"/",metab_name,"_",methyl_name,"_parallel.csv")
+  # Model 
   temp <- merge(metabolomics,methylation,by = "samplekey")
   methyl <- names(methylation)[1:(ncol(methylation)-3)]
   metab <- names(metabolomics)[2:ncol(metabolomics)]
   mods <- paste0(methyl,"~sex+age")
   mods <- paste(rep(mods, each = length(metab)), metab, sep = "+")
-  # Load on cluster
-  clusterEvalQ(cl, library(nlme))
-  clusterExport(cl,"temp","methyl","metab","mods")
+  cl <- makeCluster(no_cores,type = "FORK")
   # Linear models
   result_list <- parLapply(cl,mods[1:1000],function(x){
     form <- as.formula(x)
@@ -76,13 +50,27 @@ metab_methyl_lin_mod <- function(metabolomics,methylation,metab_name,methyl_name
     }
   })
   df <- do.call(rbind,result_list)
+  filename <- paste0(out_dir,"/",metab_name,"_",methyl_name,"_parallel.csv")
   write.csv(df,file = filename,row.names = F)
   stopCluster(cl)
 }
 
-# gctof
-## 450K
+# Methylation
+# 450K
+load("/home/biostats_share/Norris/data/methylation/sesame450K.batchAdj.Mmatrix.Rdata")
+k450 <- as.data.frame(t(M.sesame.batch))
+key_450k <- read.csv("/home/biostats_share/Norris/data/methylation/key.450K.csv",
+                     stringsAsFactors = F)
+key_450k$samplekey[duplicated(key_450k$samplekey)] <- 
+  paste0(key_450k$samplekey[duplicated(key_450k$samplekey)],".2")
+k450$samplekey <- key_450k$samplekey[match(rownames(k450),key_450k$array)]
+k450$age <- pheno$clinage[match(k450$samplekey,pheno$samplekey)]
+k450$sex <- factor(pheno$SEX[match(k450$samplekey,pheno$samplekey)])
+
+# gctof - 450K
+gctof <- read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.bc.csv")
 metab_methyl_lin_mod(gctof,k450,"gctof","450K")
+rm(gctof)
 # ## Epic
 # metab_methyl_lin_mod(gctof,epic,"gctof","EPIC")
 # 
