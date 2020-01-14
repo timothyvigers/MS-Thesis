@@ -10,6 +10,9 @@ pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample.csv
                   stringsAsFactors = F,
                   na.strings = "")
 # Methylation
+
+
+
 # 450K
 load("/home/biostats_share/Norris/data/methylation/sesame450K.batchAdj.Mmatrix.Rdata")
 k450 <- as.data.frame(t(M.sesame.batch))
