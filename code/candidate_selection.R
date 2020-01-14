@@ -46,7 +46,7 @@ mods <- paste(rep(mods, each = length(metab)), metab, sep = "+")
 # Make cluster
 cl <- makeCluster(no_cores,type = "FORK")
 # Linear models
-result_list <- parLapply(cl,mods[1:100],function(x){
+result_list <- parLapply(cl,mods[1:331000],function(x){
   form <- as.formula(x)
   mod <- tryCatch(lme(form,random = ~1|samplekey,data = temp,na.action = na.omit),
                   message = function(m) NULL,warning = function(m) NULL,
@@ -67,6 +67,12 @@ df <- do.call(rbind,result_list)
 filename <- paste0(out_dir,"/","450k","_","gctof","_parallel.csv")
 write.csv(df,file = filename,row.names = F)
 stopCluster(cl)
+
+# Use Mmatrix.platform adjust, subset the probes
+# Adjust for platform as a covariate?q
+# Ask Theresa for candidate metabolites 
+
+
 # # hilic
 # temp <- merge(hilic,k450,by = "samplekey")
 # methyl <- names(k450)[1:(ncol(k450)-3)]
