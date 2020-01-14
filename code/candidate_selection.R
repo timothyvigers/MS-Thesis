@@ -9,47 +9,41 @@ out_dir = "/home/vigerst/MS-Thesis/candidate_selection"
 pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample.csv",
                   stringsAsFactors = F,
                   na.strings = "")
+# Probes
+load("/home/biostats_share/Norris/data/methylation/probesFromPipeline.Rdata")
 # Methylation
-
-
-
-# 450K
-load("/home/biostats_share/Norris/data/methylation/sesame450K.batchAdj.Mmatrix.Rdata")
-k450 <- as.data.frame(t(M.sesame.batch))
+load("/home/biostats_share/Norris/data/methylation/Mmatrix.platformAdj.Rdata")
+methyl <- as.data.frame(t(M.adj))
+# Keys
 key_450k <- read.csv("/home/biostats_share/Norris/data/methylation/key.450K.csv",
                      stringsAsFactors = F)
-key_450k$samplekey[duplicated(key_450k$samplekey)] <- 
-  paste0(key_450k$samplekey[duplicated(key_450k$samplekey)],".2")
-k450$samplekey <- key_450k$samplekey[match(rownames(k450),key_450k$array)]
-k450$age <- pheno$clinage[match(k450$samplekey,pheno$samplekey)]
-k450$sex <- factor(pheno$SEX[match(k450$samplekey,pheno$samplekey)])
-# EPIC
-load("/home/biostats_share/Norris/data/methylation/sesameEPIC.batchAdj.Mmatrix.Rdata")
-epic <- as.data.frame(t(M.sesame.batch))
+key_450k$platform <- "450K"
 key_epic <- read.csv("/home/biostats_share/Norris/data/methylation/key.EPIC.csv",
                      stringsAsFactors = F)
-epic$samplekey <- key_epic$samplekey[match(rownames(epic),key_epic$array)]
-epic$age <- pheno$clinage[match(epic$samplekey,pheno$samplekey)]
-epic$sex <- factor(pheno$SEX[match(epic$samplekey,pheno$samplekey)])
-rm(M.sesame.batch)
+key_epic$platform <- "EPIC"
+key <- rbind(key_450k,key_epic)
+# Make final methylation dataset
+methyl$samplekey <- key$samplekey[match(rownames(methyl),key$array)]
+methyl$age <- pheno$clinage[match(methyl$samplekey,pheno$samplekey)]
+methyl$sex <- factor(pheno$SEX[match(methyl$samplekey,pheno$samplekey)])
+methyl$platform <- key$platform[match(methyl$samplekey,pheno$samplekey)]
 # Metabolites
 gctof <- read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.bc.csv")
 hilic <- read.csv("/home/biostats_share/Norris/data/metabolomics/hilic.bc.csv")
 lipid <- read.csv("/home/biostats_share/Norris/data/metabolomics/lipid.bc.csv")
 oxylipin <- read.csv("/home/biostats_share/Norris/data/metabolomics/oxylipin.bc.csv")
 vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
-
 # 450k 
 # gctof
-temp <- merge(gctof,k450,by = "samplekey")
-methyl <- names(k450)[1:(ncol(k450)-3)]
+temp <- merge(gctof,methyl,by = "samplekey")
 metab <- names(gctof)[2:ncol(gctof)]
-mods <- paste0(methyl,"~sex+age")
-mods <- paste(rep(mods, each = length(metab)), metab, sep = "+")
+mods <- paste0(names(methyl)[1:(length(names(methyl))-4)],"~sex+age+platform+",metab[1])
+#mods <- paste(rep(mods, each = length(metab)), metab, sep = "+")
 # Make cluster
+rm(c("M.adj","key_450k","key_epic"))
 cl <- makeCluster(no_cores,type = "FORK")
 # Linear models
-result_list <- parLapply(cl,mods[1:331000],function(x){
+result_list <- parLapply(cl,mods[1:100],function(x){
   form <- as.formula(x)
   mod <- tryCatch(lme(form,random = ~1|samplekey,data = temp,na.action = na.omit),
                   message = function(m) NULL,warning = function(m) NULL,
@@ -57,9 +51,9 @@ result_list <- parLapply(cl,mods[1:331000],function(x){
   if (!is.null(mod)) {
     results <- as.data.frame(summary(mod)$tTable)
     results$term <- rownames(results)
-    results[4,"methyl"] <- strsplit(x,"~")[[1]][1]
-    results[4,"metab"] <- strsplit(x,"\\+")[[1]][3]
-    return(results[4,c("methyl","metab","Value","p-value")])
+    results[5,"methyl"] <- strsplit(x,"~")[[1]][1]
+    results[5,"metab"] <- strsplit(x,"\\+")[[1]][4]
+    return(results[5,c("methyl","metab","Value","p-value")])
   } else {
     results <- as.data.frame(matrix(c(NA,NA,NA,NA),nrow = 1))
     colnames(results) <- c("methyl","metab","Value","p-value")
