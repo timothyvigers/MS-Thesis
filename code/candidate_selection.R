@@ -40,7 +40,6 @@ metab <- names(gctof)[2:ncol(gctof)]
 mods <- paste0(names(methyl)[1:(length(names(methyl))-4)],"~sex+age+platform+",metab[1])
 #mods <- paste(rep(mods, each = length(metab)), metab, sep = "+")
 # Make cluster
-rm(c("M.adj","key_450k","key_epic"))
 cl <- makeCluster(no_cores,type = "FORK")
 # Linear models
 result_list <- parLapply(cl,mods[1:100],function(x){
