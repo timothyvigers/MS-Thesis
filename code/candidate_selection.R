@@ -37,12 +37,11 @@ vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
 # gctof
 temp <- merge(gctof,methyl,by = "samplekey")
 metab <- names(gctof)[2:ncol(gctof)]
-mods <- paste0(names(methyl)[1:(length(names(methyl))-4)],"~sex+age+platform+",metab[1])
-#mods <- paste(rep(mods, each = length(metab)), metab, sep = "+")
+mods <- paste0(probesFromPipeline,"~sex+age+platform+",metab[1])
 # Make cluster
 cl <- makeCluster(no_cores,type = "FORK")
 # Linear models
-result_list <- parLapply(cl,mods[1:1000],function(x){
+result_list <- parLapply(cl,mods,function(x){
   form <- as.formula(x)
   mod <- tryCatch(lme(form,random = ~1|samplekey,data = temp,na.action = na.omit),
                   message = function(m) NULL,warning = function(m) NULL,
