@@ -37,7 +37,7 @@ vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
 # # gctof
 # temp <- merge(gctof,methyl,by = "samplekey")
 # metab <- names(gctof)[2:ncol(gctof)]
-# mods <- paste0(probesFromPipeline,"~sex+age+platform")
+# mods <- paste0(probesFromPipeline,"~sex+age+platform+")
 # mods <- paste0(rep(mods,each = length(metab)),metab)
 # # Make cluster
 # cl <- makeCluster(no_cores,type = "FORK")
@@ -67,7 +67,7 @@ vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
 # # hilic
 # temp <- merge(hilic,methyl,by = "samplekey")
 # metab <- names(hilic)[2:ncol(hilic)]
-# mods <- paste0(probesFromPipeline,"~sex+age+platform")
+# mods <- paste0(probesFromPipeline,"~sex+age+platform+")
 # mods <- paste0(rep(mods,each = length(metab)),metab)
 # # Make cluster
 # cl <- makeCluster(no_cores,type = "FORK")
@@ -97,7 +97,7 @@ vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
 # # lipid
 # temp <- merge(lipid,methyl,by = "samplekey")
 # metab <- names(lipid)[2:ncol(lipid)]
-# mods <- paste0(probesFromPipeline,"~sex+age+platform")
+# mods <- paste0(probesFromPipeline,"~sex+age+platform+")
 # mods <- paste0(rep(mods,each = length(metab)),metab)
 # # Make cluster
 # cl <- makeCluster(no_cores,type = "FORK")
@@ -127,7 +127,7 @@ vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
 # oxylipin
 temp <- merge(oxylipin,methyl,by = "samplekey")
 metab <- names(oxylipin)[2:ncol(oxylipin)]
-mods <- paste0(probesFromPipeline,"~sex+age+platform")
+mods <- paste0(probesFromPipeline,"~sex+age+platform+")
 mods <- paste0(rep(mods,each = length(metab)),metab)
 # Make cluster
 cl <- makeCluster(no_cores,type = "FORK")
@@ -157,7 +157,7 @@ stopCluster(cl)
 # vitd
 temp <- merge(vitd,methyl,by = "samplekey")
 metab <- names(vitd)[2:ncol(vitd)]
-mods <- paste0(probesFromPipeline,"~sex+age+platform")
+mods <- paste0(probesFromPipeline,"~sex+age+platform+")
 mods <- paste0(rep(mods,each = length(metab)),metab)
 # Make cluster
 cl <- makeCluster(no_cores,type = "FORK")
