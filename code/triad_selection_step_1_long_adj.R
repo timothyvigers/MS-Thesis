@@ -38,7 +38,7 @@ candidates <- read.csv("/home/vigerst/MS-Thesis/data/metabolomics/liz_candidates
 
 # Model function
 run_mods <- function(mods = model_list, data = temp,metabname,
-                     out_dir = "/home/vigerst/MS-Thesis/candidate_selection/") {
+                     out_dir = "/home/vigerst/MS-Thesis/candidate_selection/step_1") {
   require(parallel)
   require(nlme)
   # Make cluster
