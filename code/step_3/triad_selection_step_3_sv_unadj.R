@@ -52,15 +52,15 @@ run_mods <- function(mods = model_list,no_cores = 60,metabname,data,
 
 # gctof
 model_list <- paste0("T1Dgroup~",names(gctof)[20:ncol(gctof)])
-run_mods(model_list[1:50],metabname = "gctof",data = gctof)
+run_mods(model_list,metabname = "gctof",data = gctof)
 
 # hilic
 model_list <- paste0("T1Dgroup~",names(hilic)[20:ncol(hilic)])
-run_mods(model_list[1:50],metabname = "hilic",data = hilic)
+run_mods(model_list,metabname = "hilic",data = hilic)
 
 # lipid
 model_list <- paste0("T1Dgroup~",names(lipid)[20:ncol(lipid)])
-run_mods(model_list[1:50],metabname = "lipid",data = lipid)
+run_mods(model_list,metabname = "lipid",data = lipid)
 
 # oxylipin
 model_list <- paste0("T1Dgroup~",names(oxylipin)[20:ncol(oxylipin)])

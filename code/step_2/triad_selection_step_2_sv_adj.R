@@ -61,4 +61,4 @@ run_mods <- function(mods = model_list, data = methyl,no_cores = 60,
 # models
 model_list <- paste0("T1Dgroup~sex+age+",probesFromPipeline)
 
-run_mods(model_list[1:50])
+run_mods(model_list)

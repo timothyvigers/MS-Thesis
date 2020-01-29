@@ -71,32 +71,32 @@ metab <- unique(candidates$gctof[!is.na(candidates$gctof)])
 probes <- paste0(probesFromPipeline,"~")
 model_list <- paste0(rep(probes,each = length(metab)),metab)
 
-run_mods(model_list[1:50],metabname = "gctof")
+run_mods(model_list,metabname = "gctof")
 
 # hilic
 temp <- merge(hilic,methyl,by = "samplekey")
 metab <- unique(candidates$hilic[!is.na(candidates$hilic)])
 model_list <- paste0(rep(probes,each = length(metab)),metab)
 
-run_mods(model_list[1:50],metabname = "hilic")
+run_mods(model_list,metabname = "hilic")
 
 # lipid
 temp <- merge(lipid,methyl,by = "samplekey")
 metab <- unique(candidates$lipid[!is.na(candidates$lipid)])
 model_list <- paste0(rep(probes,each = length(metab)),metab)
 
-run_mods(model_list[1:50],metabname = "lipid")
+run_mods(model_list,metabname = "lipid")
 
 # oxylipin
 temp <- merge(oxylipin,methyl,by = "samplekey")
 metab <- names(oxylipin)[2:ncol(oxylipin)]
 model_list <- paste0(rep(probes,each = length(metab)),metab)
 
-run_mods(model_list[1:50],metabname = "oxylipin")
+run_mods(model_list,metabname = "oxylipin")
 
 # vitd
 temp <- merge(vitd,methyl,by = "samplekey")
 metab <- names(vitd)[2:ncol(vitd)]
 model_list <- paste0(rep(probes,each = length(metab)),metab)
 
-run_mods(model_list[1:50],metabname = "vitd")
+run_mods(model_list,metabname = "vitd")

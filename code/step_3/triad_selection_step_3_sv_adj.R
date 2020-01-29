@@ -36,7 +36,7 @@ run_mods <- function(mods = model_list,no_cores = 60,metabname,data,
     if (!is.null(mod)) {
       results <- as.data.frame(summary(mod)$coefficients)
       results$term <- rownames(results)
-      results[nrow(results),"metab"] <- strsplit(x,"~")[[1]][2]
+      results[nrow(results),"metab"] <- strsplit(x,"\\+")[[1]][3]
       results <- results[nrow(results),c("metab","Estimate","Pr(>|z|)")]
       colnames(results) <- c("metab","Value","p-value")
       return(results)
@@ -53,21 +53,21 @@ run_mods <- function(mods = model_list,no_cores = 60,metabname,data,
 }
 
 # gctof
-model_list <- paste0("T1Dgroup~sex+age+",names(gctof)[20:ncol(gctof)])
-run_mods(model_list[1:50],metabname = "gctof",data = gctof)
+model_list <- paste0("T1Dgroup~sex+age+",names(gctof)[22:ncol(gctof)])
+run_mods(model_list,metabname = "gctof",data = gctof)
 
 # hilic
-model_list <- paste0("T1Dgroup~sex+age+",names(hilic)[20:ncol(hilic)])
-run_mods(model_list[1:50],metabname = "hilic",data = hilic)
+model_list <- paste0("T1Dgroup~sex+age+",names(hilic)[22:ncol(hilic)])
+run_mods(model_list,metabname = "hilic",data = hilic)
 
 # lipid
-model_list <- paste0("T1Dgroup~sex+age+",names(lipid)[20:ncol(lipid)])
-run_mods(model_list[1:50],metabname = "lipid",data = lipid)
+model_list <- paste0("T1Dgroup~sex+age+",names(lipid)[22:ncol(lipid)])
+run_mods(model_list,metabname = "lipid",data = lipid)
 
 # oxylipin
-model_list <- paste0("T1Dgroup~sex+age+",names(oxylipin)[20:ncol(oxylipin)])
+model_list <- paste0("T1Dgroup~sex+age+",names(oxylipin)[22:ncol(oxylipin)])
 run_mods(model_list,metabname = "oxylipin",data = oxylipin)
 
 # vitd
-model_list <- paste0("T1Dgroup~sex+age+",names(vitd)[20:ncol(vitd)])
+model_list <- paste0("T1Dgroup~sex+age+",names(vitd)[22:ncol(vitd)])
 run_mods(model_list,metabname = "vitd",data = vitd)
