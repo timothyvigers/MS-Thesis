@@ -36,15 +36,12 @@ hilic <- read.csv("/home/biostats_share/Norris/data/metabolomics/hilic.bc.csv")
 lipid <- read.csv("/home/biostats_share/Norris/data/metabolomics/lipid.bc.csv")
 oxylipin <- read.csv("/home/biostats_share/Norris/data/metabolomics/oxylipin.bc.csv")
 vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
-# Candidates from Liz's analyses
-candidates <- read.csv("/home/vigerst/MS-Thesis/data/metabolomics/liz_candidates.csv",
-                       stringsAsFactors = F,na.strings = "")
 
 # gctof
 temp <- merge(gctof,methyl,by = "samplekey")
-metab <- unique(candidates$gctof[!is.na(candidates$gctof)])
-mods <- paste0(probesFromPipeline,"~sex+age+platform+visit+")
-mods <- paste0(rep(mods,each = length(metab)),metab)
+metab <- names(gctof[2:ncol(gctof)])
+probes <- paste0(names(methyl[,1:(ncol(methyl)-6)]),"~sex+age+platform+visit+")
+mods <- paste0(rep(probes,each = length(metab)),metab)
 # Make cluster
 cl <- makeCluster(no_cores,type = "FORK")
 # Linear models
@@ -66,15 +63,14 @@ result_list <- parLapply(cl,mods,function(x){
   }
 })
 df <- do.call(rbind,result_list)
-filename <- paste0(out_dir,"gctof","_parallel.csv")
+filename <- paste0(out_dir,"gctof","_parallel_all.csv")
 write.csv(df,file = filename,row.names = F)
 stopCluster(cl)
 
 # hilic
 temp <- merge(hilic,methyl,by = "samplekey")
-metab <- unique(candidates$hilic[!is.na(candidates$hilic)])
-mods <- paste0(probesFromPipeline,"~sex+age+platform+visit+")
-mods <- paste0(rep(mods,each = length(metab)),metab)
+metab <- names(hilic[2:ncol(hilic)])
+mods <- paste0(rep(probes,each = length(metab)),metab)
 # Make cluster
 cl <- makeCluster(no_cores,type = "FORK")
 # Linear models
@@ -96,15 +92,14 @@ result_list <- parLapply(cl,mods,function(x){
   }
 })
 df <- do.call(rbind,result_list)
-filename <- paste0(out_dir,"hilic","_parallel.csv")
+filename <- paste0(out_dir,"hilic","_parallel_all.csv")
 write.csv(df,file = filename,row.names = F)
 stopCluster(cl)
 
 # lipid
 temp <- merge(lipid,methyl,by = "samplekey")
-metab <- unique(candidates$lipid[!is.na(candidates$lipid)])
-mods <- paste0(probesFromPipeline,"~sex+age+platform+visit+")
-mods <- paste0(rep(mods,each = length(metab)),metab)
+metab <- names(lipid[2:ncol(lipid)])
+mods <- paste0(rep(probes,each = length(metab)),metab)
 # Make cluster
 cl <- makeCluster(no_cores,type = "FORK")
 # Linear models
@@ -126,15 +121,14 @@ result_list <- parLapply(cl,mods,function(x){
   }
 })
 df <- do.call(rbind,result_list)
-filename <- paste0(out_dir,"lipid","_parallel.csv")
+filename <- paste0(out_dir,"lipid","_parallel_all.csv")
 write.csv(df,file = filename,row.names = F)
 stopCluster(cl)
 
 # oxylipin
 temp <- merge(oxylipin,methyl,by = "samplekey")
 metab <- names(oxylipin)[2:ncol(oxylipin)]
-mods <- paste0(probesFromPipeline,"~sex+age+platform+visit+")
-mods <- paste0(rep(mods,each = length(metab)),metab)
+mods <- paste0(rep(probes,each = length(metab)),metab)
 # Make cluster
 cl <- makeCluster(no_cores,type = "FORK")
 # Linear models
@@ -156,15 +150,14 @@ result_list <- parLapply(cl,mods,function(x){
   }
 })
 df <- do.call(rbind,result_list)
-filename <- paste0(out_dir,"oxylipin","_parallel.csv")
+filename <- paste0(out_dir,"oxylipin","_parallel_all.csv")
 write.csv(df,file = filename,row.names = F)
 stopCluster(cl)
 
 # vitd
 temp <- merge(vitd,methyl,by = "samplekey")
 metab <- names(vitd)[2:ncol(vitd)]
-mods <- paste0(probesFromPipeline,"~sex+age+platform+visit+")
-mods <- paste0(rep(mods,each = length(metab)),metab)
+mods <- paste0(rep(probes,each = length(metab)),metab)
 # Make cluster
 cl <- makeCluster(no_cores,type = "FORK")
 # Linear models
@@ -186,6 +179,6 @@ result_list <- parLapply(cl,mods,function(x){
   }
 })
 df <- do.call(rbind,result_list)
-filename <- paste0(out_dir,"vitd","_parallel.csv")
+filename <- paste0(out_dir,"vitd","_parallel_all.csv")
 write.csv(df,file = filename,row.names = F)
 stopCluster(cl)
