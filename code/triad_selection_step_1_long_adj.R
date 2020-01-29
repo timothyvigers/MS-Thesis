@@ -1,5 +1,3 @@
-# Parallel package cores
-no_cores <- 60
 # Data import
 # Phenotype
 pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample.csv",
@@ -37,8 +35,8 @@ candidates <- read.csv("/home/vigerst/MS-Thesis/data/metabolomics/liz_candidates
                        stringsAsFactors = F,na.strings = "")
 
 # Model function
-run_mods <- function(mods = model_list, data = temp,metabname,
-                     out_dir = "/home/vigerst/MS-Thesis/candidate_selection/step_1") {
+run_mods <- function(mods = model_list, data = temp,metabname,no_cores = 60,
+                     out_dir = "/home/vigerst/MS-Thesis/candidate_selection/step_1/longitudinal/") {
   require(parallel)
   require(nlme)
   # Make cluster
