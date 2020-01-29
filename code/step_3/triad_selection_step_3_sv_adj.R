@@ -48,27 +48,27 @@ run_mods <- function(mods = model_list,no_cores = 60,metabname,data,
     }
   })
   df <- do.call(rbind,result_list)
-  filename <- paste0(out_dir,metabname,"_unadj.csv")
+  filename <- paste0(out_dir,metabname,"_adj.csv")
   write.csv(df,file = filename,row.names = F)
   stopCluster(cl)
 }
 
 # gctof
-model_list <- paste0("T1Dgroup~",unique(candidates$gctof))
+model_list <- paste0("T1Dgroup~sex+age+",unique(candidates$gctof))
 run_mods(model_list,metabname = "gctof",data = gctof)
 
 # hilic
-model_list <- paste0("T1Dgroup~",unique(candidates$hilic)[!is.na(unique(candidates$hilic))])
+model_list <- paste0("T1Dgroup~sex+age+",unique(candidates$hilic)[!is.na(unique(candidates$hilic))])
 run_mods(model_list,metabname = "hilic",data = hilic)
 
 # lipid
-model_list <- paste0("T1Dgroup~",unique(candidates$lipid))
+model_list <- paste0("T1Dgroup~sex+age+",unique(candidates$lipid))
 run_mods(model_list,metabname = "lipid",data = lipid)
 
 # oxylipin
-model_list <- paste0("T1Dgroup~",names(oxylipin)[20:ncol(oxylipin)])
+model_list <- paste0("T1Dgroup~sex+age+",names(oxylipin)[20:ncol(oxylipin)])
 run_mods(model_list,metabname = "oxylipin",data = oxylipin)
 
 # vitd
-model_list <- paste0("T1Dgroup~",names(vitd)[20:ncol(vitd)])
+model_list <- paste0("T1Dgroup~sex+age+",names(vitd)[20:ncol(vitd)])
 run_mods(model_list,metabname = "vitd",data = vitd)
