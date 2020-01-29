@@ -25,8 +25,6 @@ methyl <- methyl[match(pheno$samplekey,methyl$samplekey),]
 methyl$age <- pheno$clinage[match(methyl$samplekey,pheno$samplekey)]
 methyl$sex <- factor(pheno$SEX[match(methyl$samplekey,pheno$samplekey)])
 methyl$id <- factor(pheno$ID[match(methyl$samplekey,pheno$samplekey)])
-methyl$visit <- factor(pheno$Visit_Type[match(methyl$samplekey,pheno$samplekey)])
-methyl$platform <- key$platform[match(methyl$samplekey,pheno$samplekey)]
 # Metabolites
 gctof <- read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.bc.csv")
 hilic <- read.csv("/home/biostats_share/Norris/data/metabolomics/hilic.bc.csv")
@@ -46,14 +44,14 @@ run_mods <- function(mods = model_list, data = temp,metabname,no_cores = 60,
   # Parallel models
   result_list <- parLapply(cl,mods,function(x){
     form <- as.formula(x)
-    mod <- tryCatch(lm(form,data = temp),
+    mod <- tryCatch(lm(form,data = data),
                     message = function(m) NULL,warning = function(m) NULL,
                     error = function(m) NULL)
     if (!is.null(mod)) {
       results <- as.data.frame(summary(mod)$coefficients)
       results$term <- rownames(results)
       results[nrow(results),"methyl"] <- strsplit(x,"~")[[1]][1]
-      results[nrow(results),"metab"] <- strsplit(x,"~")[[1]][2]
+      results[nrow(results),"metab"] <- strsplit(x,"\\+")[[1]][3]
       results <- results[nrow(results),c("methyl","metab","Estimate","Pr(>|t|)")]
       colnames(results) <- c("methyl","metab","Value","p-value")
       return(results)
@@ -64,7 +62,7 @@ run_mods <- function(mods = model_list, data = temp,metabname,no_cores = 60,
     }
   })
   df <- do.call(rbind,result_list)
-  filename <- paste0(out_dir,metabname,"_SV_unadj.csv")
+  filename <- paste0(out_dir,metabname,"_SV_adj.csv")
   write.csv(df,file = filename,row.names = F)
   stopCluster(cl)
 }
@@ -72,10 +70,10 @@ run_mods <- function(mods = model_list, data = temp,metabname,no_cores = 60,
 # gctof
 temp <- merge(gctof,methyl,by = "samplekey")
 metab <- unique(candidates$gctof[!is.na(candidates$gctof)])
-probes <- paste0(probesFromPipeline,"~")
+probes <- paste0(probesFromPipeline,"~sex+age+")
 model_list <- paste0(rep(probes,each = length(metab)),metab)
 
-run_mods(model_list[1:100],metabname = "gctof")
+run_mods(metabname = "gctof")
 
 # hilic
 temp <- merge(hilic,methyl,by = "samplekey")
