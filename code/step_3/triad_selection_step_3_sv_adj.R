@@ -4,6 +4,8 @@ pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample.csv
                   stringsAsFactors = F,
                   na.strings = "")
 pheno$T1Dgroup <- as.factor(pheno$T1Dgroup)
+pheno$sex <- as.factor(pheno$SEX)
+pheno$age <- as.numeric(pheno$clinage)
 pheno <- pheno[with(pheno,order(ID,DOVISIT)),]
 pheno <- pheno[!is.na(pheno$T1Dgroup),]
 pheno <- pheno[pheno$Visit_Type == "SV",]
