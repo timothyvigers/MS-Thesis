@@ -20,9 +20,6 @@ oxylipin <- read.csv("/home/biostats_share/Norris/data/metabolomics/oxylipin.bc.
 oxylipin <- merge(pheno,oxylipin,by = "samplekey")
 vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
 vitd <- merge(pheno,vitd,by = "samplekey")
-# Liz's candidates
-candidates <- read.csv("/home/vigerst/MS-Thesis/data/metabolomics/liz_candidates.csv",
-                       stringsAsFactors = F,na.strings = "")
 
 # Model function
 run_mods <- function(mods = model_list,no_cores = 60,metabname,data,
@@ -56,16 +53,16 @@ run_mods <- function(mods = model_list,no_cores = 60,metabname,data,
 }
 
 # gctof
-model_list <- paste0("T1Dgroup~sex+age+",unique(candidates$gctof))
-run_mods(model_list,metabname = "gctof",data = gctof)
+model_list <- paste0("T1Dgroup~sex+age+",names(gctof)[20:ncol(gctof)])
+run_mods(model_list[1:50],metabname = "gctof",data = gctof)
 
 # hilic
-model_list <- paste0("T1Dgroup~sex+age+",unique(candidates$hilic)[!is.na(unique(candidates$hilic))])
-run_mods(model_list,metabname = "hilic",data = hilic)
+model_list <- paste0("T1Dgroup~sex+age+",names(hilic)[20:ncol(hilic)])
+run_mods(model_list[1:50],metabname = "hilic",data = hilic)
 
 # lipid
-model_list <- paste0("T1Dgroup~sex+age+",unique(candidates$lipid))
-run_mods(model_list,metabname = "lipid",data = lipid)
+model_list <- paste0("T1Dgroup~sex+age+",names(lipid)[20:ncol(lipid)])
+run_mods(model_list[1:50],metabname = "lipid",data = lipid)
 
 # oxylipin
 model_list <- paste0("T1Dgroup~sex+age+",names(oxylipin)[20:ncol(oxylipin)])
