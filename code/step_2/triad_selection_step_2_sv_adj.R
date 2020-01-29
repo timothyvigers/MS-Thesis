@@ -23,9 +23,11 @@ key <- rbind(key_450k,key_epic)
 methyl$samplekey <- key$samplekey[match(rownames(methyl),key$array)]
 methyl <- methyl[match(pheno$samplekey,methyl$samplekey),]
 methyl$id <- factor(pheno$ID[match(methyl$samplekey,pheno$samplekey)])
+methyl$age <- pheno$clinage[match(methyl$samplekey,pheno$samplekey)]
+methyl$sex <- factor(pheno$SEX[match(methyl$samplekey,pheno$samplekey)])
 methyl$T1Dgroup <- factor(pheno$T1Dgroup[match(methyl$samplekey,pheno$samplekey)])
 
-# Model function
+# Model functionc
 run_mods <- function(mods = model_list, data = methyl,no_cores = 60,
                      out_dir = "/home/vigerst/MS-Thesis/candidate_selection/step_2/") {
   require(parallel)
@@ -40,7 +42,7 @@ run_mods <- function(mods = model_list, data = methyl,no_cores = 60,
     if (!is.null(mod)) {
       results <- as.data.frame(summary(mod)$coefficients)
       results$term <- rownames(results)
-      results[nrow(results),"methyl"] <- strsplit(x,"~")[[1]][2]
+      results[nrow(results),"methyl"] <- strsplit(x,"\\+")[[1]][3]
       results <- results[nrow(results),c("methyl","Estimate","Pr(>|z|)")]
       colnames(results) <- c("methyl","Value","p-value")
       return(results)
@@ -51,12 +53,12 @@ run_mods <- function(mods = model_list, data = methyl,no_cores = 60,
     }
   })
   df <- do.call(rbind,result_list)
-  filename <- paste0(out_dir,"methyl_unadj.csv")
+  filename <- paste0(out_dir,"methyl_adj.csv")
   write.csv(df,file = filename,row.names = F)
   stopCluster(cl)
 }
 
 # models
-model_list <- paste0("T1Dgroup~",probesFromPipeline)
+model_list <- paste0("T1Dgroup~sex+age+",probesFromPipeline)
 
 run_mods(model_list[1:50])

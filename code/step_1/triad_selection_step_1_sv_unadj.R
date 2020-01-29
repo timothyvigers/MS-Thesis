@@ -42,7 +42,7 @@ run_mods <- function(mods = model_list, data = temp,metabname,no_cores = 60,
   # Parallel models
   result_list <- parLapply(cl,mods,function(x){
     form <- as.formula(x)
-    mod <- tryCatch(lm(form,data = temp),
+    mod <- tryCatch(lm(form,data = data),
                     message = function(m) NULL,warning = function(m) NULL,
                     error = function(m) NULL)
     if (!is.null(mod)) {
@@ -71,32 +71,32 @@ metab <- unique(candidates$gctof[!is.na(candidates$gctof)])
 probes <- paste0(probesFromPipeline,"~")
 model_list <- paste0(rep(probes,each = length(metab)),metab)
 
-run_mods(metabname = "gctof")
+run_mods(model_list[1:50],metabname = "gctof")
 
 # hilic
 temp <- merge(hilic,methyl,by = "samplekey")
 metab <- unique(candidates$hilic[!is.na(candidates$hilic)])
 model_list <- paste0(rep(probes,each = length(metab)),metab)
 
-run_mods(metabname = "hilic")
+run_mods(model_list[1:50],metabname = "hilic")
 
 # lipid
 temp <- merge(lipid,methyl,by = "samplekey")
 metab <- unique(candidates$lipid[!is.na(candidates$lipid)])
 model_list <- paste0(rep(probes,each = length(metab)),metab)
 
-run_mods(metabname = "lipid")
+run_mods(model_list[1:50],metabname = "lipid")
 
 # oxylipin
 temp <- merge(oxylipin,methyl,by = "samplekey")
 metab <- names(oxylipin)[2:ncol(oxylipin)]
 model_list <- paste0(rep(probes,each = length(metab)),metab)
 
-run_mods(metabname = "oxylipin")
+run_mods(model_list[1:50],metabname = "oxylipin")
 
 # vitd
 temp <- merge(vitd,methyl,by = "samplekey")
 metab <- names(vitd)[2:ncol(vitd)]
 model_list <- paste0(rep(probes,each = length(metab)),metab)
 
-run_mods(metabname = "vitd")
+run_mods(model_list[1:50],metabname = "vitd")
