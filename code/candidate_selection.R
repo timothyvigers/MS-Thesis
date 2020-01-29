@@ -9,6 +9,7 @@ out_dir = "/home/vigerst/MS-Thesis/candidate_selection/"
 pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample.csv",
                   stringsAsFactors = F,
                   na.strings = "")
+pheno <- pheno[with(pheno,order(ID,DOVISIT)),]
 # Probes
 load("/home/biostats_share/Norris/data/methylation/probesFromPipeline.Rdata")
 # Methylation
@@ -26,6 +27,8 @@ key <- rbind(key_450k,key_epic)
 methyl$samplekey <- key$samplekey[match(rownames(methyl),key$array)]
 methyl$age <- pheno$clinage[match(methyl$samplekey,pheno$samplekey)]
 methyl$sex <- factor(pheno$SEX[match(methyl$samplekey,pheno$samplekey)])
+methyl$id <- factor(pheno$ID[match(methyl$samplekey,pheno$samplekey)])
+methyl$visit <- factor(pheno$Visit_Type[match(methyl$samplekey,pheno$samplekey)])
 methyl$platform <- key$platform[match(methyl$samplekey,pheno$samplekey)]
 # Metabolites
 gctof <- read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.bc.csv")
@@ -40,22 +43,22 @@ candidates <- read.csv("/home/vigerst/MS-Thesis/data/metabolomics/liz_candidates
 # gctof
 temp <- merge(gctof,methyl,by = "samplekey")
 metab <- unique(candidates$gctof[!is.na(candidates$gctof)])
-mods <- paste0(probesFromPipeline,"~sex+age+platform+")
+mods <- paste0(probesFromPipeline,"~sex+age+platform+visit+")
 mods <- paste0(rep(mods,each = length(metab)),metab)
 # Make cluster
 cl <- makeCluster(no_cores,type = "FORK")
 # Linear models
 result_list <- parLapply(cl,mods,function(x){
   form <- as.formula(x)
-  mod <- tryCatch(lme(form,random = ~1|samplekey,data = temp,na.action = na.omit),
+  mod <- tryCatch(lme(form,random = ~1|id,data = temp,na.action = na.omit),
                   message = function(m) NULL,warning = function(m) NULL,
                   error = function(m) NULL)
   if (!is.null(mod)) {
     results <- as.data.frame(summary(mod)$tTable)
     results$term <- rownames(results)
-    results[5,"methyl"] <- strsplit(x,"~")[[1]][1]
-    results[5,"metab"] <- strsplit(x,"\\+")[[1]][4]
-    return(results[5,c("methyl","metab","Value","p-value")])
+    results[nrow(results),"methyl"] <- strsplit(x,"~")[[1]][1]
+    results[nrow(results),"metab"] <- strsplit(x,"\\+")[[1]][5]
+    return(results[nrow(results),c("methyl","metab","Value","p-value")])
   } else {
     results <- as.data.frame(matrix(c(NA,NA,NA,NA),nrow = 1))
     colnames(results) <- c("methyl","metab","Value","p-value")
@@ -70,22 +73,22 @@ stopCluster(cl)
 # hilic
 temp <- merge(hilic,methyl,by = "samplekey")
 metab <- unique(candidates$hilic[!is.na(candidates$hilic)])
-mods <- paste0(probesFromPipeline,"~sex+age+platform+")
+mods <- paste0(probesFromPipeline,"~sex+age+platform+visit+")
 mods <- paste0(rep(mods,each = length(metab)),metab)
 # Make cluster
 cl <- makeCluster(no_cores,type = "FORK")
 # Linear models
 result_list <- parLapply(cl,mods,function(x){
   form <- as.formula(x)
-  mod <- tryCatch(lme(form,random = ~1|samplekey,data = temp,na.action = na.omit),
+  mod <- tryCatch(lme(form,random = ~1|id,data = temp,na.action = na.omit),
                   message = function(m) NULL,warning = function(m) NULL,
                   error = function(m) NULL)
   if (!is.null(mod)) {
     results <- as.data.frame(summary(mod)$tTable)
     results$term <- rownames(results)
-    results[5,"methyl"] <- strsplit(x,"~")[[1]][1]
-    results[5,"metab"] <- strsplit(x,"\\+")[[1]][4]
-    return(results[5,c("methyl","metab","Value","p-value")])
+    results[nrow(results),"methyl"] <- strsplit(x,"~")[[1]][1]
+    results[nrow(results),"metab"] <- strsplit(x,"\\+")[[1]][5]
+    return(results[nrow(results),c("methyl","metab","Value","p-value")])
   } else {
     results <- as.data.frame(matrix(c(NA,NA,NA,NA),nrow = 1))
     colnames(results) <- c("methyl","metab","Value","p-value")
@@ -100,22 +103,22 @@ stopCluster(cl)
 # lipid
 temp <- merge(lipid,methyl,by = "samplekey")
 metab <- unique(candidates$lipid[!is.na(candidates$lipid)])
-mods <- paste0(probesFromPipeline,"~sex+age+platform+")
+mods <- paste0(probesFromPipeline,"~sex+age+platform+visit+")
 mods <- paste0(rep(mods,each = length(metab)),metab)
 # Make cluster
 cl <- makeCluster(no_cores,type = "FORK")
 # Linear models
 result_list <- parLapply(cl,mods,function(x){
   form <- as.formula(x)
-  mod <- tryCatch(lme(form,random = ~1|samplekey,data = temp,na.action = na.omit),
+  mod <- tryCatch(lme(form,random = ~1|id,data = temp,na.action = na.omit),
                   message = function(m) NULL,warning = function(m) NULL,
                   error = function(m) NULL)
   if (!is.null(mod)) {
     results <- as.data.frame(summary(mod)$tTable)
     results$term <- rownames(results)
-    results[5,"methyl"] <- strsplit(x,"~")[[1]][1]
-    results[5,"metab"] <- strsplit(x,"\\+")[[1]][4]
-    return(results[5,c("methyl","metab","Value","p-value")])
+    results[nrow(results),"methyl"] <- strsplit(x,"~")[[1]][1]
+    results[nrow(results),"metab"] <- strsplit(x,"\\+")[[1]][5]
+    return(results[nrow(results),c("methyl","metab","Value","p-value")])
   } else {
     results <- as.data.frame(matrix(c(NA,NA,NA,NA),nrow = 1))
     colnames(results) <- c("methyl","metab","Value","p-value")
@@ -127,62 +130,62 @@ filename <- paste0(out_dir,"lipid","_parallel.csv")
 write.csv(df,file = filename,row.names = F)
 stopCluster(cl)
 
-# # oxylipin
-# temp <- merge(oxylipin,methyl,by = "samplekey")
-# metab <- names(oxylipin)[2:ncol(oxylipin)]
-# mods <- paste0(probesFromPipeline,"~sex+age+platform+")
-# mods <- paste0(rep(mods,each = length(metab)),metab)
-# # Make cluster
-# cl <- makeCluster(no_cores,type = "FORK")
-# # Linear models
-# result_list <- parLapply(cl,mods,function(x){
-#   form <- as.formula(x)
-#   mod <- tryCatch(lme(form,random = ~1|samplekey,data = temp,na.action = na.omit),
-#                   message = function(m) NULL,warning = function(m) NULL,
-#                   error = function(m) NULL)
-#   if (!is.null(mod)) {
-#     results <- as.data.frame(summary(mod)$tTable)
-#     results$term <- rownames(results)
-#     results[5,"methyl"] <- strsplit(x,"~")[[1]][1]
-#     results[5,"metab"] <- strsplit(x,"\\+")[[1]][4]
-#     return(results[5,c("methyl","metab","Value","p-value")])
-#   } else {
-#     results <- as.data.frame(matrix(c(NA,NA,NA,NA),nrow = 1))
-#     colnames(results) <- c("methyl","metab","Value","p-value")
-#     return(results)
-#   }
-# })
-# df <- do.call(rbind,result_list)
-# filename <- paste0(out_dir,"oxylipin","_parallel.csv")
-# write.csv(df,file = filename,row.names = F)
-# stopCluster(cl)
-# 
-# # vitd
-# temp <- merge(vitd,methyl,by = "samplekey")
-# metab <- names(vitd)[2:ncol(vitd)]
-# mods <- paste0(probesFromPipeline,"~sex+age+platform+")
-# mods <- paste0(rep(mods,each = length(metab)),metab)
-# # Make cluster
-# cl <- makeCluster(no_cores,type = "FORK")
-# # Linear models
-# result_list <- parLapply(cl,mods,function(x){
-#   form <- as.formula(x)
-#   mod <- tryCatch(lme(form,random = ~1|samplekey,data = temp,na.action = na.omit),
-#                   message = function(m) NULL,warning = function(m) NULL,
-#                   error = function(m) NULL)
-#   if (!is.null(mod)) {
-#     results <- as.data.frame(summary(mod)$tTable)
-#     results$term <- rownames(results)
-#     results[5,"methyl"] <- strsplit(x,"~")[[1]][1]
-#     results[5,"metab"] <- strsplit(x,"\\+")[[1]][4]
-#     return(results[5,c("methyl","metab","Value","p-value")])
-#   } else {
-#     results <- as.data.frame(matrix(c(NA,NA,NA,NA),nrow = 1))
-#     colnames(results) <- c("methyl","metab","Value","p-value")
-#     return(results)
-#   }
-# })
-# df <- do.call(rbind,result_list)
-# filename <- paste0(out_dir,"vitd","_parallel.csv")
-# write.csv(df,file = filename,row.names = F)
-# stopCluster(cl)
+# oxylipin
+temp <- merge(oxylipin,methyl,by = "samplekey")
+metab <- names(oxylipin)[2:ncol(oxylipin)]
+mods <- paste0(probesFromPipeline,"~sex+age+platform+visit+")
+mods <- paste0(rep(mods,each = length(metab)),metab)
+# Make cluster
+cl <- makeCluster(no_cores,type = "FORK")
+# Linear models
+result_list <- parLapply(cl,mods,function(x){
+  form <- as.formula(x)
+  mod <- tryCatch(lme(form,random = ~1|id,data = temp,na.action = na.omit),
+                  message = function(m) NULL,warning = function(m) NULL,
+                  error = function(m) NULL)
+  if (!is.null(mod)) {
+    results <- as.data.frame(summary(mod)$tTable)
+    results$term <- rownames(results)
+    results[nrow(results),"methyl"] <- strsplit(x,"~")[[1]][1]
+    results[nrow(results),"metab"] <- strsplit(x,"\\+")[[1]][5]
+    return(results[nrow(results),c("methyl","metab","Value","p-value")])
+  } else {
+    results <- as.data.frame(matrix(c(NA,NA,NA,NA),nrow = 1))
+    colnames(results) <- c("methyl","metab","Value","p-value")
+    return(results)
+  }
+})
+df <- do.call(rbind,result_list)
+filename <- paste0(out_dir,"oxylipin","_parallel.csv")
+write.csv(df,file = filename,row.names = F)
+stopCluster(cl)
+
+# vitd
+temp <- merge(vitd,methyl,by = "samplekey")
+metab <- names(vitd)[2:ncol(vitd)]
+mods <- paste0(probesFromPipeline,"~sex+age+platform+visit+")
+mods <- paste0(rep(mods,each = length(metab)),metab)
+# Make cluster
+cl <- makeCluster(no_cores,type = "FORK")
+# Linear models
+result_list <- parLapply(cl,mods,function(x){
+  form <- as.formula(x)
+  mod <- tryCatch(lme(form,random = ~1|id,data = temp,na.action = na.omit),
+                  message = function(m) NULL,warning = function(m) NULL,
+                  error = function(m) NULL)
+  if (!is.null(mod)) {
+    results <- as.data.frame(summary(mod)$tTable)
+    results$term <- rownames(results)
+    results[nrow(results),"methyl"] <- strsplit(x,"~")[[1]][1]
+    results[nrow(results),"metab"] <- strsplit(x,"\\+")[[1]][5]
+    return(results[nrow(results),c("methyl","metab","Value","p-value")])
+  } else {
+    results <- as.data.frame(matrix(c(NA,NA,NA,NA),nrow = 1))
+    colnames(results) <- c("methyl","metab","Value","p-value")
+    return(results)
+  }
+})
+df <- do.call(rbind,result_list)
+filename <- paste0(out_dir,"vitd","_parallel.csv")
+write.csv(df,file = filename,row.names = F)
+stopCluster(cl)
