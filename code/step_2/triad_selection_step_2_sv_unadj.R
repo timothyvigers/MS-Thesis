@@ -6,8 +6,6 @@ pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample.csv
 pheno <- pheno[with(pheno,order(ID,DOVISIT)),]
 pheno <- pheno[!is.na(pheno$T1Dgroup),]
 pheno <- pheno[pheno$Visit_Type == "SV",]
-# Probes
-load("/home/biostats_share/Norris/data/methylation/probesFromPipeline.Rdata")
 # Methylation
 load("/home/biostats_share/Norris/data/methylation/Mmatrix.platformAdj.Rdata")
 methyl <- as.data.frame(t(M.adj))
@@ -57,6 +55,6 @@ run_mods <- function(mods = model_list, data = methyl,no_cores = 60,
 }
 
 # models
-model_list <- paste0("T1Dgroup~",probesFromPipeline)
+model_list <- paste0("T1Dgroup~",names(methyl)[1:(ncol(methyl)-3)])
 
 run_mods(model_list)
