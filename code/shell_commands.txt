@@ -1,2 +1,0 @@
-# Run script with time, low priority, no hangup.
-nohup bash -c 'time nice -n19 Rscript code/triad_selection_step_1_long_adj.R' &
