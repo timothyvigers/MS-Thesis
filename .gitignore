@@ -6,7 +6,8 @@ Data_Raw
 .Rhistory
 /candidate_selection
 *.html
-
+*_cache
+*_files
 *.pdf
 
 MS-Thesis.Rproj
