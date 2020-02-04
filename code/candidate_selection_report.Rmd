@@ -26,7 +26,7 @@ gctof_candidates <- gctof_candidates[order(as.numeric(sub(".*_","",gctof_candida
 kable(gctof_candidates,row.names = F,col.names = "")
 ```
 
-#### Adjusted Model Example
+### Adjusted Model
 
 ```{r eval=FALSE}
 lm(cg00000029 ~ sex + age + gctof_89, data = data)
@@ -37,17 +37,37 @@ lm(cg00000029 ~ sex + age + gctof_89, data = data)
 ```{r gctof adj import,echo=FALSE,cache=TRUE}
 gctof <- read.csv("/Users/timvigers/Documents/GitHub/MS-Thesis/candidate_selection/step_1/sv/gctof_SV_adj.csv")
 gctof <- gctof %>% arrange(p.value,Value)
-hist(gctof$Value,xlab = expression(paste(beta," Value")), main = expression(paste("Histogram of ",beta," Values")))
+hist(gctof$Value,xlab = expression(paste(beta," Value")), 
+     main = expression(paste("Histogram of ",beta," Values")))
 hist(gctof$p.value,xlab = "P Value", main = "Histogram of P Values")
+volcano <- ggplot(gctof,aes(x = Value, y = -log(p.value,base = 10))) + 
+  geom_point() + theme_bw() + ylab("-log10 p-value") + xlab("Estimate")
+volcano
+```
+
+#### Number of Candidates by Cutoff
+
+```{r echo=FALSE}
+gctof$p.adj <- p.adjust(gctof$p.value, method = "fdr")
+num_cand <- gctof %>% summarise(`FDR < 0.05` = sum(p.adj < 0.05),
+                            `< 1e-3` = sum(p.value < 1e-3),
+                            `< 1e-4` = sum(p.value < 1e-4),
+                            `< 1e-5` = sum(p.value < 1e-5),
+                            `< 1e-6` = sum(p.value < 1e-6),
+                            `< 1e-7` = sum(p.value < 1e-7),
+                            `< 1e-8` = sum(p.value < 1e-8))
+kable(num_cand)
 ```
 
 #### Top 10 (Sorted by P Value Then Estimate) 
 
 ```{r echo=FALSE}
+gctof$p.value <- format(gctof$p.value,digits = 3)
+gctof$p.adj <- format(gctof$p.adj,digits = 3)
 kable(head(gctof,n=10),row.names = F)
 ```
 
-#### Undjusted Model Example
+### Undjusted Model
 
 ```{r eval=FALSE}
 lm(cg00000029 ~ gctof_89, data = data)
@@ -58,12 +78,32 @@ lm(cg00000029 ~ gctof_89, data = data)
 ```{r gctof unadj import,echo=FALSE,cache=TRUE}
 gctof <- read.csv("/Users/timvigers/Documents/GitHub/MS-Thesis/candidate_selection/step_1/sv/gctof_SV_unadj.csv")
 gctof <- gctof %>% arrange(p.value,Value)
-hist(gctof$Value,xlab = expression(paste(beta," Value")), main = expression(paste("Histogram of ",beta," Values")))
+hist(gctof$Value,xlab = expression(paste(beta," Value")), 
+     main = expression(paste("Histogram of ",beta," Values")))
 hist(gctof$p.value,xlab = "P Value", main = "Histogram of P Values")
+volcano <- ggplot(gctof,aes(x = Value, y = -log(p.value,base = 10))) + 
+  geom_point() + theme_bw() + ylab("-log10 p-value") + xlab("Estimate")
+volcano
+```
+
+#### Number of Candidates by Cutoff
+
+```{r echo=FALSE}
+gctof$p.adj <- p.adjust(gctof$p.value, method = "fdr")
+num_cand <- gctof %>% summarise(`FDR < 0.05` = sum(p.adj < 0.05),
+                            `< 1e-3` = sum(p.value < 1e-3),
+                            `< 1e-4` = sum(p.value < 1e-4),
+                            `< 1e-5` = sum(p.value < 1e-5),
+                            `< 1e-6` = sum(p.value < 1e-6),
+                            `< 1e-7` = sum(p.value < 1e-7),
+                            `< 1e-8` = sum(p.value < 1e-8))
+kable(num_cand)
 ```
 
 #### Top 10 (Sorted by P Value Then Estimate) 
 
 ```{r echo=FALSE}
+gctof$p.value <- format(gctof$p.value,digits = 3)
+gctof$p.adj <- format(gctof$p.adj,digits = 3)
 kable(head(gctof,n=10),row.names = F)
 ```
