@@ -1,0 +1,69 @@
+---
+title: "Triad Selection"
+author: "Tim Vigers"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(arsenal)
+library(skimr)
+library(knitr)
+library(tidyverse)
+```
+
+## Step 1: Metabolite - Methylation
+
+For this step I ran linear models (adjusted and unadjusted) with methylation as the outcome and metabolites as the predictor. Adjusted models also included age and sex as covariates. In order to narrow down the number of models, I only looked at the metabolites that have come up repeatedly in Liz's analyses. 
+
+### GC-TOF Candidates
+
+```{r echo=FALSE}
+candidates <- read.csv("/Users/timvigers/Documents/GitHub/MS-Thesis/data/metabolomics/liz_candidates.csv",stringsAsFactors = F)
+gctof_candidates <- unique(candidates$gctof)
+gctof_candidates <- gctof_candidates[order(as.numeric(sub(".*_","",gctof_candidates)))]
+kable(gctof_candidates,row.names = F,col.names = "")
+```
+
+#### Adjusted Model Example
+
+```{r eval=FALSE}
+lm(cg00000029 ~ sex + age + gctof_89, data = data)
+```
+
+#### Plots
+
+```{r gctof adj import,echo=FALSE,cache=TRUE}
+gctof <- read.csv("/Users/timvigers/Documents/GitHub/MS-Thesis/candidate_selection/step_1/sv/gctof_SV_adj.csv")
+gctof <- gctof %>% arrange(p.value,Value)
+hist(gctof$Value,xlab = expression(paste(beta," Value")), main = expression(paste("Histogram of ",beta," Values")))
+hist(gctof$p.value,xlab = "P Value", main = "Histogram of P Values")
+```
+
+#### Top 10 (Sorted by P Value Then Estimate) 
+
+```{r echo=FALSE}
+kable(head(gctof,n=10),row.names = F)
+```
+
+#### Undjusted Model Example
+
+```{r eval=FALSE}
+lm(cg00000029 ~ gctof_89, data = data)
+```
+
+#### Plots
+
+```{r gctof unadj import,echo=FALSE,cache=TRUE}
+gctof <- read.csv("/Users/timvigers/Documents/GitHub/MS-Thesis/candidate_selection/step_1/sv/gctof_SV_unadj.csv")
+gctof <- gctof %>% arrange(p.value,Value)
+hist(gctof$Value,xlab = expression(paste(beta," Value")), main = expression(paste("Histogram of ",beta," Values")))
+hist(gctof$p.value,xlab = "P Value", main = "Histogram of P Values")
+```
+
+#### Top 10 (Sorted by P Value Then Estimate) 
+
+```{r echo=FALSE}
+kable(head(gctof,n=10),row.names = F)
+```
