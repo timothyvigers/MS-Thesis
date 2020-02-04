@@ -16,13 +16,6 @@ library(tidyverse)
 ```{r import step 3,echo=FALSE}
 methyl_step2 <- read.csv("/Users/timvigers/Documents/GitHub/MS-Thesis/candidate_selection/step_2/methyl_adj.csv",stringsAsFactors = F)
 methyl_step2$p.adj <- format(methyl_step2$p.value,digits = 3)
-methyl_step2 <- methyl_step2 %>% mutate(`FDR < 0.05` = p.adj < 0.05,
-                            `< 1e-3` = p.value < 1e-3,
-                            `< 1e-4` = p.value < 1e-4,
-                            `< 1e-5` = p.value < 1e-5,
-                            `< 1e-6` = p.value < 1e-6,
-                            `< 1e-7` = p.value < 1e-7,
-                            `< 1e-8` = p.value < 1e-8)
 ```
 
 ## Step 1: Metabolite - Methylation
@@ -54,7 +47,7 @@ hist(gctof$Value,xlab = expression(paste(beta," Value")),
 hist(gctof$p.value,xlab = "P Value", main = "Histogram of P Values")
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE,cache=TRUE}
 volcano <- ggplot(gctof,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point() + theme_bw() + ylab("-log10 p-value") + xlab("Estimate")
 volcano
@@ -64,7 +57,7 @@ volcano
 
 For this, I took a list of methylation-metabolite pairs significant at a given cutoff (columns), and counted how many of those methylation sites were significantly associated with T1D at another range of p value cutoffs (rows). Models of the association between methylation and T1D were adjusted for age and sex.
 
-```{r echo=FALSE}
+```{r echo=FALSE,cache=TRUE}
 # Adjust p values
 gctof$p.adj <- p.adjust(gctof$p.value, method = "fdr")
 # Count number of pairs that are associated with methylation correlated with T1D
@@ -118,7 +111,7 @@ hist(gctof$Value,xlab = expression(paste(beta," Value")),
 hist(gctof$p.value,xlab = "P Value", main = "Histogram of P Values")
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE,cache=FALSE}
 volcano <- ggplot(gctof,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point() + theme_bw() + ylab("-log10 p-value") + xlab("Estimate")
 volcano
@@ -128,7 +121,7 @@ volcano
 
 For this, I took a list of methylation-metabolite pairs significant at a given cutoff (columns), and counted how many of those methylation sites were significantly associated with T1D at another range of p value cutoffs (rows). Models of the association between methylation and T1D were adjusted for age and sex.
 
-```{r echo=FALSE}
+```{r echo=FALSE,cache=FALSE}
 # Adjust p values
 gctof$p.adj <- p.adjust(gctof$p.value, method = "fdr")
 # Count number of pairs that are associated with methylation correlated with T1D
