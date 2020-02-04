@@ -111,7 +111,7 @@ hist(gctof$Value,xlab = expression(paste(beta," Value")),
 hist(gctof$p.value,xlab = "P Value", main = "Histogram of P Values")
 ```
 
-```{r echo=FALSE,cache=FALSE}
+```{r echo=FALSE,cache=TRUE}
 volcano <- ggplot(gctof,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point() + theme_bw() + ylab("-log10 p-value") + xlab("Estimate")
 volcano
@@ -121,7 +121,7 @@ volcano
 
 For this, I took a list of methylation-metabolite pairs significant at a given cutoff (columns), and counted how many of those methylation sites were significantly associated with T1D at another range of p value cutoffs (rows). Models of the association between methylation and T1D were adjusted for age and sex.
 
-```{r echo=FALSE,cache=FALSE}
+```{r echo=FALSE,cache=TRUE}
 # Adjust p values
 gctof$p.adj <- p.adjust(gctof$p.value, method = "fdr")
 # Count number of pairs that are associated with methylation correlated with T1D
