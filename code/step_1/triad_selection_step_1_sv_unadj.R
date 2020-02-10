@@ -1,9 +1,9 @@
 # Data import
 # Phenotype
-pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample.csv",
+pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample_noIdentifyingInfo.csv",
                   stringsAsFactors = F,
                   na.strings = "")
-pheno <- pheno[with(pheno,order(ID,DOVISIT)),]
+pheno <- pheno[with(pheno,order(ID)),]
 pheno <- pheno[!is.na(pheno$T1Dgroup),]
 pheno <- pheno[pheno$Visit_Type == "SV",]
 # Probes
@@ -23,12 +23,19 @@ key <- rbind(key_450k,key_epic)
 methyl$samplekey <- key$samplekey[match(rownames(methyl),key$array)]
 methyl <- methyl[match(pheno$samplekey,methyl$samplekey),]
 methyl$id <- factor(pheno$ID[match(methyl$samplekey,pheno$samplekey)])
-# Metabolites
+# Scale
+methyl[,1:(ncol(methyl)-2)] <- lapply(methyl[,1:(ncol(methyl)-2)],scale)
+# Import metabolites and scale
 gctof <- read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.bc.csv")
+gctof[,2:ncol(gctof)] <- lapply(gctof[,2:ncol(gctof)],scale)
 hilic <- read.csv("/home/biostats_share/Norris/data/metabolomics/hilic.bc.csv")
+hilic[,2:ncol(hilic)] <- lapply(hilic[,2:ncol(hilic)],scale)
 lipid <- read.csv("/home/biostats_share/Norris/data/metabolomics/lipid.bc.csv")
+lipid[,2:ncol(lipid)] <- lapply(lipid[,2:ncol(lipid)],scale)
 oxylipin <- read.csv("/home/biostats_share/Norris/data/metabolomics/oxylipin.bc.csv")
+oxylipin[,2:ncol(oxylipin)] <- lapply(oxylipin[,2:ncol(oxylipin)],scale)
 vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
+vitd[,2:ncol(vitd)] <- lapply(vitd[,2:ncol(vitd)],scale)
 # Liz's candidates
 candidates <- read.csv("/home/vigerst/MS-Thesis/data/metabolomics/liz_candidates.csv",
                        stringsAsFactors = F,na.strings = "")
@@ -60,7 +67,7 @@ run_mods <- function(mods = model_list, data = temp,metabname,no_cores = 60,
     }
   })
   df <- do.call(rbind,result_list)
-  filename <- paste0(out_dir,metabname,"_SV_unadj.csv")
+  filename <- paste0(out_dir,metabname,"_SV_unadj_scaled.csv")
   write.csv(df,file = filename,row.names = F)
   stopCluster(cl)
 }
