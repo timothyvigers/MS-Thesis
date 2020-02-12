@@ -26,15 +26,25 @@ methyl$id <- factor(pheno$ID[match(methyl$samplekey,pheno$samplekey)])
 # Scale
 methyl[,1:(ncol(methyl)-2)] <- lapply(methyl[,1:(ncol(methyl)-2)],scale)
 # Import metabolites and scale
-gctof <- read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.bc.csv")
+gctof <- read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.bc.csv",
+                  stringsAsFactors = F)
+gctof <- gctof[gctof$samplekey %in% pheno$samplekey,]
 gctof[,2:ncol(gctof)] <- lapply(gctof[,2:ncol(gctof)],scale)
-hilic <- read.csv("/home/biostats_share/Norris/data/metabolomics/hilic.bc.csv")
+hilic <- read.csv("/home/biostats_share/Norris/data/metabolomics/hilic.bc.csv",
+                  stringsAsFactors = F)
+hilic <- hilic[hilic$samplekey %in% pheno$samplekey,]
 hilic[,2:ncol(hilic)] <- lapply(hilic[,2:ncol(hilic)],scale)
-lipid <- read.csv("/home/biostats_share/Norris/data/metabolomics/lipid.bc.csv")
+lipid <- read.csv("/home/biostats_share/Norris/data/metabolomics/lipid.bc.csv",
+                  stringsAsFactors = F)
+lipid <- lipid[lipid$samplekey %in% pheno$samplekey,]
 lipid[,2:ncol(lipid)] <- lapply(lipid[,2:ncol(lipid)],scale)
-oxylipin <- read.csv("/home/biostats_share/Norris/data/metabolomics/oxylipin.bc.csv")
+oxylipin <- read.csv("/home/biostats_share/Norris/data/metabolomics/oxylipin.bc.csv",
+                     stringsAsFactors = F)
+oxylipin <- oxylipin[oxylipin$samplekey %in% pheno$samplekey,]
 oxylipin[,2:ncol(oxylipin)] <- lapply(oxylipin[,2:ncol(oxylipin)],scale)
-vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
+vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv",
+                 stringsAsFactors = F)
+vitd <- vitd[vitd$samplekey %in% pheno$samplekey,]
 vitd[,2:ncol(vitd)] <- lapply(vitd[,2:ncol(vitd)],scale)
 # Liz's candidates
 candidates <- read.csv("/home/vigerst/MS-Thesis/data/metabolomics/liz_candidates.csv",
@@ -75,35 +85,34 @@ run_mods <- function(mods = model_list, data = temp,metabname,no_cores = 60,
 # gctof
 temp <- merge(gctof,methyl,by = "samplekey")
 metab <- unique(candidates$gctof[!is.na(candidates$gctof)])
-probes <- paste0(probesFromPipeline,"~")
-model_list <- paste0(rep(probes,each = length(metab)),metab)
+model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~",metab)
 
 run_mods(model_list,metabname = "gctof")
 
 # hilic
 temp <- merge(hilic,methyl,by = "samplekey")
 metab <- unique(candidates$hilic[!is.na(candidates$hilic)])
-model_list <- paste0(rep(probes,each = length(metab)),metab)
+model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~",metab)
 
 run_mods(model_list,metabname = "hilic")
 
 # lipid
 temp <- merge(lipid,methyl,by = "samplekey")
 metab <- unique(candidates$lipid[!is.na(candidates$lipid)])
-model_list <- paste0(rep(probes,each = length(metab)),metab)
+model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~",metab)
 
 run_mods(model_list,metabname = "lipid")
 
 # oxylipin
 temp <- merge(oxylipin,methyl,by = "samplekey")
 metab <- names(oxylipin)[2:ncol(oxylipin)]
-model_list <- paste0(rep(probes,each = length(metab)),metab)
+model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~",metab)
 
 run_mods(model_list,metabname = "oxylipin")
 
 # vitd
 temp <- merge(vitd,methyl,by = "samplekey")
 metab <- names(vitd)[2:ncol(vitd)]
-model_list <- paste0(rep(probes,each = length(metab)),metab)
+model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~",metab)
 
 run_mods(model_list,metabname = "vitd")
