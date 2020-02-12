@@ -24,8 +24,6 @@ methyl$samplekey <- key$samplekey[match(rownames(methyl),key$array)]
 methyl <- methyl[match(pheno$samplekey,methyl$samplekey),]
 methyl$id <- factor(pheno$ID[match(methyl$samplekey,pheno$samplekey)])
 methyl <- methyl[,c(probesFromPipeline,"samplekey","id")]
-# Scale
-methyl[,1:(ncol(methyl)-2)] <- lapply(methyl[,1:(ncol(methyl)-2)],scale)
 # Import metabolites and scale
 gctof <- read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.bc.csv",
                   stringsAsFactors = F)

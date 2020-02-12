@@ -24,8 +24,7 @@ methyl$samplekey <- key$samplekey[match(rownames(methyl),key$array)]
 methyl <- methyl[match(pheno$samplekey,methyl$samplekey),]
 methyl$id <- factor(pheno$ID[match(methyl$samplekey,pheno$samplekey)])
 methyl <- methyl[,c(probesFromPipeline,"samplekey","id")]
-# Scale, add sex and age
-methyl[,1:(ncol(methyl)-2)] <- lapply(methyl[,1:(ncol(methyl)-2)],scale)
+# Add sex and age
 methyl[,1:(ncol(methyl)-2)] <- lapply(methyl[,1:(ncol(methyl)-2)],function(x){
   x + pheno$clinage[match(methyl$samplekey,pheno$samplekey)] + 
     as.numeric(factor(pheno$SEX[match(methyl$samplekey,pheno$samplekey)]))
@@ -35,26 +34,47 @@ gctof <- read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.bc.csv",
                   stringsAsFactors = F)
 gctof <- gctof[gctof$samplekey %in% pheno$samplekey,]
 gctof[,2:ncol(gctof)] <- lapply(gctof[,2:ncol(gctof)],scale)
-temp <- lapply(gctof[,2:ncol(gctof)],function(x){
+gctof <- lapply(gctof[,2:ncol(gctof)],function(x){
   x + pheno$clinage[match(gctof$samplekey,pheno$samplekey)] + 
     as.numeric(factor(pheno$SEX[match(gctof$samplekey,pheno$samplekey)]))
 })
+
 hilic <- read.csv("/home/biostats_share/Norris/data/metabolomics/hilic.bc.csv",
                   stringsAsFactors = F)
 hilic <- hilic[hilic$samplekey %in% pheno$samplekey,]
 hilic[,2:ncol(hilic)] <- lapply(hilic[,2:ncol(hilic)],scale)
+hilic <- lapply(hilic[,2:ncol(hilic)],function(x){
+  x + pheno$clinage[match(hilic$samplekey,pheno$samplekey)] + 
+    as.numeric(factor(pheno$SEX[match(hilic$samplekey,pheno$samplekey)]))
+})
+
 lipid <- read.csv("/home/biostats_share/Norris/data/metabolomics/lipid.bc.csv",
                   stringsAsFactors = F)
 lipid <- lipid[lipid$samplekey %in% pheno$samplekey,]
 lipid[,2:ncol(lipid)] <- lapply(lipid[,2:ncol(lipid)],scale)
+lipid <- lapply(lipid[,2:ncol(lipid)],function(x){
+  x + pheno$clinage[match(lipid$samplekey,pheno$samplekey)] + 
+    as.numeric(factor(pheno$SEX[match(lipid$samplekey,pheno$samplekey)]))
+})
+
 oxylipin <- read.csv("/home/biostats_share/Norris/data/metabolomics/oxylipin.bc.csv",
                      stringsAsFactors = F)
 oxylipin <- oxylipin[oxylipin$samplekey %in% pheno$samplekey,]
 oxylipin[,2:ncol(oxylipin)] <- lapply(oxylipin[,2:ncol(oxylipin)],scale)
+oxylipin <- lapply(oxylipin[,2:ncol(oxylipin)],function(x){
+  x + pheno$clinage[match(oxylipin$samplekey,pheno$samplekey)] + 
+    as.numeric(factor(pheno$SEX[match(oxylipin$samplekey,pheno$samplekey)]))
+})
+
 vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv",
                  stringsAsFactors = F)
 vitd <- vitd[vitd$samplekey %in% pheno$samplekey,]
 vitd[,2:ncol(vitd)] <- lapply(vitd[,2:ncol(vitd)],scale)
+vitd <- lapply(vitd[,2:ncol(vitd)],function(x){
+  x + pheno$clinage[match(vitd$samplekey,pheno$samplekey)] + 
+    as.numeric(factor(pheno$SEX[match(vitd$samplekey,pheno$samplekey)]))
+})
+
 # Liz's candidates
 candidates <- read.csv("/home/vigerst/MS-Thesis/data/metabolomics/liz_candidates.csv",
                        stringsAsFactors = F,na.strings = "")
