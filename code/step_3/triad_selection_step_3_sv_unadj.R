@@ -1,6 +1,6 @@
 # Data import
 # Phenotype
-pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample.csv",
+pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample_noIdentifyingInfo.csv",
                   stringsAsFactors = F,
                   na.strings = "")
 pheno$T1Dgroup <- as.factor(pheno$T1Dgroup)
@@ -18,7 +18,6 @@ oxylipin <- read.csv("/home/biostats_share/Norris/data/metabolomics/oxylipin.bc.
 oxylipin <- merge(pheno,oxylipin,by = "samplekey")
 vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
 vitd <- merge(pheno,vitd,by = "samplekey")
-
 # Model function
 run_mods <- function(mods = model_list,no_cores = 60,metabname,data,
                      out_dir = "/home/vigerst/MS-Thesis/candidate_selection/step_3/") {

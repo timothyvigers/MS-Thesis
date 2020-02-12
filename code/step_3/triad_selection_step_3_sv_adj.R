@@ -1,6 +1,6 @@
 # Data import
 # Phenotype
-pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample.csv",
+pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample_noIdentifyingInfo.csv",
                   stringsAsFactors = F,
                   na.strings = "")
 pheno$T1Dgroup <- as.factor(pheno$T1Dgroup)
