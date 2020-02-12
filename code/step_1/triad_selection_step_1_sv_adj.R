@@ -59,7 +59,7 @@ candidates <- read.csv("/home/vigerst/MS-Thesis/data/metabolomics/liz_candidates
                        stringsAsFactors = F,na.strings = "")
 
 # Model function
-run_mods <- function(mods = model_list, data = temp,metabname,no_cores = 1,
+run_mods <- function(mods = model_list, data = temp,metabname,no_cores = 60,
                      out_dir = "/home/vigerst/MS-Thesis/candidate_selection/step_1/sv/") {
   require(parallel)
   # Make cluster
