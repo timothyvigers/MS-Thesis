@@ -1,11 +1,13 @@
 # Data import
 # Phenotype
-pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample.csv",
+pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample_noIdentifyingInfo.csv",
                   stringsAsFactors = F,
                   na.strings = "")
-pheno <- pheno[with(pheno,order(ID,DOVISIT)),]
+pheno <- pheno[with(pheno,order(ID)),]
 pheno <- pheno[!is.na(pheno$T1Dgroup),]
 pheno <- pheno[pheno$Visit_Type == "SV",]
+# Probes
+load("/home/biostats_share/Norris/data/methylation/probesFromPipeline.Rdata")
 # Methylation
 load("/home/biostats_share/Norris/data/methylation/Mmatrix.platformAdj.Rdata")
 methyl <- as.data.frame(t(M.adj))
@@ -20,12 +22,12 @@ key <- rbind(key_450k,key_epic)
 # Make final methylation dataset
 methyl$samplekey <- key$samplekey[match(rownames(methyl),key$array)]
 methyl <- methyl[match(pheno$samplekey,methyl$samplekey),]
+methyl <- methyl[,c(probesFromPipeline,"samplekey")]
 methyl$id <- factor(pheno$ID[match(methyl$samplekey,pheno$samplekey)])
 methyl$age <- pheno$clinage[match(methyl$samplekey,pheno$samplekey)]
 methyl$sex <- factor(pheno$SEX[match(methyl$samplekey,pheno$samplekey)])
 methyl$T1Dgroup <- factor(pheno$T1Dgroup[match(methyl$samplekey,pheno$samplekey)])
-
-# Model functionc
+# Model function
 run_mods <- function(mods = model_list, data = methyl,no_cores = 60,
                      out_dir = "/home/vigerst/MS-Thesis/candidate_selection/step_2/") {
   require(parallel)
