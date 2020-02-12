@@ -1,9 +1,9 @@
 # Data import
 # Phenotype
-pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample.csv",
+pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample_noIdentifyingInfo.csv",
                   stringsAsFactors = F,
                   na.strings = "")
-pheno <- pheno[with(pheno,order(ID,DOVISIT)),]
+pheno <- pheno[with(pheno,order(ID)),]
 pheno <- pheno[!is.na(pheno$T1Dgroup),]
 pheno <- pheno[pheno$Visit_Type == "SV",]
 # Probes
@@ -22,15 +22,23 @@ key <- rbind(key_450k,key_epic)
 # Make final methylation dataset
 methyl$samplekey <- key$samplekey[match(rownames(methyl),key$array)]
 methyl <- methyl[match(pheno$samplekey,methyl$samplekey),]
-methyl$age <- pheno$clinage[match(methyl$samplekey,pheno$samplekey)]
-methyl$sex <- factor(pheno$SEX[match(methyl$samplekey,pheno$samplekey)])
 methyl$id <- factor(pheno$ID[match(methyl$samplekey,pheno$samplekey)])
-# Metabolites
+# Scale, add sex and age
+methyl[,1:(ncol(methyl)-2)] <- lapply(methyl[,1:(ncol(methyl)-2)],scale)
+methyl[,1:(ncol(methyl)-2)] <- lapply(methyl[,1:(ncol(methyl)-2)],function(x){
+  x + pheno$clinage[match(methyl$samplekey,pheno$samplekey)] + as.numeric(factor(pheno$SEX[match(methyl$samplekey,pheno$samplekey)]))
+})
+# Import metabolites, scale, add sex and age
 gctof <- read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.bc.csv")
+gctof[,2:ncol(gctof)] <- lapply(gctof[,2:ncol(gctof)],scale)
 hilic <- read.csv("/home/biostats_share/Norris/data/metabolomics/hilic.bc.csv")
+hilic[,2:ncol(hilic)] <- lapply(hilic[,2:ncol(hilic)],scale)
 lipid <- read.csv("/home/biostats_share/Norris/data/metabolomics/lipid.bc.csv")
+lipid[,2:ncol(lipid)] <- lapply(lipid[,2:ncol(lipid)],scale)
 oxylipin <- read.csv("/home/biostats_share/Norris/data/metabolomics/oxylipin.bc.csv")
+oxylipin[,2:ncol(oxylipin)] <- lapply(oxylipin[,2:ncol(oxylipin)],scale)
 vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
+vitd[,2:ncol(vitd)] <- lapply(vitd[,2:ncol(vitd)],scale)
 # Liz's candidates
 candidates <- read.csv("/home/vigerst/MS-Thesis/data/metabolomics/liz_candidates.csv",
                        stringsAsFactors = F,na.strings = "")
@@ -51,7 +59,7 @@ run_mods <- function(mods = model_list, data = temp,metabname,no_cores = 60,
       results <- as.data.frame(summary(mod)$coefficients)
       results$term <- rownames(results)
       results[nrow(results),"methyl"] <- strsplit(x,"~")[[1]][1]
-      results[nrow(results),"metab"] <- strsplit(x,"\\+")[[1]][3]
+      results[nrow(results),"metab"] <- strsplit(x,"~")[[1]][2]
       results <- results[nrow(results),c("methyl","metab","Estimate","Pr(>|t|)")]
       colnames(results) <- c("methyl","metab","Value","p-value")
       return(results)
@@ -62,7 +70,7 @@ run_mods <- function(mods = model_list, data = temp,metabname,no_cores = 60,
     }
   })
   df <- do.call(rbind,result_list)
-  filename <- paste0(out_dir,metabname,"_SV_adj.csv")
+  filename <- paste0(out_dir,metabname,"_SV_adj_scaled.csv")
   write.csv(df,file = filename,row.names = F)
   stopCluster(cl)
 }
@@ -70,10 +78,9 @@ run_mods <- function(mods = model_list, data = temp,metabname,no_cores = 60,
 # gctof
 temp <- merge(gctof,methyl,by = "samplekey")
 metab <- unique(candidates$gctof[!is.na(candidates$gctof)])
-probes <- paste0(probesFromPipeline,"~sex+age+")
-model_list <- paste0(rep(probes,each = length(metab)),metab)
+model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~",metab)
 
-run_mods(model_list,metabname = "gctof")
+run_mods(model_list[1:100],metabname = "gctof")
 
 # hilic
 temp <- merge(hilic,methyl,by = "samplekey")
