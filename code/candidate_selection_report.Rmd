@@ -14,7 +14,8 @@ library(tidyverse)
 ```
 
 ```{r import step 3,echo=FALSE}
-methyl_step2 <- read.csv("/Users/timvigers/Documents/GitHub/MS-Thesis/candidate_selection/step_2/methyl_adj.csv",stringsAsFactors = F)
+methyl_step2 <- 
+  read.csv("/Users/timvigers/Documents/GitHub/MS-Thesis/candidate_selection/step_2/methyl_adj.csv",stringsAsFactors = F)
 methyl_step2$p.adj <- format(methyl_step2$p.value,digits = 3)
 ```
 
@@ -28,67 +29,67 @@ For this step I ran unadjusted linear models. In order to narrow down the number
 candidates <- read.csv("/Users/timvigers/Documents/GitHub/MS-Thesis/data/metabolomics/liz_candidates.csv",stringsAsFactors = F)
 gctof_candidates <- unique(candidates$gctof)
 gctof_candidates <- gctof_candidates[order(as.numeric(sub(".*_","",gctof_candidates)))]
-kable(gctof_candidates,row.names = F,col.namesm = "")
+kable(gctof_candidates,row.names = F,col.names = "")
 ```
 
-### Unadjusted Model
+<!-- ### Unadjusted Model -->
 
-```{r eval=FALSE}
-lm(cg00000029 ~ gctof_89, data = data)
-```
+<!-- ```{r eval=FALSE} -->
+<!-- lm(cg00000029 ~ gctof_89, data = data) -->
+<!-- ``` -->
 
-#### Plots
+<!-- #### Plots -->
 
-```{r gctof unadj import,echo=FALSE,cache=TRUE}
-gctof <- read.csv("/Users/timvigers/Documents/GitHub/MS-Thesis/candidate_selection/step_1/sv/gctof_SV_unadj_scaled.csv",stringsAsFactors = F)
-gctof <- gctof %>% arrange(p.value,Value)
-hist(gctof$Value,xlab = expression(paste(beta," Value")), 
-     main = expression(paste("Histogram of ",beta," Values")))
-hist(gctof$p.value,xlab = "P Value", main = "Histogram of P Values")
-```
+<!-- ```{r gctof unadj import,echo=FALSE,cache=TRUE} -->
+<!-- gctof <- read.csv("/Users/timvigers/Documents/GitHub/MS-Thesis/candidate_selection/step_1/sv/gctof_SV_unadj_scaled.csv",stringsAsFactors = F) -->
+<!-- gctof <- gctof %>% arrange(p.value,Value) -->
+<!-- hist(gctof$Value,xlab = expression(paste(beta," Value")),  -->
+<!--      main = expression(paste("Histogram of ",beta," Values"))) -->
+<!-- hist(gctof$p.value,xlab = "P Value", main = "Histogram of P Values") -->
+<!-- ``` -->
 
-```{r echo=FALSE,cache=TRUE}
-volcano <- ggplot(gctof,aes(x = Value, y = -log(p.value,base = 10))) +
-  geom_point() + theme_bw() + ylab("-log10 p-value") + xlab("Estimate")
-volcano
-```
+<!-- ```{r echo=FALSE,cache=TRUE} -->
+<!-- volcano <- ggplot(gctof,aes(x = Value, y = -log(p.value,base = 10))) + -->
+<!--   geom_point() + theme_bw() + ylab("-log10 p-value") + xlab("Estimate") -->
+<!-- volcano -->
+<!-- ``` -->
 
-#### Number of Candidates by Cutoff
+<!-- #### Number of Candidates by Cutoff -->
 
-For this, I took a list of methylation-metabolite pairs significant at a given cutoff (columns), and counted how many of those methylation sites were significantly associated with T1D at another range of p value cutoffs (rows). Models of the association between methylation and T1D were adjusted for age and sex.
+<!-- For this, I took a list of methylation-metabolite pairs significant at a given cutoff (columns), and counted how many of those methylation sites were significantly associated with T1D at another range of p value cutoffs (rows). Models of the association between methylation and T1D were adjusted for age and sex. -->
 
-```{r echo=FALSE,cache=TRUE}
-# Adjust p values
-gctof$p.adj <- p.adjust(gctof$p.value, method = "fdr")
-# Count number of pairs that are associated with methylation correlated with T1D
-num_cand <- data.frame()
-# Methylation < 0.05
-num_cand[1,"FDR < 0.05"] <- sum(unique(gctof$methyl[gctof$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
-num_cand[1,"p < 1e-2"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
-num_cand[1,"p < 1e-3"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
-num_cand[1,"p < 1e-4"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
-# Methylation < 0.01
-num_cand[2,"FDR < 0.05"] <- sum(unique(gctof$methyl[gctof$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
-num_cand[2,"p < 1e-2"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
-num_cand[2,"p < 1e-3"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
-num_cand[2,"p < 1e-4"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
-# Methylation < 0.001
-num_cand[3,"FDR < 0.05"] <- sum(unique(gctof$methyl[gctof$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
-num_cand[3,"p < 1e-2"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
-num_cand[3,"p < 1e-3"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
-num_cand[3,"p < 1e-4"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
-# Row and column names
-rownames(num_cand) <- c("< 0.05","< 0.01","< 0.001")
-kable(num_cand)
-```
+<!-- ```{r echo=FALSE,cache=TRUE} -->
+<!-- # Adjust p values -->
+<!-- gctof$p.adj <- p.adjust(gctof$p.value, method = "fdr") -->
+<!-- # Count number of pairs that are associated with methylation correlated with T1D -->
+<!-- num_cand <- data.frame() -->
+<!-- # Methylation < 0.05 -->
+<!-- num_cand[1,"FDR < 0.05"] <- sum(unique(gctof$methyl[gctof$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05])) -->
+<!-- num_cand[1,"p < 1e-2"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05])) -->
+<!-- num_cand[1,"p < 1e-3"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05])) -->
+<!-- num_cand[1,"p < 1e-4"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05])) -->
+<!-- # Methylation < 0.01 -->
+<!-- num_cand[2,"FDR < 0.05"] <- sum(unique(gctof$methyl[gctof$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01])) -->
+<!-- num_cand[2,"p < 1e-2"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01])) -->
+<!-- num_cand[2,"p < 1e-3"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01])) -->
+<!-- num_cand[2,"p < 1e-4"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01])) -->
+<!-- # Methylation < 0.001 -->
+<!-- num_cand[3,"FDR < 0.05"] <- sum(unique(gctof$methyl[gctof$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001])) -->
+<!-- num_cand[3,"p < 1e-2"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001])) -->
+<!-- num_cand[3,"p < 1e-3"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001])) -->
+<!-- num_cand[3,"p < 1e-4"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001])) -->
+<!-- # Row and column names -->
+<!-- rownames(num_cand) <- c("< 0.05","< 0.01","< 0.001") -->
+<!-- kable(num_cand) -->
+<!-- ``` -->
 
-#### Top 10 (Sorted by P Value Then Estimate) 
+<!-- #### Top 10 (Sorted by P Value Then Estimate)  -->
 
-```{r echo=FALSE}
-gctof$p.value <- format(gctof$p.value,digits = 3)
-gctof$p.adj <- format(gctof$p.adj,digits = 3)
-kable(head(gctof,n=10),row.names = F)
-```
+<!-- ```{r echo=FALSE} -->
+<!-- gctof$p.value <- format(gctof$p.value,digits = 3) -->
+<!-- gctof$p.adj <- format(gctof$p.adj,digits = 3) -->
+<!-- kable(head(gctof,n=10),row.names = F) -->
+<!-- ``` -->
 
 ## HILIC Candidates
 
@@ -159,7 +160,8 @@ kable(head(hilic,n=10),row.names = F)
 
 ```{r echo=FALSE}
 lipid_candidates <- unique(candidates$lipid)
-lipid_candidates <- lipid_candidates[order(as.numeric(sub(".*_","",lipid_candidates)))]
+lipid_candidates <- 
+  lipid_candidates[order(as.numeric(sub(".*_","",lipid_candidates)))]
 kable(lipid_candidates,row.names = F,col.names = "")
 ```
 
@@ -172,7 +174,9 @@ lm(cg00000029 ~ lipid_79, data = data)
 #### Plots
 
 ```{r lipid unadj import,echo=FALSE,cache=TRUE}
-lipid <- read.csv("/Users/timvigers/Documents/GitHub/MS-Thesis/candidate_selection/step_1/sv/lipid_SV_unadj_scaled.csv",stringsAsFactors = F)
+lipid <- 
+  read.csv("/Users/timvigers/Documents/GitHub/MS-Thesis/candidate_selection/step_1/sv/lipid_SV_unadj_scaled.csv",
+           stringsAsFactors = F)
 lipid <- lipid %>% arrange(p.value,Value)
 hist(lipid$Value,xlab = expression(paste(beta," Value")), 
      main = expression(paste("Histogram of ",beta," Values")))
@@ -220,177 +224,120 @@ lipid$p.adj <- format(lipid$p.adj,digits = 3)
 kable(head(lipid,n=10),row.names = F)
 ```
 
-<!-- ## Oxylipin Candidates -->
+## Oxylipin Candidates
 
-<!-- ### Unadjusted Model -->
+### Unadjusted Model
 
-<!-- ```{r eval=FALSE} -->
-<!-- lm(cg00000029 ~ oxylipin_1, data = data) -->
-<!-- ``` -->
+```{r eval=FALSE}
+lm(cg00000029 ~ oxylipin_1, data = data)
+```
 
-<!-- #### Plots -->
+#### Plots
 
-<!-- ```{r oxylipin unadj import,echo=FALSE,cache=TRUE} -->
-<!-- oxylipin <- read.csv("/Users/timvigers/Documents/GitHub/MS-Thesis/candidate_selection/step_1/sv/oxylipin_SV_unadj.csv",stringsAsFactors = F) -->
-<!-- oxylipin <- oxylipin %>% arrange(p.value,Value) -->
-<!-- hist(oxylipin$Value,xlab = expression(paste(beta," Value")), -->
-<!--      main = expression(paste("Histogram of ",beta," Values"))) -->
-<!-- hist(oxylipin$p.value,xlab = "P Value", main = "Histogram of P Values") -->
-<!-- ``` -->
+```{r oxylipin unadj import,echo=FALSE,cache=TRUE}
+oxylipin <- read.csv("/Users/timvigers/Documents/GitHub/MS-Thesis/candidate_selection/step_1/sv/oxylipin_SV_unadj_scaled.csv",stringsAsFactors = F)
+oxylipin <- oxylipin %>% arrange(p.value,Value)
+hist(oxylipin$Value,xlab = expression(paste(beta," Value")),
+     main = expression(paste("Histogram of ",beta," Values")))
+hist(oxylipin$p.value,xlab = "P Value", main = "Histogram of P Values")
+```
 
-<!-- ```{r echo=FALSE,cache=TRUE} -->
-<!-- volcano <- ggplot(oxylipin,aes(x = Value, y = -log(p.value,base = 10))) + -->
-<!--   geom_point() + theme_bw() + ylab("-log10 p-value") + xlab("Estimate") -->
-<!-- volcano -->
-<!-- ``` -->
+```{r echo=FALSE,cache=TRUE}
+volcano <- ggplot(oxylipin,aes(x = Value, y = -log(p.value,base = 10))) +
+  geom_point() + theme_bw() + ylab("-log10 p-value") + xlab("Estimate")
+volcano
+```
 
-<!-- #### Number of Candidates by Cutoff -->
+#### Number of Candidates by Cutoff
 
-<!-- ```{r echo=FALSE,cache=TRUE} -->
-<!-- # Adjust p values -->
-<!-- oxylipin$p.adj <- p.adjust(oxylipin$p.value, method = "fdr") -->
-<!-- # Count number of pairs that are associated with methylation correlated with T1D -->
-<!-- num_cand <- data.frame() -->
-<!-- # Methylation < 0.05 -->
-<!-- num_cand[1,"FDR < 0.05"] <- sum(oxylipin$methyl[oxylipin$p.adj < 0.05] %in% methyl_step2$methyl[methyl_step2$p.value < 0.05]) -->
-<!-- num_cand[1,"p < 1e-2"] <- sum(oxylipin$methyl[oxylipin$p.value < 1e-2] %in% methyl_step2$methyl[methyl_step2$p.value < 0.05]) -->
-<!-- num_cand[1,"p < 1e-3"] <- sum(oxylipin$methyl[oxylipin$p.value < 1e-3] %in% methyl_step2$methyl[methyl_step2$p.value < 0.05]) -->
-<!-- num_cand[1,"p < 1e-4"] <- sum(oxylipin$methyl[oxylipin$p.value < 1e-4] %in% methyl_step2$methyl[methyl_step2$p.value < 0.05]) -->
-<!-- # Methylation < 0.01 -->
-<!-- num_cand[2,"FDR < 0.05"] <- sum(oxylipin$methyl[oxylipin$p.adj < 0.05] %in% methyl_step2$methyl[methyl_step2$p.value < 0.01]) -->
-<!-- num_cand[2,"p < 1e-2"] <- sum(oxylipin$methyl[oxylipin$p.value < 1e-2] %in% methyl_step2$methyl[methyl_step2$p.value < 0.01]) -->
-<!-- num_cand[2,"p < 1e-3"] <- sum(oxylipin$methyl[oxylipin$p.value < 1e-3] %in% methyl_step2$methyl[methyl_step2$p.value < 0.01]) -->
-<!-- num_cand[2,"p < 1e-4"] <- sum(oxylipin$methyl[oxylipin$p.value < 1e-4] %in% methyl_step2$methyl[methyl_step2$p.value < 0.01]) -->
-<!-- # Methylation < 0.001 -->
-<!-- num_cand[3,"FDR < 0.05"] <- sum(oxylipin$methyl[oxylipin$p.adj < 0.05] %in% methyl_step2$methyl[methyl_step2$p.value < 0.001]) -->
-<!-- num_cand[3,"p < 1e-2"] <- sum(oxylipin$methyl[oxylipin$p.value < 1e-2] %in% methyl_step2$methyl[methyl_step2$p.value < 0.001]) -->
-<!-- num_cand[3,"p < 1e-3"] <- sum(oxylipin$methyl[oxylipin$p.value < 1e-3] %in% methyl_step2$methyl[methyl_step2$p.value < 0.001]) -->
-<!-- num_cand[3,"p < 1e-4"] <- sum(oxylipin$methyl[oxylipin$p.value < 1e-4] %in% methyl_step2$methyl[methyl_step2$p.value < 0.001]) -->
-<!-- # Row and column names -->
-<!-- rownames(num_cand) <- c("< 0.05","< 0.01","< 0.001") -->
-<!-- kable(num_cand) -->
-<!-- ``` -->
+```{r echo=FALSE,cache=TRUE}
+# Adjust p values
+oxylipin$p.adj <- p.adjust(oxylipin$p.value, method = "fdr")
+# Count number of pairs that are associated with methylation correlated with T1D
+num_cand <- data.frame()
+# Methylation < 0.05
+num_cand[1,"FDR < 0.05"] <- sum(unique(oxylipin$methyl[oxylipin$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-2"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-3"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-4"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+# Methylation < 0.01
+num_cand[2,"FDR < 0.05"] <- sum(unique(oxylipin$methyl[oxylipin$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-2"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-3"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-4"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+# Methylation < 0.001
+num_cand[3,"FDR < 0.05"] <- sum(unique(oxylipin$methyl[oxylipin$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-2"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-3"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-4"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+# Row and column names
+rownames(num_cand) <- c("< 0.05","< 0.01","< 0.001")
+kable(num_cand)
+```
 
-<!-- #### Top 10 (Sorted by P Value Then Estimate) -->
+#### Top 10 (Sorted by P Value Then Estimate)
 
-<!-- ```{r echo=FALSE} -->
-<!-- oxylipin$p.value <- format(oxylipin$p.value,digits = 3) -->
-<!-- oxylipin$p.adj <- format(oxylipin$p.adj,digits = 3) -->
-<!-- kable(head(oxylipin,n=10),row.names = F) -->
-<!-- ``` -->
+```{r echo=FALSE}
+oxylipin$p.value <- format(oxylipin$p.value,digits = 3)
+oxylipin$p.adj <- format(oxylipin$p.adj,digits = 3)
+kable(head(oxylipin,n=10),row.names = F)
+```
 
-<!-- ## Vitamin D Candidates -->
+## Vitamin D Candidates
 
-<!-- ### Adjusted Model -->
+### Unadjusted Model
 
-<!-- ```{r eval=FALSE} -->
-<!-- lm(cg00000029 ~ sex + age + vitd_1, data = data) -->
-<!-- ``` -->
+```{r eval=FALSE}
+lm(cg00000029 ~ vitd_1, data = data)
+```
 
-<!-- #### Plots -->
+#### Plots
 
-<!-- ```{r vitd adj import,echo=FALSE,cache=TRUE} -->
-<!-- vitd <- read.csv("/Users/timvigers/Documents/GitHub/MS-Thesis/candidate_selection/step_1/sv/vitd_SV_adj.csv",stringsAsFactors = F) -->
-<!-- vitd <- vitd %>% arrange(p.value,Value) -->
-<!-- hist(vitd$Value,xlab = expression(paste(beta," Value")),  -->
-<!--      main = expression(paste("Histogram of ",beta," Values"))) -->
-<!-- hist(vitd$p.value,xlab = "P Value", main = "Histogram of P Values") -->
-<!-- ``` -->
+```{r vitd unadj import,echo=FALSE,cache=TRUE}
+vitd <- read.csv("/Users/timvigers/Documents/GitHub/MS-Thesis/candidate_selection/step_1/sv/vitd_SV_unadj_scaled.csv",stringsAsFactors = F)
+vitd <- vitd %>% arrange(p.value,Value)
+hist(vitd$Value,xlab = expression(paste(beta," Value")),
+     main = expression(paste("Histogram of ",beta," Values")))
+hist(vitd$p.value,xlab = "P Value", main = "Histogram of P Values")
+```
 
-<!-- ```{r echo=FALSE,cache=TRUE} -->
-<!-- volcano <- ggplot(vitd,aes(x = Value, y = -log(p.value,base = 10))) + -->
-<!--   geom_point() + theme_bw() + ylab("-log10 p-value") + xlab("Estimate") -->
-<!-- volcano -->
-<!-- ``` -->
+```{r echo=FALSE,cache=TRUE}
+volcano <- ggplot(vitd,aes(x = Value, y = -log(p.value,base = 10))) +
+  geom_point() + theme_bw() + ylab("-log10 p-value") + xlab("Estimate")
+volcano
+```
 
-<!-- #### Number of Candidates by Cutoff -->
+#### Number of Candidates by Cutoff
 
-<!-- ```{r echo=FALSE,cache=TRUE} -->
-<!-- # Adjust p values -->
-<!-- vitd$p.adj <- p.adjust(vitd$p.value, method = "fdr") -->
-<!-- # Count number of pairs that are associated with methylation correlated with T1D -->
-<!-- num_cand <- data.frame() -->
-<!-- # Methylation < 0.05 -->
-<!-- num_cand[1,"FDR < 0.05"] <- sum(vitd$methyl[vitd$p.adj < 0.05] %in% methyl_step2$methyl[methyl_step2$p.value < 0.05]) -->
-<!-- num_cand[1,"p < 1e-2"] <- sum(vitd$methyl[vitd$p.value < 1e-2] %in% methyl_step2$methyl[methyl_step2$p.value < 0.05]) -->
-<!-- num_cand[1,"p < 1e-3"] <- sum(vitd$methyl[vitd$p.value < 1e-3] %in% methyl_step2$methyl[methyl_step2$p.value < 0.05]) -->
-<!-- num_cand[1,"p < 1e-4"] <- sum(vitd$methyl[vitd$p.value < 1e-4] %in% methyl_step2$methyl[methyl_step2$p.value < 0.05]) -->
-<!-- # Methylation < 0.01 -->
-<!-- num_cand[2,"FDR < 0.05"] <- sum(vitd$methyl[vitd$p.adj < 0.05] %in% methyl_step2$methyl[methyl_step2$p.value < 0.01]) -->
-<!-- num_cand[2,"p < 1e-2"] <- sum(vitd$methyl[vitd$p.value < 1e-2] %in% methyl_step2$methyl[methyl_step2$p.value < 0.01]) -->
-<!-- num_cand[2,"p < 1e-3"] <- sum(vitd$methyl[vitd$p.value < 1e-3] %in% methyl_step2$methyl[methyl_step2$p.value < 0.01]) -->
-<!-- num_cand[2,"p < 1e-4"] <- sum(vitd$methyl[vitd$p.value < 1e-4] %in% methyl_step2$methyl[methyl_step2$p.value < 0.01]) -->
-<!-- # Methylation < 0.001 -->
-<!-- num_cand[3,"FDR < 0.05"] <- sum(vitd$methyl[vitd$p.adj < 0.05] %in% methyl_step2$methyl[methyl_step2$p.value < 0.001]) -->
-<!-- num_cand[3,"p < 1e-2"] <- sum(vitd$methyl[vitd$p.value < 1e-2] %in% methyl_step2$methyl[methyl_step2$p.value < 0.001]) -->
-<!-- num_cand[3,"p < 1e-3"] <- sum(vitd$methyl[vitd$p.value < 1e-3] %in% methyl_step2$methyl[methyl_step2$p.value < 0.001]) -->
-<!-- num_cand[3,"p < 1e-4"] <- sum(vitd$methyl[vitd$p.value < 1e-4] %in% methyl_step2$methyl[methyl_step2$p.value < 0.001]) -->
-<!-- # Row and column names -->
-<!-- rownames(num_cand) <- c("< 0.05","< 0.01","< 0.001") -->
-<!-- kable(num_cand) -->
-<!-- ``` -->
+```{r echo=FALSE,cache=TRUE}
+# Adjust p values
+vitd$p.adj <- p.adjust(vitd$p.value, method = "fdr")
+# Count number of pairs that are associated with methylation correlated with T1D
+num_cand <- data.frame()
+# Methylation < 0.05
+num_cand[1,"FDR < 0.05"] <- sum(unique(vitd$methyl[vitd$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-2"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-3"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-4"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+# Methylation < 0.01
+num_cand[2,"FDR < 0.05"] <- sum(unique(vitd$methyl[vitd$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-2"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-3"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-4"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+# Methylation < 0.001
+num_cand[3,"FDR < 0.05"] <- sum(unique(vitd$methyl[vitd$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-2"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-3"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-4"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+# Row and column names
+rownames(num_cand) <- c("< 0.05","< 0.01","< 0.001")
+kable(num_cand)
+```
 
-<!-- #### Top 10 (Sorted by P Value Then Estimate)  -->
+#### Top 10 (Sorted by P Value Then Estimate)
 
-<!-- ```{r echo=FALSE} -->
-<!-- vitd$p.value <- format(vitd$p.value,digits = 3) -->
-<!-- vitd$p.adj <- format(vitd$p.adj,digits = 3) -->
-<!-- kable(head(vitd,n=10),row.names = F) -->
-<!-- ``` -->
-
-<!-- ### Unadjusted Model -->
-
-<!-- ```{r eval=FALSE} -->
-<!-- lm(cg00000029 ~ vitd_1, data = data) -->
-<!-- ``` -->
-
-<!-- #### Plots -->
-
-<!-- ```{r vitd unadj import,echo=FALSE,cache=TRUE} -->
-<!-- vitd <- read.csv("/Users/timvigers/Documents/GitHub/MS-Thesis/candidate_selection/step_1/sv/vitd_SV_unadj.csv",stringsAsFactors = F) -->
-<!-- vitd <- vitd %>% arrange(p.value,Value) -->
-<!-- hist(vitd$Value,xlab = expression(paste(beta," Value")),  -->
-<!--      main = expression(paste("Histogram of ",beta," Values"))) -->
-<!-- hist(vitd$p.value,xlab = "P Value", main = "Histogram of P Values") -->
-<!-- ``` -->
-
-<!-- ```{r echo=FALSE,cache=TRUE} -->
-<!-- volcano <- ggplot(vitd,aes(x = Value, y = -log(p.value,base = 10))) + -->
-<!--   geom_point() + theme_bw() + ylab("-log10 p-value") + xlab("Estimate") -->
-<!-- volcano -->
-<!-- ``` -->
-
-<!-- #### Number of Candidates by Cutoff -->
-
-<!-- ```{r echo=FALSE,cache=TRUE} -->
-<!-- # Adjust p values -->
-<!-- vitd$p.adj <- p.adjust(vitd$p.value, method = "fdr") -->
-<!-- # Count number of pairs that are associated with methylation correlated with T1D -->
-<!-- num_cand <- data.frame() -->
-<!-- # Methylation < 0.05 -->
-<!-- num_cand[1,"FDR < 0.05"] <- sum(vitd$methyl[vitd$p.adj < 0.05] %in% methyl_step2$methyl[methyl_step2$p.value < 0.05]) -->
-<!-- num_cand[1,"p < 1e-2"] <- sum(vitd$methyl[vitd$p.value < 1e-2] %in% methyl_step2$methyl[methyl_step2$p.value < 0.05]) -->
-<!-- num_cand[1,"p < 1e-3"] <- sum(vitd$methyl[vitd$p.value < 1e-3] %in% methyl_step2$methyl[methyl_step2$p.value < 0.05]) -->
-<!-- num_cand[1,"p < 1e-4"] <- sum(vitd$methyl[vitd$p.value < 1e-4] %in% methyl_step2$methyl[methyl_step2$p.value < 0.05]) -->
-<!-- # Methylation < 0.01 -->
-<!-- num_cand[2,"FDR < 0.05"] <- sum(vitd$methyl[vitd$p.adj < 0.05] %in% methyl_step2$methyl[methyl_step2$p.value < 0.01]) -->
-<!-- num_cand[2,"p < 1e-2"] <- sum(vitd$methyl[vitd$p.value < 1e-2] %in% methyl_step2$methyl[methyl_step2$p.value < 0.01]) -->
-<!-- num_cand[2,"p < 1e-3"] <- sum(vitd$methyl[vitd$p.value < 1e-3] %in% methyl_step2$methyl[methyl_step2$p.value < 0.01]) -->
-<!-- num_cand[2,"p < 1e-4"] <- sum(vitd$methyl[vitd$p.value < 1e-4] %in% methyl_step2$methyl[methyl_step2$p.value < 0.01]) -->
-<!-- # Methylation < 0.001 -->
-<!-- num_cand[3,"FDR < 0.05"] <- sum(vitd$methyl[vitd$p.adj < 0.05] %in% methyl_step2$methyl[methyl_step2$p.value < 0.001]) -->
-<!-- num_cand[3,"p < 1e-2"] <- sum(vitd$methyl[vitd$p.value < 1e-2] %in% methyl_step2$methyl[methyl_step2$p.value < 0.001]) -->
-<!-- num_cand[3,"p < 1e-3"] <- sum(vitd$methyl[vitd$p.value < 1e-3] %in% methyl_step2$methyl[methyl_step2$p.value < 0.001]) -->
-<!-- num_cand[3,"p < 1e-4"] <- sum(vitd$methyl[vitd$p.value < 1e-4] %in% methyl_step2$methyl[methyl_step2$p.value < 0.001]) -->
-<!-- # Row and column names -->
-<!-- rownames(num_cand) <- c("< 0.05","< 0.01","< 0.001") -->
-<!-- kable(num_cand) -->
-<!-- ``` -->
-
-<!-- #### Top 10 (Sorted by P Value Then Estimate)  -->
-
-<!-- ```{r echo=FALSE} -->
-<!-- vitd$p.value <- format(vitd$p.value,digits = 3) -->
-<!-- vitd$p.adj <- format(vitd$p.adj,digits = 3) -->
-<!-- kable(head(vitd,n=10),row.names = F) -->
-<!-- ``` -->
+```{r echo=FALSE}
+vitd$p.value <- format(vitd$p.value,digits = 3)
+vitd$p.adj <- format(vitd$p.adj,digits = 3)
+kable(head(vitd,n=10),row.names = F)
+```
