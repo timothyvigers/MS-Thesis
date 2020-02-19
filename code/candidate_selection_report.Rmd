@@ -23,14 +23,14 @@ methyl_step2$p.adj <- format(methyl_step2$p.value,digits = 3)
 
 For this step I ran unadjusted linear models. In order to narrow down the number of models, I only looked at the metabolites that have come up repeatedly in Liz's analyses. Metabolite and methylation data were converted to z scores prior to fitting the models.
 
-## GC-TOF Candidates
+<!-- ## GC-TOF Candidates -->
 
-```{r echo=FALSE}
-candidates <- read.csv("/Users/timvigers/Documents/GitHub/MS-Thesis/data/metabolomics/liz_candidates.csv",stringsAsFactors = F)
-gctof_candidates <- unique(candidates$gctof)
-gctof_candidates <- gctof_candidates[order(as.numeric(sub(".*_","",gctof_candidates)))]
-kable(gctof_candidates,row.names = F,col.names = "")
-```
+<!-- ```{r echo=FALSE} -->
+<!-- candidates <- read.csv("/Users/timvigers/Documents/GitHub/MS-Thesis/data/metabolomics/liz_candidates.csv",stringsAsFactors = F) -->
+<!-- gctof_candidates <- unique(candidates$gctof) -->
+<!-- gctof_candidates <- gctof_candidates[order(as.numeric(sub(".*_","",gctof_candidates)))] -->
+<!-- kable(gctof_candidates,row.names = F,col.names = "") -->
+<!-- ``` -->
 
 <!-- ### Unadjusted Model -->
 
