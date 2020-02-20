@@ -50,7 +50,8 @@ hist(gctof$p.value,xlab = "P Value", main = "Histogram of P Values")
 
 ```{r echo=FALSE,cache=TRUE}
 volcano <- ggplot(gctof,aes(x = Value, y = -log(p.value,base = 10))) +
-  geom_point() + theme_bw() + ylab("-log10 p-value") + xlab("Estimate")
+  geom_point() + 
+  theme_bw() + ylab("-log10 p-value") + xlab("Estimate") + ylim(0,15)
 volcano
 ```
 
@@ -117,7 +118,8 @@ hist(hilic$p.value,xlab = "P Value", main = "Histogram of P Values")
 
 ```{r echo=FALSE,cache=TRUE}
 volcano <- ggplot(hilic,aes(x = Value, y = -log(p.value,base = 10))) +
-  geom_point() + theme_bw() + ylab("-log10 p-value") + xlab("Estimate")
+  geom_point() + 
+  theme_bw() + ylab("-log10 p-value") + xlab("Estimate") + ylim(0,15)
 volcano
 ```
 
@@ -185,7 +187,8 @@ hist(lipid$p.value,xlab = "P Value", main = "Histogram of P Values")
 
 ```{r echo=FALSE,cache=TRUE}
 volcano <- ggplot(lipid,aes(x = Value, y = -log(p.value,base = 10))) +
-  geom_point() + theme_bw() + ylab("-log10 p-value") + xlab("Estimate")
+  geom_point() + 
+  theme_bw() + ylab("-log10 p-value") + xlab("Estimate") + ylim(0,15)
 volcano
 ```
 
@@ -244,7 +247,8 @@ hist(oxylipin$p.value,xlab = "P Value", main = "Histogram of P Values")
 
 ```{r echo=FALSE,cache=TRUE}
 volcano <- ggplot(oxylipin,aes(x = Value, y = -log(p.value,base = 10))) +
-  geom_point() + theme_bw() + ylab("-log10 p-value") + xlab("Estimate")
+  geom_point() + 
+  theme_bw() + ylab("-log10 p-value") + xlab("Estimate") + ylim(0,15)
 volcano
 ```
 
@@ -303,7 +307,8 @@ hist(vitd$p.value,xlab = "P Value", main = "Histogram of P Values")
 
 ```{r echo=FALSE,cache=TRUE}
 volcano <- ggplot(vitd,aes(x = Value, y = -log(p.value,base = 10))) +
-  geom_point() + theme_bw() + ylab("-log10 p-value") + xlab("Estimate")
+  geom_point() + 
+  theme_bw() + ylab("-log10 p-value") + xlab("Estimate") + ylim(0,15)
 volcano
 ```
 
