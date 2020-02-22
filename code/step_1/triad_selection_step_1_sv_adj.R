@@ -45,12 +45,12 @@ gctof <- read.csv("/home/vigerst/MS-Thesis/data/step_1/sv/gctof_adj.csv",strings
 
 # gctof
 temp <- merge(gctof,methyl,by = "samplekey")
-write.csv(temp,file = "/home/vigerst/MS-Thesis/candidate_selection/step_1/sv/methyl_and_gctof.csv",row.names = F)
-# metab <- unique(candidates$gctof[!is.na(candidates$gctof)])
-# model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~",metab)
-# 
-# model_list <- as.data.frame(model_list)
+metab <- unique(candidates$gctof[!is.na(candidates$gctof)])
+model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~",metab)
 
+model_list <- as.data.frame(model_list)
+
+write.csv(model_list,file = "/home/vigerst/MS-Thesis/candidate_selection/step_1/sv/model_list.csv",row.names = F)
 
 # run_mods(model_list[1:100],metabname = "gctof")
 # 
