@@ -6,32 +6,32 @@ pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample_noI
 pheno <- pheno[with(pheno,order(ID)),]
 pheno <- pheno[!is.na(pheno$T1Dgroup),]
 pheno <- pheno[pheno$Visit_Type == "SV",]
-# # Probes
-# load("/home/biostats_share/Norris/data/methylation/probesFromPipeline.Rdata")
-# # Methylation
-# load("/home/biostats_share/Norris/data/methylation/Mmatrix.platformAdj.Rdata")
-# methyl <- as.data.frame(t(M.adj))
-# # Keys
-# key_450k <- read.csv("/home/biostats_share/Norris/data/methylation/key.450K.csv",
-#                      stringsAsFactors = F)
-# key_450k$platform <- "450K"
-# key_epic <- read.csv("/home/biostats_share/Norris/data/methylation/key.EPIC.csv",
-#                      stringsAsFactors = F)
-# key_epic$platform <- "EPIC"
-# key <- rbind(key_450k,key_epic)
-# # Make final methylation dataset
-# methyl$samplekey <- key$samplekey[match(rownames(methyl),key$array)]
-# methyl <- methyl[match(pheno$samplekey,methyl$samplekey),]
-# methyl$id <- pheno$ID[match(methyl$samplekey,pheno$samplekey)]
-# methyl <- methyl[,c(probesFromPipeline,"samplekey","id")]
-# # Add sex and age
-# methyl[,1:(ncol(methyl)-2)] <- lapply(methyl[,1:(ncol(methyl)-2)],function(x){
-#   x + pheno$clinage[match(methyl$samplekey,pheno$samplekey)] + 
-#     as.numeric(factor(pheno$SEX[match(methyl$samplekey,pheno$samplekey)]))
-# })
-# # Write Rdata
+# Probes
+load("/home/biostats_share/Norris/data/methylation/probesFromPipeline.Rdata")
+# Methylation
+load("/home/biostats_share/Norris/data/methylation/Mmatrix.platformAdj.Rdata")
+methyl <- as.data.frame(t(M.adj))
+# Keys
+key_450k <- read.csv("/home/biostats_share/Norris/data/methylation/key.450K.csv",
+                     stringsAsFactors = F)
+key_450k$platform <- "450K"
+key_epic <- read.csv("/home/biostats_share/Norris/data/methylation/key.EPIC.csv",
+                     stringsAsFactors = F)
+key_epic$platform <- "EPIC"
+key <- rbind(key_450k,key_epic)
+# Make final methylation dataset
+methyl$samplekey <- key$samplekey[match(rownames(methyl),key$array)]
+methyl <- methyl[match(pheno$samplekey,methyl$samplekey),]
+methyl$id <- pheno$ID[match(methyl$samplekey,pheno$samplekey)]
+methyl <- methyl[,c(probesFromPipeline,"samplekey","id")]
+# Add sex and age
+methyl[,1:(ncol(methyl)-2)] <- lapply(methyl[,1:(ncol(methyl)-2)],function(x){
+  x + pheno$clinage[match(methyl$samplekey,pheno$samplekey)] +
+    as.numeric(factor(pheno$SEX[match(methyl$samplekey,pheno$samplekey)]))
+})
+# Write Rdata
 out_dir = "/home/vigerst/MS-Thesis/data/step_1/sv/"
-# save(methyl,file = paste0(out_dir,"methyl_adj.Rdata"))
+save(methyl,file = paste0(out_dir,"methyl_adj.Rdata"))
 # Import metabolites, scale, add sex and age
 gctof <- read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.bc.csv",
                   stringsAsFactors = F)
