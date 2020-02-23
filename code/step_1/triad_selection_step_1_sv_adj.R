@@ -1,12 +1,12 @@
 # Data import
 # Methylation
-methyl <- read.csv("/home/vigerst/MS-Thesis/data/step_1/sv/methyl_adj.csv",stringsAsFactors = F)
+methyl <- load("/home/vigerst/MS-Thesis/data/step_1/sv/methyl_adj.Rdata")
 # Metabolites
-gctof <- read.csv("/home/vigerst/MS-Thesis/data/step_1/sv/gctof_adj.csv",stringsAsFactors = F)
-hilic <- read.csv("/home/vigerst/MS-Thesis/data/step_1/sv/hilic_adj.csv",stringsAsFactors = F)
-lipid <- read.csv("/home/vigerst/MS-Thesis/data/step_1/sv/lipid_adj.csv",stringsAsFactors = F)
-oxylipin <- read.csv("/home/vigerst/MS-Thesis/data/step_1/sv/oxylipin_adj.csv",stringsAsFactors = F)
-vitd <- read.csv("/home/vigerst/MS-Thesis/data/step_1/sv/vitd_adj.csv",stringsAsFactors = F)
+gctof <- load("/home/vigerst/MS-Thesis/data/step_1/sv/gctof_adj.csv")
+hilic <- load("/home/vigerst/MS-Thesis/data/step_1/sv/hilic_adj.csv")
+lipid <- load("/home/vigerst/MS-Thesis/data/step_1/sv/lipid_adj.csv")
+oxylipin <- load("/home/vigerst/MS-Thesis/data/step_1/sv/oxylipin_adj.csv")
+vitd <- load("/home/vigerst/MS-Thesis/data/step_1/sv/vitd_adj.csv")
 # Liz's candidates
 candidates <- read.csv("/home/vigerst/MS-Thesis/data/metabolomics/liz_candidates.csv",
                        stringsAsFactors = F,na.strings = "")
