@@ -1,15 +1,23 @@
 # Data import
 # Methylation
-methyl <- load("/home/vigerst/MS-Thesis/data/step_1/sv/methyl_adj.Rdata")
+load("/home/vigerst/MS-Thesis/data/step_1/sv/methyl_adj.Rdata")
+methyl <- as.data.frame(methyl)
 # Metabolites
-gctof <- load("/home/vigerst/MS-Thesis/data/step_1/sv/gctof_adj.csv")
-hilic <- load("/home/vigerst/MS-Thesis/data/step_1/sv/hilic_adj.csv")
-lipid <- load("/home/vigerst/MS-Thesis/data/step_1/sv/lipid_adj.csv")
-oxylipin <- load("/home/vigerst/MS-Thesis/data/step_1/sv/oxylipin_adj.csv")
-vitd <- load("/home/vigerst/MS-Thesis/data/step_1/sv/vitd_adj.csv")
+load("/home/vigerst/MS-Thesis/data/step_1/sv/gctof_adj.Rdata")
+gctof <- as.data.frame(gctof)
+load("/home/vigerst/MS-Thesis/data/step_1/sv/hilic_adj.Rdata")
+hilic <- as.data.frame(hilic)
+load("/home/vigerst/MS-Thesis/data/step_1/sv/lipid_adj.Rdata")
+lipid <- as.data.frame(lipid)
+load("/home/vigerst/MS-Thesis/data/step_1/sv/oxylipin_adj.Rdata")
+oxylipin <- as.data.frame(oxylipin)
+load("/home/vigerst/MS-Thesis/data/step_1/sv/vitd_adj.Rdata")
+vitd <- as.data.frame(vitd)
 # Liz's candidates
 candidates <- read.csv("/home/vigerst/MS-Thesis/data/metabolomics/liz_candidates.csv",
                        stringsAsFactors = F,na.strings = "")
+# Probes
+load("/home/biostats_share/Norris/data/methylation/probesFromPipeline.Rdata")
 
 # Model function
 run_mods <- function(mods = model_list, data = temp,metabname,no_cores = 60,
@@ -75,5 +83,7 @@ run_mods(model_list,metabname = "oxylipin")
 temp <- merge(vitd,methyl,by = "samplekey")
 metab <- names(vitd)[2:ncol(vitd)]
 model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~",metab)
+
+run_mods(model_list,metabname = "vitd")
 
 run_mods(model_list,metabname = "vitd")
