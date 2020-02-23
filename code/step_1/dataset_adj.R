@@ -30,7 +30,7 @@ pheno <- pheno[pheno$Visit_Type == "SV",]
 #     as.numeric(factor(pheno$SEX[match(methyl$samplekey,pheno$samplekey)]))
 # })
 # # Write Rdata
-# out_dir = "/home/vigerst/MS-Thesis/data/step_1/sv/"
+out_dir = "/home/vigerst/MS-Thesis/data/step_1/sv/"
 # save(methyl,file = paste0(out_dir,"methyl_adj.Rdata"))
 # Import metabolites, scale, add sex and age
 gctof <- read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.bc.csv",
