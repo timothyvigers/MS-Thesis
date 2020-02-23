@@ -22,7 +22,7 @@ key <- rbind(key_450k,key_epic)
 # Make final methylation dataset
 methyl$samplekey <- key$samplekey[match(rownames(methyl),key$array)]
 methyl <- methyl[match(pheno$samplekey,methyl$samplekey),]
-methyl$id <- factor(pheno$ID[match(methyl$samplekey,pheno$samplekey)])
+methyl$id <- pheno$ID[match(methyl$samplekey,pheno$samplekey)]
 methyl <- methyl[,c(probesFromPipeline,"samplekey","id")]
 # Add sex and age
 methyl[,1:(ncol(methyl)-2)] <- lapply(methyl[,1:(ncol(methyl)-2)],function(x){
