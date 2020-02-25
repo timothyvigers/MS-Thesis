@@ -2,4 +2,4 @@
 *_files
 /data
 .DS_Store
-.Rproj*
+*.Rproj*
