@@ -64,23 +64,40 @@ gctof$p.adj <- p.adjust(gctof$p.value, method = "fdr")
 # Count number of pairs that are associated with methylation correlated with T1D
 num_cand <- data.frame()
 # Methylation < 0.05
-num_cand[1,"FDR < 0.05"] <- sum(unique(gctof$methyl[gctof$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
-num_cand[1,"p < 1e-2"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
-num_cand[1,"p < 1e-3"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
-num_cand[1,"p < 1e-4"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"FDR < 0.05"] <- sum(unique(gctof$methyl[gctof$p.adj < 0.05]) %in% 
+                                  unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-2"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-2]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-3"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-3]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-4"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-4]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
 # Methylation < 0.01
-num_cand[2,"FDR < 0.05"] <- sum(unique(gctof$methyl[gctof$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
-num_cand[2,"p < 1e-2"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
-num_cand[2,"p < 1e-3"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
-num_cand[2,"p < 1e-4"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"FDR < 0.05"] <- sum(unique(gctof$methyl[gctof$p.adj < 0.05]) %in% 
+                                  unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-2"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-2]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-3"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-3]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-4"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-4]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
 # Methylation < 0.001
-num_cand[3,"FDR < 0.05"] <- sum(unique(gctof$methyl[gctof$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
-num_cand[3,"p < 1e-2"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
-num_cand[3,"p < 1e-3"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
-num_cand[3,"p < 1e-4"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"FDR < 0.05"] <- sum(unique(gctof$methyl[gctof$p.adj < 0.05]) %in% 
+                                  unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-2"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-2]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-3"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-3]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-4"] <- sum(unique(gctof$methyl[gctof$p.value < 1e-4]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
 # Row and column names
 rownames(num_cand) <- c("< 0.05","< 0.01","< 0.001")
 kable(num_cand)
+# Totals
+tot_1e_3_1e_4 <- num_cand["< 0.001","p < 1e-4"]
+tot_1e_2_1e_4 <- num_cand["< 0.01","p < 1e-4"]
+tot_1e_3_1e_3 <- num_cand["< 0.001","p < 1e-3"]
+tot_1e_2_1e_3 <- num_cand["< 0.01","p < 1e-3"]
 ```
 
 #### Top 10 (Sorted by P Value Then Estimate)
@@ -131,23 +148,40 @@ hilic$p.adj <- p.adjust(hilic$p.value, method = "fdr")
 # Count number of pairs that are associated with methylation correlated with T1D
 num_cand <- data.frame()
 # Methylation < 0.05
-num_cand[1,"FDR < 0.05"] <- sum(unique(hilic$methyl[hilic$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
-num_cand[1,"p < 1e-2"] <- sum(unique(hilic$methyl[hilic$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
-num_cand[1,"p < 1e-3"] <- sum(unique(hilic$methyl[hilic$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
-num_cand[1,"p < 1e-4"] <- sum(unique(hilic$methyl[hilic$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"FDR < 0.05"] <- sum(unique(hilic$methyl[hilic$p.adj < 0.05]) %in% 
+                                  unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-2"] <- sum(unique(hilic$methyl[hilic$p.value < 1e-2]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-3"] <- sum(unique(hilic$methyl[hilic$p.value < 1e-3]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-4"] <- sum(unique(hilic$methyl[hilic$p.value < 1e-4]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
 # Methylation < 0.01
-num_cand[2,"FDR < 0.05"] <- sum(unique(hilic$methyl[hilic$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
-num_cand[2,"p < 1e-2"] <- sum(unique(hilic$methyl[hilic$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
-num_cand[2,"p < 1e-3"] <- sum(unique(hilic$methyl[hilic$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
-num_cand[2,"p < 1e-4"] <- sum(unique(hilic$methyl[hilic$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"FDR < 0.05"] <- sum(unique(hilic$methyl[hilic$p.adj < 0.05]) %in% 
+                                  unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-2"] <- sum(unique(hilic$methyl[hilic$p.value < 1e-2]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-3"] <- sum(unique(hilic$methyl[hilic$p.value < 1e-3]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-4"] <- sum(unique(hilic$methyl[hilic$p.value < 1e-4]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
 # Methylation < 0.001
-num_cand[3,"FDR < 0.05"] <- sum(unique(hilic$methyl[hilic$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
-num_cand[3,"p < 1e-2"] <- sum(unique(hilic$methyl[hilic$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
-num_cand[3,"p < 1e-3"] <- sum(unique(hilic$methyl[hilic$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
-num_cand[3,"p < 1e-4"] <- sum(unique(hilic$methyl[hilic$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"FDR < 0.05"] <- sum(unique(hilic$methyl[hilic$p.adj < 0.05]) %in% 
+                                  unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-2"] <- sum(unique(hilic$methyl[hilic$p.value < 1e-2]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-3"] <- sum(unique(hilic$methyl[hilic$p.value < 1e-3]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-4"] <- sum(unique(hilic$methyl[hilic$p.value < 1e-4]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
 # Row and column names
 rownames(num_cand) <- c("< 0.05","< 0.01","< 0.001")
 kable(num_cand)
+# Totals
+tot_1e_3_1e_4 <- tot_1e_3_1e_4 + num_cand["< 0.001","p < 1e-4"]
+tot_1e_2_1e_4 <- tot_1e_2_1e_4 + num_cand["< 0.01","p < 1e-4"]
+tot_1e_3_1e_3 <- tot_1e_3_1e_3 + num_cand["< 0.001","p < 1e-3"]
+tot_1e_2_1e_3 <- tot_1e_2_1e_3 + num_cand["< 0.01","p < 1e-3"]
 ```
 
 #### Top 10 (Sorted by P Value Then Estimate) 
@@ -200,23 +234,40 @@ lipid$p.adj <- p.adjust(lipid$p.value, method = "fdr")
 # Count number of pairs that are associated with methylation correlated with T1D
 num_cand <- data.frame()
 # Methylation < 0.05
-num_cand[1,"FDR < 0.05"] <- sum(unique(lipid$methyl[lipid$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
-num_cand[1,"p < 1e-2"] <- sum(unique(lipid$methyl[lipid$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
-num_cand[1,"p < 1e-3"] <- sum(unique(lipid$methyl[lipid$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
-num_cand[1,"p < 1e-4"] <- sum(unique(lipid$methyl[lipid$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"FDR < 0.05"] <- sum(unique(lipid$methyl[lipid$p.adj < 0.05]) %in% 
+                                  unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-2"] <- sum(unique(lipid$methyl[lipid$p.value < 1e-2]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-3"] <- sum(unique(lipid$methyl[lipid$p.value < 1e-3]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-4"] <- sum(unique(lipid$methyl[lipid$p.value < 1e-4]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
 # Methylation < 0.01
-num_cand[2,"FDR < 0.05"] <- sum(unique(lipid$methyl[lipid$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
-num_cand[2,"p < 1e-2"] <- sum(unique(lipid$methyl[lipid$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
-num_cand[2,"p < 1e-3"] <- sum(unique(lipid$methyl[lipid$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
-num_cand[2,"p < 1e-4"] <- sum(unique(lipid$methyl[lipid$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"FDR < 0.05"] <- sum(unique(lipid$methyl[lipid$p.adj < 0.05]) %in% 
+                                  unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-2"] <- sum(unique(lipid$methyl[lipid$p.value < 1e-2]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-3"] <- sum(unique(lipid$methyl[lipid$p.value < 1e-3]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-4"] <- sum(unique(lipid$methyl[lipid$p.value < 1e-4]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
 # Methylation < 0.001
-num_cand[3,"FDR < 0.05"] <- sum(unique(lipid$methyl[lipid$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
-num_cand[3,"p < 1e-2"] <- sum(unique(lipid$methyl[lipid$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
-num_cand[3,"p < 1e-3"] <- sum(unique(lipid$methyl[lipid$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
-num_cand[3,"p < 1e-4"] <- sum(unique(lipid$methyl[lipid$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"FDR < 0.05"] <- sum(unique(lipid$methyl[lipid$p.adj < 0.05]) %in% 
+                                  unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-2"] <- sum(unique(lipid$methyl[lipid$p.value < 1e-2]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-3"] <- sum(unique(lipid$methyl[lipid$p.value < 1e-3]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-4"] <- sum(unique(lipid$methyl[lipid$p.value < 1e-4]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
 # Row and column names
 rownames(num_cand) <- c("< 0.05","< 0.01","< 0.001")
 kable(num_cand)
+# Totals
+tot_1e_3_1e_4 <- tot_1e_3_1e_4 + num_cand["< 0.001","p < 1e-4"]
+tot_1e_2_1e_4 <- tot_1e_2_1e_4 + num_cand["< 0.01","p < 1e-4"]
+tot_1e_3_1e_3 <- tot_1e_3_1e_3 + num_cand["< 0.001","p < 1e-3"]
+tot_1e_2_1e_3 <- tot_1e_2_1e_3 + num_cand["< 0.01","p < 1e-3"]
 ```
 
 #### Top 10 (Sorted by P Value Then Estimate) 
@@ -261,23 +312,40 @@ oxylipin$p.adj <- p.adjust(oxylipin$p.value, method = "fdr")
 # Count number of pairs that are associated with methylation correlated with T1D
 num_cand <- data.frame()
 # Methylation < 0.05
-num_cand[1,"FDR < 0.05"] <- sum(unique(oxylipin$methyl[oxylipin$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
-num_cand[1,"p < 1e-2"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
-num_cand[1,"p < 1e-3"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
-num_cand[1,"p < 1e-4"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"FDR < 0.05"] <- sum(unique(oxylipin$methyl[oxylipin$p.adj < 0.05]) %in% 
+                                  unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-2"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-2]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-3"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-3]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-4"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-4]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
 # Methylation < 0.01
-num_cand[2,"FDR < 0.05"] <- sum(unique(oxylipin$methyl[oxylipin$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
-num_cand[2,"p < 1e-2"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
-num_cand[2,"p < 1e-3"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
-num_cand[2,"p < 1e-4"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"FDR < 0.05"] <- sum(unique(oxylipin$methyl[oxylipin$p.adj < 0.05]) %in% 
+                                  unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-2"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-2]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-3"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-3]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-4"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-4]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
 # Methylation < 0.001
-num_cand[3,"FDR < 0.05"] <- sum(unique(oxylipin$methyl[oxylipin$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
-num_cand[3,"p < 1e-2"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
-num_cand[3,"p < 1e-3"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
-num_cand[3,"p < 1e-4"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"FDR < 0.05"] <- sum(unique(oxylipin$methyl[oxylipin$p.adj < 0.05]) %in% 
+                                  unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-2"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-2]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-3"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-3]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-4"] <- sum(unique(oxylipin$methyl[oxylipin$p.value < 1e-4]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
 # Row and column names
 rownames(num_cand) <- c("< 0.05","< 0.01","< 0.001")
 kable(num_cand)
+# Totals
+tot_1e_3_1e_4 <- tot_1e_3_1e_4 + num_cand["< 0.001","p < 1e-4"]
+tot_1e_2_1e_4 <- tot_1e_2_1e_4 + num_cand["< 0.01","p < 1e-4"]
+tot_1e_3_1e_3 <- tot_1e_3_1e_3 + num_cand["< 0.001","p < 1e-3"]
+tot_1e_2_1e_3 <- tot_1e_2_1e_3 + num_cand["< 0.01","p < 1e-3"]
 ```
 
 #### Top 10 (Sorted by P Value Then Estimate)
@@ -321,23 +389,40 @@ vitd$p.adj <- p.adjust(vitd$p.value, method = "fdr")
 # Count number of pairs that are associated with methylation correlated with T1D
 num_cand <- data.frame()
 # Methylation < 0.05
-num_cand[1,"FDR < 0.05"] <- sum(unique(vitd$methyl[vitd$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
-num_cand[1,"p < 1e-2"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
-num_cand[1,"p < 1e-3"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
-num_cand[1,"p < 1e-4"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"FDR < 0.05"] <- sum(unique(vitd$methyl[vitd$p.adj < 0.05]) %in% 
+                                  unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-2"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-2]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-3"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-3]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
+num_cand[1,"p < 1e-4"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-4]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.05]))
 # Methylation < 0.01
-num_cand[2,"FDR < 0.05"] <- sum(unique(vitd$methyl[vitd$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
-num_cand[2,"p < 1e-2"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
-num_cand[2,"p < 1e-3"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
-num_cand[2,"p < 1e-4"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"FDR < 0.05"] <- sum(unique(vitd$methyl[vitd$p.adj < 0.05]) %in% 
+                                  unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-2"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-2]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-3"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-3]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
+num_cand[2,"p < 1e-4"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-4]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.01]))
 # Methylation < 0.001
-num_cand[3,"FDR < 0.05"] <- sum(unique(vitd$methyl[vitd$p.adj < 0.05]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
-num_cand[3,"p < 1e-2"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-2]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
-num_cand[3,"p < 1e-3"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-3]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
-num_cand[3,"p < 1e-4"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-4]) %in% unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"FDR < 0.05"] <- sum(unique(vitd$methyl[vitd$p.adj < 0.05]) %in% 
+                                  unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-2"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-2]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-3"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-3]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
+num_cand[3,"p < 1e-4"] <- sum(unique(vitd$methyl[vitd$p.value < 1e-4]) %in% 
+                                unique(methyl_step2$methyl[methyl_step2$p.value < 0.001]))
 # Row and column names
 rownames(num_cand) <- c("< 0.05","< 0.01","< 0.001")
 kable(num_cand)
+# Totals
+tot_1e_3_1e_4 <- tot_1e_3_1e_4 + num_cand["< 0.001","p < 1e-4"]
+tot_1e_2_1e_4 <- tot_1e_2_1e_4 + num_cand["< 0.01","p < 1e-4"]
+tot_1e_3_1e_3 <- tot_1e_3_1e_3 + num_cand["< 0.001","p < 1e-3"]
+tot_1e_2_1e_3 <- tot_1e_2_1e_3 + num_cand["< 0.01","p < 1e-3"]
 ```
 
 #### Top 10 (Sorted by P Value Then Estimate)
@@ -346,4 +431,17 @@ kable(num_cand)
 vitd$p.value <- format(vitd$p.value,digits = 3)
 vitd$p.adj <- format(vitd$p.adj,digits = 3)
 kable(head(vitd,n=10),row.names = F)
+```
+
+## Totals
+
+```{r echo=FALSE}
+totals <- data.frame()
+# Totals
+totals["< 0.01","p < 1e-3"] <- tot_1e_2_1e_3
+totals["< 0.001","p < 1e-3"] <- tot_1e_3_1e_3
+totals["< 0.01","p < 1e-4"] <- tot_1e_2_1e_4
+totals["< 0.001","p < 1e-4"] <- tot_1e_3_1e_4
+# kable
+kable(totals)
 ```
