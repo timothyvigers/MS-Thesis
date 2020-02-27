@@ -1,6 +1,7 @@
 *_cache
 *_files
 data/*
+candidate_selection/*
 .DS_Store
 *.Rproj*
 .Rproj.user
