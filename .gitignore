@@ -1,6 +1,6 @@
 *_cache
 *_files
-/data
+data/*
 .DS_Store
 *.Rproj*
 .Rproj.user
