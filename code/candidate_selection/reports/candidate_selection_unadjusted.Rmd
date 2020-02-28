@@ -38,7 +38,7 @@ lm(cg00000029 ~ gctof_89, data = data)
 
 #### Plots
 
-```{r gctof unadj import,echo=FALSE,cache=TRUE}
+```{r gctof unadj import,echo=FALSE}
 gctof <- read.csv("/Users/timvigers/GitHub/MS-Thesis/data/candidate_selection/step_1/sv/gctof_SV_unadj_scaled.csv",
                   stringsAsFactors = F)
 gctof <- gctof %>% arrange(p.value,Value)
@@ -47,7 +47,7 @@ hist(gctof$Value,xlab = expression(paste(beta," Value")),
 hist(gctof$p.value,xlab = "P Value", main = "Histogram of P Values")
 ```
 
-```{r echo=FALSE,cache=TRUE}
+```{r echo=FALSE}
 volcano <- ggplot(gctof,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point() + 
   theme_bw() + ylab("-log10 p-value") + xlab("Estimate") + ylim(0,15)
@@ -58,7 +58,7 @@ volcano
 
 For this, I took a list of methylation-metabolite pairs significant at a given cutoff (columns), and counted how many of those methylation sites were significantly associated with T1D at another range of p value cutoffs (rows). Models of the association between methylation and T1D were adjusted for age and sex.
 
-```{r echo=FALSE,cache=TRUE}
+```{r echo=FALSE}
 # Adjust p values
 gctof$p.adj <- p.adjust(gctof$p.value, method = "fdr")
 # Count number of pairs that are associated with methylation correlated with T1D
@@ -124,7 +124,7 @@ lm(cg00000029 ~ hilic_89, data = data)
 
 #### Plots
 
-```{r hilic unadj import,echo=FALSE,cache=TRUE}
+```{r hilic unadj import,echo=FALSE}
 hilic <- read.csv("/Users/timvigers/GitHub/MS-Thesis/data/candidate_selection/step_1/sv/hilic_SV_unadj_scaled.csv",
                   stringsAsFactors = F)
 hilic <- hilic %>% arrange(p.value,Value)
@@ -133,7 +133,7 @@ hist(hilic$Value,xlab = expression(paste(beta," Value")),
 hist(hilic$p.value,xlab = "P Value", main = "Histogram of P Values")
 ```
 
-```{r echo=FALSE,cache=TRUE}
+```{r echo=FALSE}
 volcano <- ggplot(hilic,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point() + 
   theme_bw() + ylab("-log10 p-value") + xlab("Estimate") + ylim(0,15)
@@ -142,7 +142,7 @@ volcano
 
 #### Number of Candidates by Cutoff
 
-```{r echo=FALSE,cache=TRUE}
+```{r echo=FALSE}
 # Adjust p values
 hilic$p.adj <- p.adjust(hilic$p.value, method = "fdr")
 # Count number of pairs that are associated with methylation correlated with T1D
@@ -209,7 +209,7 @@ lm(cg00000029 ~ lipid_79, data = data)
 
 #### Plots
 
-```{r lipid unadj import,echo=FALSE,cache=TRUE}
+```{r lipid unadj import,echo=FALSE}
 lipid <- 
   read.csv("/Users/timvigers/GitHub/MS-Thesis/data/candidate_selection/step_1/sv/lipid_SV_unadj_scaled.csv",
            stringsAsFactors = F)
@@ -219,7 +219,7 @@ hist(lipid$Value,xlab = expression(paste(beta," Value")),
 hist(lipid$p.value,xlab = "P Value", main = "Histogram of P Values")
 ```
 
-```{r echo=FALSE,cache=TRUE}
+```{r echo=FALSE}
 volcano <- ggplot(lipid,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point() + 
   theme_bw() + ylab("-log10 p-value") + xlab("Estimate") + ylim(0,15)
@@ -228,7 +228,7 @@ volcano
 
 #### Number of Candidates by Cutoff
 
-```{r echo=FALSE,cache=TRUE}
+```{r echo=FALSE}
 # Adjust p values
 lipid$p.adj <- p.adjust(lipid$p.value, method = "fdr")
 # Count number of pairs that are associated with methylation correlated with T1D
@@ -288,7 +288,7 @@ lm(cg00000029 ~ oxylipin_1, data = data)
 
 #### Plots
 
-```{r oxylipin unadj import,echo=FALSE,cache=TRUE}
+```{r oxylipin unadj import,echo=FALSE}
 oxylipin <- read.csv("/Users/timvigers/GitHub/MS-Thesis/data/candidate_selection/step_1/sv/oxylipin_SV_unadj_scaled.csv",
                      stringsAsFactors = F)
 oxylipin <- oxylipin %>% arrange(p.value,Value)
@@ -297,7 +297,7 @@ hist(oxylipin$Value,xlab = expression(paste(beta," Value")),
 hist(oxylipin$p.value,xlab = "P Value", main = "Histogram of P Values")
 ```
 
-```{r echo=FALSE,cache=TRUE}
+```{r echo=FALSE}
 volcano <- ggplot(oxylipin,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point() + 
   theme_bw() + ylab("-log10 p-value") + xlab("Estimate") + ylim(0,15)
@@ -306,7 +306,7 @@ volcano
 
 #### Number of Candidates by Cutoff
 
-```{r echo=FALSE,cache=TRUE}
+```{r echo=FALSE}
 # Adjust p values
 oxylipin$p.adj <- p.adjust(oxylipin$p.value, method = "fdr")
 # Count number of pairs that are associated with methylation correlated with T1D
@@ -366,7 +366,7 @@ lm(cg00000029 ~ vitd_1, data = data)
 
 #### Plots
 
-```{r vitd unadj import,echo=FALSE,cache=TRUE}
+```{r vitd unadj import,echo=FALSE}
 vitd <- read.csv("/Users/timvigers/GitHub/MS-Thesis/data/candidate_selection/step_1/sv/vitd_SV_unadj_scaled.csv",stringsAsFactors = F)
 vitd <- vitd %>% arrange(p.value,Value)
 hist(vitd$Value,xlab = expression(paste(beta," Value")),
@@ -374,7 +374,7 @@ hist(vitd$Value,xlab = expression(paste(beta," Value")),
 hist(vitd$p.value,xlab = "P Value", main = "Histogram of P Values")
 ```
 
-```{r echo=FALSE,cache=TRUE}
+```{r echo=FALSE}
 volcano <- ggplot(vitd,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point() + 
   theme_bw() + ylab("-log10 p-value") + xlab("Estimate") + ylim(0,15)
@@ -383,7 +383,7 @@ volcano
 
 #### Number of Candidates by Cutoff
 
-```{r echo=FALSE,cache=TRUE}
+```{r echo=FALSE}
 # Adjust p values
 vitd$p.adj <- p.adjust(vitd$p.value, method = "fdr")
 # Count number of pairs that are associated with methylation correlated with T1D
