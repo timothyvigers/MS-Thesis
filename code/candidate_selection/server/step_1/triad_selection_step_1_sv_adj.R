@@ -56,7 +56,7 @@ vitd[,2:ncol(vitd)] <- lapply(vitd[,2:ncol(vitd)],scale)
 candidates <- read.csv("/home/vigerst/MS-Thesis/data/metabolomics/liz_candidates.csv",
                        stringsAsFactors = F,na.strings = "")
 # Model function
-run_mods <- function(mods = model_list, data = temp,metabname,no_cores = 60,
+run_mods <- function(mods = model_list, data = temp,metabname,outcome,no_cores = 60,
                      out_dir = "/home/vigerst/MS-Thesis/data/candidate_selection/step_1/sv/") {
   require(parallel)
   # Make cluster
@@ -70,8 +70,13 @@ run_mods <- function(mods = model_list, data = temp,metabname,no_cores = 60,
     if (!is.null(mod)) {
       results <- as.data.frame(summary(mod)$coefficients)
       results$term <- rownames(results)
-      results[nrow(results),"methyl"] <- strsplit(x,"~")[[1]][1]
-      results[nrow(results),"metab"] <- strsplit(x,"\\+")[[1]][3]
+      if (outcome == "methyl") {
+        results[nrow(results),"methyl"] <- strsplit(x,"~")[[1]][1]
+        results[nrow(results),"metab"] <- strsplit(x,"\\+")[[1]][3]
+      } else if (outcome == "metab") {
+        results[nrow(results),"methyl"] <- strsplit(x,"\\+")[[1]][3]
+        results[nrow(results),"metab"] <- strsplit(x,"~")[[1]][1]
+      }
       results <- results[nrow(results),c("methyl","metab","Estimate","Pr(>|t|)")]
       colnames(results) <- c("methyl","metab","Value","p-value")
       return(results)
@@ -82,7 +87,7 @@ run_mods <- function(mods = model_list, data = temp,metabname,no_cores = 60,
     }
   })
   df <- do.call(rbind,result_list)
-  filename <- paste0(out_dir,metabname,"_SV_adj_scaled.csv")
+  filename <- paste0(out_dir,metabname,"_SV_adj_scaled_",outcome,"_outcome.csv")
   write.csv(df,file = filename,row.names = F)
   stopCluster(cl)
 }
@@ -90,34 +95,48 @@ run_mods <- function(mods = model_list, data = temp,metabname,no_cores = 60,
 # gctof
 temp <- merge(gctof,methyl,by = "samplekey")
 metab <- unique(candidates$gctof[!is.na(candidates$gctof)])
+
 model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~","age+sex+",metab)
+run_mods(model_list[1:100],metabname = "gctof",outcome = "methyl")
 
-run_mods(model_list[1:100],metabname = "gctof")
-
+model_list <- paste0(metab,"~","age+sex+",rep(probesFromPipeline,each = length(metab)))
+run_mods(model_list[1:100],metabname = "gctof",outcome = "metab")
 # hilic
 temp <- merge(hilic,methyl,by = "samplekey")
 metab <- unique(candidates$hilic[!is.na(candidates$hilic)])
-model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~","age+sex+",metab)
 
-run_mods(model_list[1:100],metabname = "hilic")
+model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~","age+sex+",metab)
+run_mods(model_list[1:100],metabname = "hilic",outcome = "methyl")
+
+model_list <- paste0(metab,"~","age+sex+",rep(probesFromPipeline,each = length(metab)))
+run_mods(model_list[1:100],metabname = "hilic",outcome = "metab")
 
 # lipid
 temp <- merge(lipid,methyl,by = "samplekey")
 metab <- unique(candidates$lipid[!is.na(candidates$lipid)])
-model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~","age+sex+",metab)
 
-run_mods(model_list[1:100],metabname = "lipid")
+model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~","age+sex+",metab)
+run_mods(model_list[1:100],metabname = "lipid",outcome = "methyl")
+
+model_list <- paste0(metab,"~","age+sex+",rep(probesFromPipeline,each = length(metab)))
+run_mods(model_list[1:100],metabname = "lipid",outcome = "metab")
 
 # oxylipin
 temp <- merge(oxylipin,methyl,by = "samplekey")
 metab <- names(oxylipin)[2:ncol(oxylipin)]
-model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~","age+sex+",metab)
 
-run_mods(model_list[1:100],metabname = "oxylipin")
+model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~","age+sex+",metab)
+run_mods(model_list[1:100],metabname = "oxylipin",outcome = "methyl")
+
+model_list <- paste0(metab,"~","age+sex+",rep(probesFromPipeline,each = length(metab)))
+run_mods(model_list[1:100],metabname = "oxylipin",outcome = "metab")
 
 # vitd
 temp <- merge(vitd,methyl,by = "samplekey")
 metab <- names(vitd)[2:ncol(vitd)]
-model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~","age+sex+",metab)
 
-run_mods(model_list[1:100],metabname = "vitd")
+model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~","age+sex+",metab)
+run_mods(model_list[1:100],metabname = "vitd",outcome = "methyl")
+
+model_list <- paste0(metab,"~","age+sex+",rep(probesFromPipeline,each = length(metab)))
+run_mods(model_list[1:100],metabname = "vitd",outcome = "metab")
