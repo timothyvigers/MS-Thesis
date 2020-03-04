@@ -59,7 +59,7 @@ pairs <- pairs[which(pairs$methyl %in% methyl_pheno | pairs$metab %in% metab_phe
 
 Below is a volcano plot of all metabolite-methylation pairs. Pairs selected based on Rudra et al. cutoffs are highlighted in red. Total pairs = `r nrow(pairs)`
 
-```{r gctof volcano,echo=FALSE}
+```{r gctof volcano,echo=FALSE,cache=TRUE}
 volcano <- ggplot(gctof,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point() + 
   geom_point(data = pairs,color = "red") +
@@ -83,7 +83,7 @@ pairs <- pairs[which(pairs$methyl %in% methyl_pheno | pairs$metab %in% metab_phe
 
 Below is a volcano plot of all metabolite-methylation pairs. Pairs selected based on Rudra et al. cutoffs are highlighted in red. Total pairs = `r nrow(pairs)`
 
-```{r hilic volcano,echo=FALSE}
+```{r hilic volcano,echo=FALSE,cache=TRUE}
 volcano <- ggplot(hilic,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point() + 
   geom_point(data = pairs,color = "red") +
@@ -107,7 +107,7 @@ pairs <- pairs[which(pairs$methyl %in% methyl_pheno | pairs$metab %in% metab_phe
 
 Below is a volcano plot of all metabolite-methylation pairs. Pairs selected based on Rudra et al. cutoffs are highlighted in red. Total pairs = `r nrow(pairs)`
 
-```{r lipid volcano,echo=FALSE}
+```{r lipid volcano,echo=FALSE,cache=TRUE}
 volcano <- ggplot(lipid,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point() + 
   geom_point(data = pairs,color = "red") +
@@ -131,7 +131,7 @@ pairs <- pairs[which(pairs$methyl %in% methyl_pheno | pairs$metab %in% metab_phe
 
 Below is a volcano plot of all metabolite-methylation pairs. Pairs selected based on Rudra et al. cutoffs are highlighted in red. Total pairs = `r nrow(pairs)`
 
-```{r oxylipin volcano,echo=FALSE}
+```{r oxylipin volcano,echo=FALSE,cache=TRUE}
 volcano <- ggplot(oxylipin,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point() + 
   geom_point(data = pairs,color = "red") +
@@ -155,7 +155,7 @@ pairs <- pairs[which(pairs$methyl %in% methyl_pheno | pairs$metab %in% metab_phe
 
 Below is a volcano plot of all metabolite-methylation pairs. Pairs selected based on Rudra et al. cutoffs are highlighted in red. Total pairs = `r nrow(pairs)`
 
-```{r vitd volcano,echo=FALSE}
+```{r vitd volcano,echo=FALSE,cache=TRUE}
 volcano <- ggplot(vitd,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point() + 
   geom_point(data = pairs,color = "red") +
