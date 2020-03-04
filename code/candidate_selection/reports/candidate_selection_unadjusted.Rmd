@@ -62,7 +62,7 @@ Below is a volcano plot of all metabolite-methylation pairs. Pairs selected base
 ```{r gctof volcano,echo=FALSE}
 volcano <- ggplot(gctof,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point(alpha = 0.5) + 
-  geom_point(data = pairs,color = "red") +
+  geom_point(data = pairs,color = "red",alpha = 0.5) +
   theme_bw() + ylab("-log10 p-value") + xlab("Estimate") + ylim(0,15)
 volcano
 ```
@@ -86,7 +86,7 @@ Below is a volcano plot of all metabolite-methylation pairs. Pairs selected base
 ```{r hilic volcano,echo=FALSE}
 volcano <- ggplot(hilic,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point(alpha = 0.5) + 
-  geom_point(data = pairs,color = "red") +
+  geom_point(data = pairs,color = "red",alpha = 0.5) +
   theme_bw() + ylab("-log10 p-value") + xlab("Estimate") + ylim(0,15)
 volcano
 ```
@@ -110,7 +110,7 @@ Below is a volcano plot of all metabolite-methylation pairs. Pairs selected base
 ```{r lipid volcano,echo=FALSE}
 volcano <- ggplot(lipid,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point(alpha = 0.5) + 
-  geom_point(data = pairs,color = "red") +
+  geom_point(data = pairs,color = "red",alpha = 0.5) +
   theme_bw() + ylab("-log10 p-value") + xlab("Estimate") + ylim(0,15)
 volcano
 ```
@@ -134,7 +134,7 @@ Below is a volcano plot of all metabolite-methylation pairs. Pairs selected base
 ```{r oxylipin volcano,echo=FALSE}
 volcano <- ggplot(oxylipin,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point(alpha = 0.5) + 
-  geom_point(data = pairs,color = "red") +
+  geom_point(data = pairs,color = "red",alpha = 0.5) +
   theme_bw() + ylab("-log10 p-value") + xlab("Estimate") + ylim(0,15)
 volcano
 ```
@@ -158,7 +158,7 @@ Below is a volcano plot of all metabolite-methylation pairs. Pairs selected base
 ```{r vitd volcano,echo=FALSE}
 volcano <- ggplot(vitd,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point(alpha = 0.5) + 
-  geom_point(data = pairs,color = "red") +
+  geom_point(data = pairs,color = "red",alpha = 0.5) +
   theme_bw() + ylab("-log10 p-value") + xlab("Estimate") + ylim(0,15)
 volcano
 ```
