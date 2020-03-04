@@ -49,12 +49,14 @@ gctof_pairs <- nrow(pairs)
 
 Below is a volcano plot of all metabolite-methylation pairs. Pairs selected based on Rudra et al. cutoffs are highlighted in red. Total pairs = `r gctof_pairs`
 
-```{r gctof volcano,echo=FALSE}
+```{r gctof volcano base,echo=FALSE,cache=TRUE}
 volcano <- ggplot(gctof,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point(alpha = 0.5) + 
-  geom_point(data = pairs,color = "red",alpha = 0.5) +
   theme_bw() + ylab("-log10 p-value") + xlab("Estimate") + ylim(0,15)
-volcano
+```
+
+```{r print gctof volcano,echo=FALSE}
+volcano + geom_point(data = pairs,color = "red",alpha = 0.5)
 ```
 
 ## HILIC Metabolites
@@ -74,12 +76,14 @@ hilic_pairs <- nrow(pairs)
 
 Below is a volcano plot of all metabolite-methylation pairs. Pairs selected based on Rudra et al. cutoffs are highlighted in red. Total pairs = `r hilic_pairs`
 
-```{r hilic volcano,echo=FALSE}
+```{r hilic volcano base,echo=FALSE,cache=TRUE}
 volcano <- ggplot(hilic,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point(alpha = 0.5) + 
-  geom_point(data = pairs,color = "red",alpha = 0.5) +
   theme_bw() + ylab("-log10 p-value") + xlab("Estimate") + ylim(0,15)
-volcano
+```
+
+```{r print hilic volcano,echo=FALSE}
+volcano + geom_point(data = pairs,color = "red",alpha = 0.5)
 ```
 
 ## Lipid Metabolites
@@ -99,12 +103,14 @@ lipid_pairs <- nrow(pairs)
 
 Below is a volcano plot of all metabolite-methylation pairs. Pairs selected based on Rudra et al. cutoffs are highlighted in red. Total pairs = `r lipid_pairs`
 
-```{r lipid volcano,echo=FALSE}
+```{r lipid volcano base,echo=FALSE,cache=TRUE}
 volcano <- ggplot(lipid,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point(alpha = 0.5) + 
-  geom_point(data = pairs,color = "red",alpha = 0.5) +
   theme_bw() + ylab("-log10 p-value") + xlab("Estimate") + ylim(0,15)
-volcano
+```
+
+```{r print lipid volcano,echo=FALSE}
+volcano + geom_point(data = pairs,color = "red",alpha = 0.5)
 ```
 
 ## Oxylipin Metabolites
@@ -125,12 +131,14 @@ oxylipin_pairs <- nrow(pairs)
 
 Below is a volcano plot of all metabolite-methylation pairs. Pairs selected based on Rudra et al. cutoffs are highlighted in red. Total pairs = `r oxylipin_pairs`
 
-```{r oxylipin volcano,echo=FALSE}
+```{r oxylipin volcano base,echo=FALSE,cache=TRUE}
 volcano <- ggplot(oxylipin,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point(alpha = 0.5) + 
-  geom_point(data = pairs,color = "red",alpha = 0.5) +
   theme_bw() + ylab("-log10 p-value") + xlab("Estimate") + ylim(0,15)
-volcano
+```
+
+```{r print oxylipin volcano,echo=FALSE}
+volcano + geom_point(data = pairs,color = "red",alpha = 0.5)
 ```
 
 ## Vitamin D Metabolites
@@ -150,12 +158,14 @@ vitd_pairs <- nrow(pairs)
 
 Below is a volcano plot of all metabolite-methylation pairs. Pairs selected based on Rudra et al. cutoffs are highlighted in red. Total pairs = `r vitd_pairs`
 
-```{r vitd volcano,echo=FALSE}
+```{r vitd volcano base,echo=FALSE,cache=TRUE}
 volcano <- ggplot(vitd,aes(x = Value, y = -log(p.value,base = 10))) +
   geom_point(alpha = 0.5) + 
-  geom_point(data = pairs,color = "red",alpha = 0.5) +
   theme_bw() + ylab("-log10 p-value") + xlab("Estimate") + ylim(0,15)
-volcano
+```
+
+```{r print vitd volcano,echo=FALSE}
+volcano + geom_point(data = pairs,color = "red",alpha = 0.5)
 ```
 
 ### Total Candidates = `r sum(gctof_pairs,hilic_pairs,lipid_pairs,oxylipin_pairs,vitd_pairs)`
