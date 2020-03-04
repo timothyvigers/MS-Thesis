@@ -48,7 +48,7 @@ vitd[,2:ncol(vitd)] <- lapply(vitd[,2:ncol(vitd)],scale)
 
 # Model function
 run_mods <- function(mods = model_list, data = temp,metabname,no_cores = 60,
-                     out_dir = "/home/vigerst/MS-Thesis/candidate_selection/step_1/") {
+                     out_dir = "/home/vigerst/MS-Thesis/data/candidate_selection/step_1/") {
   require(parallel)
   # Make cluster
   cl <- makeCluster(no_cores,type = "FORK")
@@ -99,16 +99,16 @@ model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~",metab)
 
 run_mods(model_list,metabname = "lipid")
 
-# # oxylipin
-# temp <- merge(oxylipin,methyl,by = "samplekey")
-# metab <- names(oxylipin)[2:ncol(oxylipin)]
-# model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~",metab)
-# 
-# run_mods(model_list,metabname = "oxylipin")
-# 
-# # vitd
-# temp <- merge(vitd,methyl,by = "samplekey")
-# metab <- names(vitd)[2:ncol(vitd)]
-# model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~",metab)
-# 
-# run_mods(model_list,metabname = "vitd")
+# oxylipin
+temp <- merge(oxylipin,methyl,by = "samplekey")
+metab <- names(oxylipin)[2:ncol(oxylipin)]
+model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~",metab)
+
+run_mods(model_list,metabname = "oxylipin")
+
+# vitd
+temp <- merge(vitd,methyl,by = "samplekey")
+metab <- names(vitd)[2:ncol(vitd)]
+model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~",metab)
+
+run_mods(model_list,metabname = "vitd")

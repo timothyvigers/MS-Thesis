@@ -9,18 +9,23 @@ pheno <- pheno[!is.na(pheno$T1Dgroup),]
 pheno <- pheno[pheno$Visit_Type == "SV",]
 # Metabolites
 gctof <- read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.bc.csv")
-gctof <- merge(pheno,gctof,by = "samplekey")
+gctof <- gctof[gctof$samplekey %in% pheno$samplekey,]
+gctof[,2:ncol(gctof)] <- lapply(gctof[,2:ncol(gctof)],scale)
 hilic <- read.csv("/home/biostats_share/Norris/data/metabolomics/hilic.bc.csv")
-hilic <- merge(pheno,hilic,by = "samplekey")
+hilic <- hilic[hilic$samplekey %in% pheno$samplekey,]
+hilic[,2:ncol(hilic)] <- lapply(hilic[,2:ncol(hilic)],scale)
 lipid <- read.csv("/home/biostats_share/Norris/data/metabolomics/lipid.bc.csv")
-lipid <- merge(pheno,lipid,by = "samplekey")
+lipid <- lipid[lipid$samplekey %in% pheno$samplekey,]
+lipid[,2:ncol(lipid)] <- lapply(lipid[,2:ncol(lipid)],scale)
 oxylipin <- read.csv("/home/biostats_share/Norris/data/metabolomics/oxylipin.bc.csv")
-oxylipin <- merge(pheno,oxylipin,by = "samplekey")
+oxylipin <- oxylipin[oxylipin$samplekey %in% pheno$samplekey,]
+oxylipin[,2:ncol(oxylipin)] <- lapply(oxylipin[,2:ncol(oxylipin)],scale)
 vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
-vitd <- merge(pheno,vitd,by = "samplekey")
+vitd <- vitd[vitd$samplekey %in% pheno$samplekey,]
+vitd[,2:ncol(vitd)] <- lapply(vitd[,2:ncol(vitd)],scale)
 # Model function
 run_mods <- function(mods = model_list,no_cores = 60,metabname,data,
-                     out_dir = "/home/vigerst/MS-Thesis/candidate_selection/step_3/") {
+                     out_dir = "/home/vigerst/MS-Thesis/data/candidate_selection/step_3/") {
   require(parallel)
   # Make cluster
   cl <- makeCluster(no_cores,type = "FORK")
@@ -50,21 +55,21 @@ run_mods <- function(mods = model_list,no_cores = 60,metabname,data,
 }
 
 # gctof
-model_list <- paste0("T1Dgroup~",names(gctof)[20:ncol(gctof)])
+model_list <- paste0("T1Dgroup~",names(gctof)[2:ncol(gctof)])
 run_mods(model_list,metabname = "gctof",data = gctof)
 
 # hilic
-model_list <- paste0("T1Dgroup~",names(hilic)[20:ncol(hilic)])
+model_list <- paste0("T1Dgroup~",names(hilic)[2:ncol(hilic)])
 run_mods(model_list,metabname = "hilic",data = hilic)
 
 # lipid
-model_list <- paste0("T1Dgroup~",names(lipid)[20:ncol(lipid)])
+model_list <- paste0("T1Dgroup~",names(lipid)[2:ncol(lipid)])
 run_mods(model_list,metabname = "lipid",data = lipid)
 
 # oxylipin
-model_list <- paste0("T1Dgroup~",names(oxylipin)[20:ncol(oxylipin)])
+model_list <- paste0("T1Dgroup~",names(oxylipin)[2:ncol(oxylipin)])
 run_mods(model_list,metabname = "oxylipin",data = oxylipin)
 
 # vitd
-model_list <- paste0("T1Dgroup~",names(vitd)[20:ncol(vitd)])
+model_list <- paste0("T1Dgroup~",names(vitd)[2:ncol(vitd)])
 run_mods(model_list,metabname = "vitd",data = vitd)
