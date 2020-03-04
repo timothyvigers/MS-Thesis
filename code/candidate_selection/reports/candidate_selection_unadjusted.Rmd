@@ -25,8 +25,8 @@ metab_step3 <- bind_rows(gctof_step3,hilic_step3,lipid_step3,
                          oxylipin_step3,vitd_step3)
 metab_step3 <- metab_step3 %>% arrange(p.value,Value)
 # Define cutoffs
-pheno_cutoff <- 0.01
-pair_cutoff <- 0.0001
+pheno_cutoff <- 0.05
+pair_cutoff <- 0.001
 # Get methyl and metabs associated with phenotype
 methyl_pheno <- unique(methyl_step2$methyl[methyl_step2$p.value < pheno_cutoff])
 metab_pheno <- unique(metab_step3$metab[metab_step3$p.value < pheno_cutoff])
