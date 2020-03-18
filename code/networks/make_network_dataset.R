@@ -58,8 +58,8 @@ gctof = gctof[,c("samplekey",colnames(gctof)[which(colnames(gctof) %in% unique(p
 gctof[,2:ncol(gctof)] = lapply(gctof[,2:ncol(gctof)],scale)
 hilic = read.csv("/home/biostats_share/Norris/data/metabolomics/hilic.bc.csv",stringsAsFactors = F)
 hilic = hilic[hilic$samplekey %in% pheno$samplekey,]
-hilic = hilic[,c("samplekey",colnames(hilic)[which(colnames(hilic) %in% unique(pairs$metab))])]
-hilic[,2:ncol(hilic)] = lapply(hilic[,2:ncol(hilic)],scale)
+hilic = hilic[,c("samplekey","hilic_12")]
+hilic$hilic_12 = scale(hilic$hilic_12)
 lipid = read.csv("/home/biostats_share/Norris/data/metabolomics/lipid.bc.csv",stringsAsFactors = F)
 lipid = lipid[lipid$samplekey %in% pheno$samplekey,]
 lipid = lipid[,c("samplekey",colnames(lipid)[which(colnames(lipid) %in% unique(pairs$metab))])]
