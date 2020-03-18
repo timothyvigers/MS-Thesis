@@ -73,12 +73,12 @@ vitd = vitd[vitd$samplekey %in% pheno$samplekey,]
 vitd = vitd[,c("samplekey",colnames(vitd)[which(colnames(vitd) %in% unique(pairs$metab))])]
 vitd[,2:ncol(vitd)] = lapply(vitd[,2:ncol(vitd)],scale)
 # Merge
-df = merge(pheno,methyl,by = "samplekey")
-df = merge(df,gctof,by = "samplekey")
-df = merge(df,hilic,by = "samplekey")
-df = merge(df,lipid,by = "samplekey")
-df = merge(df,oxylipin,by = "samplekey")
-df = merge(df,vitd,by = "samplekey")
+df = merge(pheno,methyl,by = "samplekey",all.x = T)
+df = merge(df,gctof,by = "samplekey",all.x = T)
+df = merge(df,hilic,by = "samplekey",all.x = T)
+df = merge(df,lipid,by = "samplekey",all.x = T)
+df = merge(df,oxylipin,by = "samplekey",all.x = T)
+df = merge(df,vitd,by = "samplekey",all.x = T)
 pair_data = df
 # Save
 save(pair_data,file = "~/MS-Thesis/data/networks/pair_data.Rdata")
