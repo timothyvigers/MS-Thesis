@@ -33,7 +33,7 @@ pairs = rbind(pairs,vitd[vitd$p.value < pair_cutoff,])
 # Pairs with methyl or metab associated with disease
 pairs = pairs[which(pairs$methyl %in% methyl_pheno | pairs$metab %in% metab_pheno),]
 # Write pairs list
-save(pairs,file = "~/MS-Thesis/data/candidate_selection/pairs.Rdata")
+save(pairs,file = "~/MS-Thesis/data/networks/pair_list.Rdata")
 # Combine all necessary data into one DF
 pheno = read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample_noIdentifyingInfo.csv",stringsAsFactors = F)
 pheno = pheno[!is.na(pheno$T1Dgroup),]
@@ -80,6 +80,6 @@ df = merge(df,lipid,by = "samplekey")
 df = merge(df,oxylipin,by = "samplekey")
 df = merge(df,vitd,by = "samplekey")
 # Save
-save(df,file = "~/MS-Thesis/data/candidate_selection/df.Rdata")
+save(df,file = "~/MS-Thesis/data/networks/pair_data.Rdata")
 
 
