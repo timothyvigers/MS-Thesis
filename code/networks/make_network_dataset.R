@@ -35,7 +35,7 @@ pairs = pairs[which(pairs$methyl %in% methyl_pheno | pairs$metab %in% metab_phen
 # Write pairs list
 save(pairs,file = "~/MS-Thesis/data/networks/pair_list.Rdata")
 # Combine all necessary data into one DF
-pheno = read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample_noIdentifyingInfo.csv",stringsAsFactors = F)
+pheno = read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample_noIdentifyingInfo.csv",stringsAsFactors = F,na.strings = "")
 pheno = pheno[!is.na(pheno$T1Dgroup),]
 pheno = pheno[pheno$Visit_Type == "SV",]
 # Code from candidate selection
@@ -79,5 +79,6 @@ df = merge(df,hilic,by = "samplekey")
 df = merge(df,lipid,by = "samplekey")
 df = merge(df,oxylipin,by = "samplekey")
 df = merge(df,vitd,by = "samplekey")
+pair_data = df
 # Save
-save(df,file = "~/MS-Thesis/data/networks/pair_data.Rdata")
+save(pair_data,file = "~/MS-Thesis/data/networks/pair_data.Rdata")
