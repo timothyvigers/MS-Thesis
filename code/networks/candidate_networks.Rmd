@@ -17,21 +17,68 @@ library(tidyverse)
 # Load list and data
 load("/Users/timvigers/GitHub/MS-Thesis/data/networks/pair_list.Rdata")
 load("/Users/timvigers/GitHub/MS-Thesis/data/networks/pair_data.Rdata")
+pair_data$T1Dgroup = factor(pair_data$T1Dgroup)
 ```
 
 # Possible Triplet Structures
 
-```{r echo=FALSE,fig.height=6}
+```{r general structures,echo=FALSE,fig.height=6}
 # Define and print all network structures
-net = empty.graph(c("t1d","methyl","metab"))
-modelstring(net) = "[t1d][methyl|t1d][metab|t1d][methyl|metab]"
-plot(net)
-modelstring(net) = "[t1d][methyl|t1d][metab|t1d][metab|methyl]"
-plot(net)
-# Iterate through each pair and pick best network structure based on BIC
-l = apply(pairs, 1, function(x){
-  methyl = as.character(x["methyl"])
-  metab = as.character(x["metab"])
-  
+# Empty graph
+net = empty.graph(c("T1Dgroup","methyl","metab"))
+# Structures
+struct1 = "[T1Dgroup][methyl|T1Dgroup:metab][metab|T1Dgroup]"
+struct2 = "[T1Dgroup][methyl|T1Dgroup][metab|T1Dgroup:methyl]"
+struct3 = "[T1Dgroup|methyl:metab][methyl][metab|methyl]"
+struct4 = "[T1Dgroup|methyl][methyl][metab|methyl:T1Dgroup]"
+struct5 = "[T1Dgroup|metab:methyl][methyl|metab][metab]"
+struct6 = "[T1Dgroup|metab][methyl|metab:T1Dgroup][metab]"
+```
+
+```{r specific structures,echo=FALSE,message=FALSE}
+# Make a list of every possible network structure (generic nodes)
+nets = c(struct1,struct2,struct3,struct4,struct5,struct6)
+# Repeat list of network structures for each pair
+all_nets = list(nets)
+all_nets = rep(all_nets,times = nrow(pairs))
+names(all_nets) = 1:nrow(pairs)
+# Iterate through pairs, and replace generic nodes with named ones
+all_nets = lapply(names(all_nets), function(x){
+  methyl = pairs[as.numeric(x),"methyl"]
+  metab = pairs[as.numeric(x),"metab"]
+  new_struct = gsub("methyl",methyl,all_nets[[x]])
+  new_struct = gsub("metab",metab,new_struct)
+  new_struct
+})
+# Plot first 6
+invisible(lapply(all_nets[[1]],function(x){
+  plot(model2network(x))
+}))
+```
+
+```{r scores,echo=FALSE}
+l = lapply(all_nets, function(x){
+  mod1 = model2network(x[1])
+  mod2 = model2network(x[2])
+  mod3 = model2network(x[3])
+  mod4 = model2network(x[4])
+  mod5 = model2network(x[5])
+  mod6 = model2network(x[6])
+  temp = pair_data[,nodes(mod1)]
+  temp = temp[complete.cases(temp),]
+  score1 = tryCatch(score(mod1,temp),message = function(m) Inf,
+                    warning = function(m) Inf,error = function(m) Inf)
+  score2 = tryCatch(score(mod2,temp),message = function(m) Inf,
+                    warning = function(m) Inf,error = function(m) Inf)
+  score3 = tryCatch(score(mod3,temp),message = function(m) Inf,
+                    warning = function(m) Inf,error = function(m) Inf)
+  score4 = tryCatch(score(mod4,temp),message = function(m) Inf,
+                    warning = function(m) Inf,error = function(m) Inf)
+  score5 = tryCatch(score(mod5,temp),message = function(m) Inf,
+                    warning = function(m) Inf,error = function(m) Inf)
+  score6 = tryCatch(score(mod6,temp),message = function(m) Inf,
+                    warning = function(m) Inf,error = function(m) Inf)
+  scores = c(score1,score2,score3,score4,score5,score6)
+  scores
 })
 ```
