@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(knitr)
 library(bnlearn)
+library(patchwork)
 library(tidyverse)
 ```
 
@@ -16,4 +17,21 @@ library(tidyverse)
 # Load list and data
 load("/Users/timvigers/GitHub/MS-Thesis/data/networks/pair_list.Rdata")
 load("/Users/timvigers/GitHub/MS-Thesis/data/networks/pair_data.Rdata")
+```
+
+# Possible Triplet Structures
+
+```{r echo=FALSE,fig.height=6}
+# Define and print all network structures
+net = empty.graph(c("t1d","methyl","metab"))
+modelstring(net) = "[t1d][methyl|t1d][metab|t1d][methyl|metab]"
+plot(net)
+modelstring(net) = "[t1d][methyl|t1d][metab|t1d][metab|methyl]"
+plot(net)
+# Iterate through each pair and pick best network structure based on BIC
+l = apply(pairs, 1, function(x){
+  methyl = as.character(x["methyl"])
+  metab = as.character(x["metab"])
+  
+})
 ```
