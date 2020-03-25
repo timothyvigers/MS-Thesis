@@ -20,19 +20,23 @@ load("/Users/timvigers/GitHub/MS-Thesis/data/networks/pair_data.Rdata")
 pair_data$T1Dgroup = factor(pair_data$T1Dgroup)
 ```
 
-# Possible Triplet Structures
+# Triplet Networks
 
 ```{r general structures,echo=FALSE,fig.height=6}
 # Define and print all network structures
 # Empty graph
 net = empty.graph(c("T1Dgroup","methyl","metab"))
 # Structures
+# 3 arcs
 struct1 = "[T1Dgroup][methyl|T1Dgroup:metab][metab|T1Dgroup]"
 struct2 = "[T1Dgroup][methyl|T1Dgroup][metab|T1Dgroup:methyl]"
 struct3 = "[T1Dgroup|methyl:metab][methyl][metab|methyl]"
 struct4 = "[T1Dgroup|methyl][methyl][metab|methyl:T1Dgroup]"
 struct5 = "[T1Dgroup|metab:methyl][methyl|metab][metab]"
 struct6 = "[T1Dgroup|metab][methyl|metab:T1Dgroup][metab]"
+# 2 arcs
+struct7 = "[T1Dgroup][methyl|T1Dgroup][metab|T1Dgroup]"
+struct8 = "[T1Dgroup|methyl][methyl][metab|T1Dgroup]"
 ```
 
 ```{r specific structures,echo=FALSE,message=FALSE}
@@ -50,13 +54,9 @@ all_nets = lapply(names(all_nets), function(x){
   new_struct = gsub("metab",metab,new_struct)
   new_struct
 })
-# Plot first 6
-invisible(lapply(all_nets[[1]],function(x){
-  plot(model2network(x))
-}))
 ```
 
-```{r scores,echo=FALSE}
+```{r scores,echo=FALSE,eval=FALSE}
 l = lapply(all_nets, function(x){
   mod1 = model2network(x[1])
   mod2 = model2network(x[2])
@@ -81,4 +81,25 @@ l = lapply(all_nets, function(x){
   scores = c(score1,score2,score3,score4,score5,score6)
   scores
 })
+```
+
+## Hill Climbing (First 10)
+
+```{r hc,echo=FALSE}
+l = lapply(all_nets, function(x){
+  mod1 = model2network(x[1])
+  mod2 = model2network(x[2])
+  mod3 = model2network(x[3])
+  mod4 = model2network(x[4])
+  mod5 = model2network(x[5])
+  mod6 = model2network(x[6])
+  temp = pair_data[,nodes(mod1)]
+  temp = temp[complete.cases(temp),]
+  hc = hc(temp,score = "bic-cg")
+  hc
+})
+# plot first 10
+invisible(lapply(l[1:10], function(x){
+  plot(x)
+}))
 ```
