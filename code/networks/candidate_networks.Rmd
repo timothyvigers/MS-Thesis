@@ -37,9 +37,9 @@ struct4 = "[T1Dgroup|methyl][methyl][metab|methyl:T1Dgroup]"
 struct5 = "[T1Dgroup|metab:methyl][methyl|metab][metab]"
 struct6 = "[T1Dgroup|metab][methyl|metab:T1Dgroup][metab]"
 # Plot
-invisible(lapply(c(struct1,struct2,struct3,struct4,struct5,struct6), function(x){
-  plot(model2network(x))
-}))
+# invisible(lapply(c(struct1,struct2,struct3,struct4,struct5,struct6), function(x){
+#   plot(model2network(x))
+# }))
 ```
 
 ## Two Arcs
@@ -61,13 +61,24 @@ struct16 = "[T1Dgroup][methyl|metab][metab|T1Dgroup]"
 struct17 = "[T1Dgroup|metab][methyl][metab|methyl]"
 struct18 = "[T1Dgroup][methyl][metab|methyl:T1Dgroup]"
 # Plot
-invisible(lapply(c(struct7,struct8,struct9,struct10,
-                   struct11,struct12,struct13,struct14,
-                   struct15,struct16,struct17,struct18), function(x){
-  plot(model2network(x))
-}))
+# invisible(lapply(c(struct7,struct8,struct9,struct10,
+#                    struct11,struct12,struct13,struct14,
+#                    struct15,struct16,struct17,struct18), function(x){
+#   plot(model2network(x))
+# }))
 ```
 
+## One Arc
+
+```{r one arc,echo=FALSE,fig.height=6}
+# 1 arc
+struct19 = "[T1Dgroup][methyl|T1Dgroup][metab]"
+struct20 = "[T1Dgroup][methyl][metab|T1Dgroup]"
+struct21 = "[T1Dgroup|methyl][methyl][metab]"
+struct22 = "[T1Dgroup][methyl][metab|methyl]"
+struct23 = "[T1Dgroup|metab][methyl][metab]"
+struct24 = "[T1Dgroup][methyl|metab][metab]"
+```
 
 ```{r specific structures,echo=FALSE,message=FALSE}
 # Make a list of every possible network structure (generic nodes)
@@ -113,23 +124,23 @@ l = lapply(all_nets, function(x){
 })
 ```
 
-<!-- ## Hill Climbing (First 10) -->
+## Hill Climbing (First 10)
 
-<!-- ```{r hc,echo=FALSE} -->
-<!-- l = lapply(all_nets, function(x){ -->
-<!--   mod1 = model2network(x[1]) -->
-<!--   mod2 = model2network(x[2]) -->
-<!--   mod3 = model2network(x[3]) -->
-<!--   mod4 = model2network(x[4]) -->
-<!--   mod5 = model2network(x[5]) -->
-<!--   mod6 = model2network(x[6]) -->
-<!--   temp = pair_data[,nodes(mod1)] -->
-<!--   temp = temp[complete.cases(temp),] -->
-<!--   hc = hc(temp,score = "bic-cg") -->
-<!--   hc -->
-<!-- }) -->
-<!-- # plot first 10 -->
-<!-- invisible(lapply(l[1:10], function(x){ -->
-<!--   plot(x) -->
-<!-- })) -->
-<!-- ``` -->
+```{r hc,echo=FALSE}
+l = lapply(all_nets, function(x){
+  mod1 = model2network(x[1])
+  mod2 = model2network(x[2])
+  mod3 = model2network(x[3])
+  mod4 = model2network(x[4])
+  mod5 = model2network(x[5])
+  mod6 = model2network(x[6])
+  temp = pair_data[,nodes(mod1)]
+  temp = temp[complete.cases(temp),]
+  hc = hc(temp,score = "bic-cg")
+  hc
+})
+# plot first 10
+invisible(lapply(l[1:10], function(x){
+  plot(x)
+}))
+```
