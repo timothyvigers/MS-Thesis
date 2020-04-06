@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(knitr)
 library(bnlearn)
+library(patchwork)
 library(tidyverse)
 ```
 
@@ -16,4 +17,130 @@ library(tidyverse)
 # Load list and data
 load("/Users/timvigers/GitHub/MS-Thesis/data/networks/pair_list.Rdata")
 load("/Users/timvigers/GitHub/MS-Thesis/data/networks/pair_data.Rdata")
+pair_data$T1Dgroup = factor(pair_data$T1Dgroup)
+```
+
+# Triplet Networks
+
+## Three Arcs
+
+```{r three arcs,echo=FALSE,fig.height=6}
+# Define and print all network structures
+# Empty graph
+net = empty.graph(c("T1Dgroup","methyl","metab"))
+# Structures
+# 3 arcs
+struct1 = "[T1Dgroup][methyl|T1Dgroup:metab][metab|T1Dgroup]"
+struct2 = "[T1Dgroup][methyl|T1Dgroup][metab|T1Dgroup:methyl]"
+struct3 = "[T1Dgroup|methyl:metab][methyl][metab|methyl]"
+struct4 = "[T1Dgroup|methyl][methyl][metab|methyl:T1Dgroup]"
+struct5 = "[T1Dgroup|metab:methyl][methyl|metab][metab]"
+struct6 = "[T1Dgroup|metab][methyl|metab:T1Dgroup][metab]"
+# Plot
+# invisible(lapply(c(struct1,struct2,struct3,struct4,struct5,struct6), function(x){
+#   plot(model2network(x))
+# }))
+```
+
+## Two Arcs
+
+```{r two arcs,echo=FALSE,fig.height=6}
+# 2 arcs
+struct7 = "[T1Dgroup][methyl|T1Dgroup][metab|T1Dgroup]"
+struct8 = "[T1Dgroup|methyl][methyl][metab|T1Dgroup]"
+struct9 = "[T1Dgroup|metab][methyl|T1Dgroup][metab]"
+struct10 = "[T1Dgroup|metab:methyl][methyl][metab]"
+
+struct11 = "[T1Dgroup|methyl][methyl][metab|methyl]"
+struct12 = "[T1Dgroup][methyl|T1Dgroup][metab|methyl]"
+struct13 = "[T1Dgroup|methyl][methyl|metab][metab]"
+struct14 = "[T1Dgroup][methyl|metab:T1Dgroup][metab]"
+
+struct15 = "[T1Dgroup|metab][methyl|metab][metab]"
+struct16 = "[T1Dgroup][methyl|metab][metab|T1Dgroup]"
+struct17 = "[T1Dgroup|metab][methyl][metab|methyl]"
+struct18 = "[T1Dgroup][methyl][metab|methyl:T1Dgroup]"
+# Plot
+# invisible(lapply(c(struct7,struct8,struct9,struct10,
+#                    struct11,struct12,struct13,struct14,
+#                    struct15,struct16,struct17,struct18), function(x){
+#   plot(model2network(x))
+# }))
+```
+
+## One Arc
+
+```{r one arc,echo=FALSE,fig.height=6}
+# 1 arc
+struct19 = "[T1Dgroup][methyl|T1Dgroup][metab]"
+struct20 = "[T1Dgroup][methyl][metab|T1Dgroup]"
+struct21 = "[T1Dgroup|methyl][methyl][metab]"
+struct22 = "[T1Dgroup][methyl][metab|methyl]"
+struct23 = "[T1Dgroup|metab][methyl][metab]"
+struct24 = "[T1Dgroup][methyl|metab][metab]"
+```
+
+```{r specific structures,echo=FALSE,message=FALSE}
+# Make a list of every possible network structure (generic nodes)
+nets = c(struct1,struct2,struct3,struct4,struct5,struct6)
+# Repeat list of network structures for each pair
+all_nets = list(nets)
+all_nets = rep(all_nets,times = nrow(pairs))
+names(all_nets) = 1:nrow(pairs)
+# Iterate through pairs, and replace generic nodes with named ones
+all_nets = lapply(names(all_nets), function(x){
+  methyl = pairs[as.numeric(x),"methyl"]
+  metab = pairs[as.numeric(x),"metab"]
+  new_struct = gsub("methyl",methyl,all_nets[[x]])
+  new_struct = gsub("metab",metab,new_struct)
+  new_struct
+})
+```
+
+```{r scores,echo=FALSE,eval=FALSE}
+l = lapply(all_nets, function(x){
+  mod1 = model2network(x[1])
+  mod2 = model2network(x[2])
+  mod3 = model2network(x[3])
+  mod4 = model2network(x[4])
+  mod5 = model2network(x[5])
+  mod6 = model2network(x[6])
+  temp = pair_data[,nodes(mod1)]
+  temp = temp[complete.cases(temp),]
+  score1 = tryCatch(score(mod1,temp),message = function(m) Inf,
+                    warning = function(m) Inf,error = function(m) Inf)
+  score2 = tryCatch(score(mod2,temp),message = function(m) Inf,
+                    warning = function(m) Inf,error = function(m) Inf)
+  score3 = tryCatch(score(mod3,temp),message = function(m) Inf,
+                    warning = function(m) Inf,error = function(m) Inf)
+  score4 = tryCatch(score(mod4,temp),message = function(m) Inf,
+                    warning = function(m) Inf,error = function(m) Inf)
+  score5 = tryCatch(score(mod5,temp),message = function(m) Inf,
+                    warning = function(m) Inf,error = function(m) Inf)
+  score6 = tryCatch(score(mod6,temp),message = function(m) Inf,
+                    warning = function(m) Inf,error = function(m) Inf)
+  scores = c(score1,score2,score3,score4,score5,score6)
+  scores
+})
+```
+
+## Hill Climbing (First 10)
+
+```{r hc,echo=FALSE}
+l = lapply(all_nets, function(x){
+  mod1 = model2network(x[1])
+  mod2 = model2network(x[2])
+  mod3 = model2network(x[3])
+  mod4 = model2network(x[4])
+  mod5 = model2network(x[5])
+  mod6 = model2network(x[6])
+  temp = pair_data[,nodes(mod1)]
+  temp = temp[complete.cases(temp),]
+  hc = hc(temp,score = "bic-cg")
+  hc
+})
+# plot first 10
+invisible(lapply(l[1:10], function(x){
+  plot(x)
+}))
 ```
