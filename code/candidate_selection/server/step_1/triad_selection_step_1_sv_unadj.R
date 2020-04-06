@@ -48,8 +48,8 @@ vitd <- vitd[vitd$samplekey %in% pheno$samplekey,]
 vitd[,2:ncol(vitd)] <- lapply(vitd[,2:ncol(vitd)],scale)
 
 # Model function
-run_mods <- function(mods = model_list, data = temp,metabname,no_cores = 20,
-                     out_dir = "/home/vigerst/MS-Thesis/data/candidate_selection/step_1/") {
+run_mods <- function(mods = model_list, data = temp,metabname,no_cores = 10,
+                     out_dir = "/home/vigerst/MS-Thesis/data/candidate_selection/step_1/sv/") {
   require(parallel)
   # Make cluster
   cl <- makeCluster(no_cores,type = "FORK")
