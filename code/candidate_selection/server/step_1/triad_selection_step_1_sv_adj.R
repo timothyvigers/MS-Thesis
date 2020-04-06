@@ -20,12 +20,13 @@ key_epic <- read.csv("/home/biostats_share/Norris/data/methylation/key.EPIC.csv"
 key_epic$platform <- "EPIC"
 key <- rbind(key_450k,key_epic)
 # Make final methylation dataset
-methyl$samplekey <- key$samplekey[match(rownames(methyl),key$array)]
-methyl <- methyl[match(pheno$samplekey,methyl$samplekey),]
-methyl$id <- pheno$ID[match(methyl$samplekey,pheno$samplekey)]
-methyl$age <- pheno$clinage[match(methyl$samplekey,pheno$samplekey)]
-methyl$sex <- pheno$SEX[match(methyl$samplekey,pheno$samplekey)]
-methyl <- methyl[,c(probesFromPipeline,"samplekey","id","sex","age")]
+methyl$samplekey = key$samplekey[match(rownames(methyl),key$array)]
+methyl$platform = key$platform[match(rownames(methyl),key$array)]
+methyl = methyl[match(pheno$samplekey,methyl$samplekey),]
+methyl$id = pheno$ID[match(methyl$samplekey,pheno$samplekey)]
+methyl$age = pheno$clinage[match(methyl$samplekey,pheno$samplekey)]
+methyl$sex = pheno$SEX[match(methyl$samplekey,pheno$samplekey)]
+methyl = methyl[,c(probesFromPipeline,"samplekey","id","platform","sex","age")]
 # Metabolites
 # Import metabolites, add sex and age, scale
 gctof <- read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.bc.csv",
@@ -72,9 +73,9 @@ run_mods <- function(mods = model_list, data = temp,metabname,outcome,no_cores =
       results$term <- rownames(results)
       if (outcome == "methyl") {
         results[nrow(results),"methyl"] <- strsplit(x,"~")[[1]][1]
-        results[nrow(results),"metab"] <- strsplit(x,"\\+")[[1]][3]
+        results[nrow(results),"metab"] <- strsplit(x,"\\+")[[1]][4]
       } else if (outcome == "metab") {
-        results[nrow(results),"methyl"] <- strsplit(x,"\\+")[[1]][3]
+        results[nrow(results),"methyl"] <- strsplit(x,"\\+")[[1]][4]
         results[nrow(results),"metab"] <- strsplit(x,"~")[[1]][1]
       }
       results <- results[nrow(results),c("methyl","metab","Estimate","Pr(>|t|)")]
@@ -96,48 +97,48 @@ run_mods <- function(mods = model_list, data = temp,metabname,outcome,no_cores =
 temp <- merge(gctof,methyl,by = "samplekey")
 metab <- unique(candidates$gctof[!is.na(candidates$gctof)])
 
-model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~","age+sex+",metab)
-run_mods(model_list,metabname = "gctof",outcome = "methyl")
+model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~","platform+age+sex+",metab)
+run_mods(model_list[1:100],metabname = "gctof",outcome = "methyl")
 
-model_list <- paste0(metab,"~","age+sex+",rep(probesFromPipeline,each = length(metab)))
-run_mods(model_list,metabname = "gctof",outcome = "metab")
+model_list <- paste0(metab,"~","platform+age+sex+",rep(probesFromPipeline,each = length(metab)))
+run_mods(model_list[1:100],metabname = "gctof",outcome = "metab")
 
 # hilic
 temp <- merge(hilic,methyl,by = "samplekey")
 metab <- unique(candidates$hilic[!is.na(candidates$hilic)])
 
-model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~","age+sex+",metab)
-run_mods(model_list,metabname = "hilic",outcome = "methyl")
+model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~","platform+age+sex+",metab)
+run_mods(model_list[1:100],metabname = "hilic",outcome = "methyl")
 
-model_list <- paste0(metab,"~","age+sex+",rep(probesFromPipeline,each = length(metab)))
-run_mods(model_list,metabname = "hilic",outcome = "metab")
+model_list <- paste0(metab,"~","platform+age+sex+",rep(probesFromPipeline,each = length(metab)))
+run_mods(model_list[1:100],metabname = "hilic",outcome = "metab")
 
 # lipid
 temp <- merge(lipid,methyl,by = "samplekey")
 metab <- unique(candidates$lipid[!is.na(candidates$lipid)])
 
-model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~","age+sex+",metab)
-run_mods(model_list,metabname = "lipid",outcome = "methyl")
+model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~","platform+age+sex+",metab)
+run_mods(model_list[1:100][1:100],metabname = "lipid",outcome = "methyl")
 
-model_list <- paste0(metab,"~","age+sex+",rep(probesFromPipeline,each = length(metab)))
-run_mods(model_list,metabname = "lipid",outcome = "metab")
+model_list <- paste0(metab,"~","platform+age+sex+",rep(probesFromPipeline,each = length(metab)))
+run_mods(model_list[1:100][1:100],metabname = "lipid",outcome = "metab")
 
 # oxylipin
 temp <- merge(oxylipin,methyl,by = "samplekey")
 metab <- names(oxylipin)[2:ncol(oxylipin)]
 
-model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~","age+sex+",metab)
-run_mods(model_list,metabname = "oxylipin",outcome = "methyl")
+model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~","platform+age+sex+",metab)
+run_mods(model_list[1:100][1:100],metabname = "oxylipin",outcome = "methyl")
 
-model_list <- paste0(metab,"~","age+sex+",rep(probesFromPipeline,each = length(metab)))
-run_mods(model_list,metabname = "oxylipin",outcome = "metab")
+model_list <- paste0(metab,"~","platform+age+sex+",rep(probesFromPipeline,each = length(metab)))
+run_mods(model_list[1:100][1:100],metabname = "oxylipin",outcome = "metab")
 
 # vitd
 temp <- merge(vitd,methyl,by = "samplekey")
 metab <- names(vitd)[2:ncol(vitd)]
 
-model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~","age+sex+",metab)
-run_mods(model_list,metabname = "vitd",outcome = "methyl")
+model_list <- paste0(rep(probesFromPipeline,each = length(metab)),"~","platform+age+sex+",metab)
+run_mods(model_list[1:100][1:100],metabname = "vitd",outcome = "methyl")
 
-model_list <- paste0(metab,"~","age+sex+",rep(probesFromPipeline,each = length(metab)))
-run_mods(model_list,metabname = "vitd",outcome = "metab")
+model_list <- paste0(metab,"~","platform+age+sex+",rep(probesFromPipeline,each = length(metab)))
+run_mods(model_list[1:100][1:100],metabname = "vitd",outcome = "metab")
