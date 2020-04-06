@@ -57,7 +57,7 @@ vitd[,2:ncol(vitd)] <- lapply(vitd[,2:ncol(vitd)],scale)
 candidates <- read.csv("/home/vigerst/MS-Thesis/data/metabolomics/liz_candidates.csv",
                        stringsAsFactors = F,na.strings = "")
 # Model function
-run_mods <- function(mods = model_list, data = temp,metabname,outcome,no_cores = 60,
+run_mods <- function(mods = model_list, data = temp,metabname,outcome,no_cores = 20,
                      out_dir = "/home/vigerst/MS-Thesis/data/candidate_selection/step_1/sv/") {
   require(parallel)
   # Make cluster
