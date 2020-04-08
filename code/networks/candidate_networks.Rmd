@@ -67,8 +67,6 @@ all_nets = apply(pairs,1,function(x){
 })
 ```
 
-## Hill Climbing
-
 ```{r hc,echo=FALSE}
 # Find best model
 best_nets = apply(pairs,1,function(x){
@@ -116,7 +114,58 @@ for(n in best_nets) {
 tabs = as.data.frame(table(types))
 ```
 
-```{r echo=FALSE}
+## Graph Structures
+
+Optimal Bayesian network structures for `r nrow(pairs)` metabolite-methylation-T1D triads (selected from linear models) were determined using a hill climbing algorithm based on BIC. There are a total of 24 possible network structures for each triad, and in total the selected triads contain `r length(unique(pairs$methyl))` unique methylation sites and `r length(unique(pairs$metab))` unique metabolites. 
+
+## Results
+
+Of the 24 possible network structures, only 10 were picked using the hill-climbing algorithm.
+
+### Three arcs
+
+```{r plots of 3 arcs,echo=FALSE}
 n_struct1 = sum(types == "metab -> methyl, T1D -> metab, T1D -> methyl")
 plot(model2network(struct1),main = paste0("n = ",n_struct1))
+
+n_struct2 = sum(types == "methyl -> metab, T1D -> metab, T1D -> methyl")
+plot(model2network(struct2),main = paste0("n = ",n_struct2))
 ```
+
+Total three-arc graphs: `r as.numeric(table(arc_count)[4])`
+
+### Two arcs
+
+```{r plots of 2 arcs,echo=FALSE}
+n_struct7 = sum(types == "T1D -> metab, T1D -> methyl")
+plot(model2network(struct7),main = paste0("n = ",n_struct7))
+
+n_struct12 = sum(types == "methyl -> metab, T1D -> methyl")
+plot(model2network(struct12),main = paste0("n = ",n_struct12))
+
+n_struct14 = sum(types == "metab -> methyl, T1D -> methyl")
+plot(model2network(struct14),main = paste0("n = ",n_struct14))
+
+n_struct16 = sum(types == "metab -> methyl, T1D -> metab")
+plot(model2network(struct16),main = paste0("n = ",n_struct16))
+
+n_struct18 = sum(types == "methyl -> metab, T1D -> metab")
+plot(model2network(struct18),main = paste0("n = ",n_struct18))
+```
+
+Total two-arc graphs: `r as.numeric(table(arc_count)[3])`
+
+### One arc
+
+```{r plots of 1 arc,echo=FALSE}
+n_struct19 = sum(types == "T1D -> methyl")
+plot(model2network(struct19),main = paste0("n = ",n_struct19))
+
+n_struct20 = sum(types == "T1D -> metab")
+plot(model2network(struct20),main = paste0("n = ",n_struct20))
+
+n_struct22 = sum(types == "methyl -> metab")
+plot(model2network(struct22),main = paste0("n = ",n_struct22))
+```
+
+Total one-arc graphs: `r as.numeric(table(arc_count)[2])`
