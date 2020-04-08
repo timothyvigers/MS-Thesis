@@ -169,3 +169,10 @@ plot(model2network(struct22),main = paste0("n = ",n_struct22))
 ```
 
 Total one-arc graphs: `r as.numeric(table(arc_count)[2])`
+
+### Graph Table
+
+```{r echo=FALSE}
+colnames(tabs) = c("Graph Structure","n")
+kable(tabs)
+```
