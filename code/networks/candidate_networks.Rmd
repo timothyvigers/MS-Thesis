@@ -94,9 +94,10 @@ l = lapply(all_nets, function(x){
 })
 ```
 
-## Hill Climbing (First 10)
+## Hill Climbing
 
 ```{r hc,echo=FALSE}
+# Find best model
 best_nets = apply(pairs,1,function(x){
   methyl = as.character(x["methyl"])
   metab = as.character(x["metab"])
@@ -105,4 +106,23 @@ best_nets = apply(pairs,1,function(x){
   mod = hc(temp)
   mod
 })
+# Tabulate model types
+arc_count = c()
+types = c()
+for(n in best_nets) {
+  arcs = as.data.frame(n$arcs)
+  arc_count = c(arc_count,nrow(arcs))
+  if (nrow(arcs) == 3) {
+    if (sum(grepl("T1D",arcs$from)) == 2) {
+      if (sum(grepl("cg",arcs$from)) > 0) {
+        types = c(types,"T1D -> omics, methyl -> metab")
+      } else {
+        types = c(types,"T1D -> omics, metab -> methyl")
+      }
+    } else {NA}
+  }
+  if (nrow(arcs) == 2) {
+    
+  }
+}
 ```
