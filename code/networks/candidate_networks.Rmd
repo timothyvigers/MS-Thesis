@@ -67,33 +67,6 @@ all_nets = apply(pairs,1,function(x){
 })
 ```
 
-```{r scores,echo=FALSE,eval=FALSE}
-l = lapply(all_nets, function(x){
-  mod1 = model2network(x[1])
-  mod2 = model2network(x[2])
-  mod3 = model2network(x[3])
-  mod4 = model2network(x[4])
-  mod5 = model2network(x[5])
-  mod6 = model2network(x[6])
-  temp = pair_data[,nodes(mod1)]
-  temp = temp[complete.cases(temp),]
-  score1 = tryCatch(score(mod1,temp),message = function(m) Inf,
-                    warning = function(m) Inf,error = function(m) Inf)
-  score2 = tryCatch(score(mod2,temp),message = function(m) Inf,
-                    warning = function(m) Inf,error = function(m) Inf)
-  score3 = tryCatch(score(mod3,temp),message = function(m) Inf,
-                    warning = function(m) Inf,error = function(m) Inf)
-  score4 = tryCatch(score(mod4,temp),message = function(m) Inf,
-                    warning = function(m) Inf,error = function(m) Inf)
-  score5 = tryCatch(score(mod5,temp),message = function(m) Inf,
-                    warning = function(m) Inf,error = function(m) Inf)
-  score6 = tryCatch(score(mod6,temp),message = function(m) Inf,
-                    warning = function(m) Inf,error = function(m) Inf)
-  scores = c(score1,score2,score3,score4,score5,score6)
-  scores
-})
-```
-
 ## Hill Climbing
 
 ```{r hc,echo=FALSE}
@@ -110,19 +83,40 @@ best_nets = apply(pairs,1,function(x){
 arc_count = c()
 types = c()
 for(n in best_nets) {
-  arcs = as.data.frame(n$arcs)
+  # Arc count
+  arcs = as.data.frame(n$arcs,stringsAsFactors = F)
   arc_count = c(arc_count,nrow(arcs))
+  # Rename arcs to general category
+  arcs$from = sub("T1Dgroup","T1D",arcs$from)
+  arcs$from = sub("cg.*","methyl",arcs$from)
+  arcs$from = sub("ch.*","methyl",arcs$from)
+  arcs$from = sub(".*_.*","metab",arcs$from)
+  arcs$to = sub("T1Dgroup","T1D",arcs$to)
+  arcs$to = sub("cg.*","methyl",arcs$to)
+  arcs$to = sub("ch.*","methyl",arcs$to)
+  arcs$to = sub(".*_.*","metab",arcs$to)
+  # Get arcs
+  arc1 = paste(arcs[1,1],"->",arcs[1,2])
+  arc2 = paste(arcs[2,1],"->",arcs[2,2])
+  arc3 = paste(arcs[3,1],"->",arcs[3,2])
   if (nrow(arcs) == 3) {
-    if (sum(grepl("T1D",arcs$from)) == 2) {
-      if (sum(grepl("cg",arcs$from)) > 0) {
-        types = c(types,"T1D -> omics, methyl -> metab")
-      } else {
-        types = c(types,"T1D -> omics, metab -> methyl")
-      }
-    } else {NA}
-  }
-  if (nrow(arcs) == 2) {
-    
+    all_arcs = c(arc1,arc2,arc3)
+    all_arcs = all_arcs[order(all_arcs)]
+    type = paste(all_arcs,collapse = ", ")
+    types = c(types, type)
+  } else if (nrow(arcs) == 2) {
+    all_arcs = c(arc1,arc2)
+    all_arcs = all_arcs[order(all_arcs)]
+    type = paste(all_arcs,collapse = ", ")
+    types = c(types, type)
+  } else if (nrow(arcs) == 1) {
+    types = c(types, arc1)
   }
 }
+tabs = as.data.frame(table(types))
+```
+
+```{r echo=FALSE}
+n_struct1 = sum(types == "metab -> methyl, T1D -> metab, T1D -> methyl")
+plot(model2network(struct1),main = paste0("n = ",n_struct1))
 ```
