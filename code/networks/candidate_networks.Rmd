@@ -7,6 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "/Users/timvigers/GitHub/MS-Thesis")
 library(knitr)
 library(bnlearn)
 library(rjags)
@@ -17,8 +18,8 @@ library(tidyverse)
 
 ```{r data import,echo=FALSE}
 # Load list and data
-load("/Users/timvigers/GitHub/MS-Thesis/data/networks/pair_list.Rdata")
-load("/Users/timvigers/GitHub/MS-Thesis/data/networks/pair_data.Rdata")
+load("./data/networks/pair_list.Rdata")
+load("./data/networks/pair_data.Rdata")
 pair_data$T1Dgroup = factor(pair_data$T1Dgroup)
 ```
 
@@ -56,23 +57,23 @@ struct23 = "[T1Dgroup|metab][methyl][metab]"
 struct24 = "[T1Dgroup][methyl|metab][metab]"
 ```
 
-```{r mcmc test,echo=FALSE}
+```{r mcmc test}
 # MCMC parameters
-n_adapt = 10000
+n_adapt = 1000
 iter = 50000
-
+# Example nodes
 methyl = "cg00287636"
 metab = "gctof_33"
 temp = pair_data[,c("T1Dgroup",methyl,metab)]
 temp = temp[complete.cases(temp),]
-
+# Data (X[,1] must be methylation and X[,2] must be metabolite)
 y = as.numeric(temp$T1Dgroup) - 1
 X = temp[,c(methyl,metab)]
 N = nrow(X)
 # JAGS
 jags_data = list(y=y,X=X,N=N)
-mod = jags.model("/Users/timvigers/GitHub/MS-Thesis/code/networks/logistic.jags",
-                 data = jags_data, n.adapt = 1000,n.chains = 2)
+mod = jags.model("./code/networks/omics_to_t1d_methyl_to_metab.jags",
+                 data = jags_data, n.adapt = n_adapt,n.chains = 2)
 # MCMC
 samples = coda.samples(mod,n.iter = iter,thin = 20,
                        variable.names = c("beta0","beta1","beta2","gamma0","gamma1"))
