@@ -9,6 +9,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(knitr)
 library(bnlearn)
+library(rjags)
+library(MCMCvis)
 library(patchwork)
 library(tidyverse)
 ```
@@ -54,125 +56,28 @@ struct23 = "[T1Dgroup|metab][methyl][metab]"
 struct24 = "[T1Dgroup][methyl|metab][metab]"
 ```
 
-```{r specific structures,echo=FALSE,message=FALSE,eval=FALSE}
-# Make a list of every possible network structure (generic nodes)
-all_nets = unlist(lapply(c(paste0("struct",1:24)), get))
-# Iterate through pairs, and replace generic nodes with named ones
-all_nets = apply(pairs,1,function(x){
-  methyl = as.character(x["methyl"])
-  metab = as.character(x["metab"])
-  new_structs = gsub("methyl",methyl,all_nets)
-  new_structs = gsub("metab",metab,new_structs)
-  new_structs
-})
+```{r mcmc test,echo=FALSE}
+methyl = "cg00287636"
+metab = "gctof_33"
+y = as.numeric(pair_data$T1Dgroup) - 1
+X = pair_data[,methyl]
+X = matrix(X[complete.cases(X)])
+N = nrow(X)
+# JAGS
+jags_data = list(y=y,X=X,N=N)
+mod = jags.model("/Users/timvigers/GitHub/MS-Thesis/code/networks/logistic.jags",
+                 data = jags_data, n.adapt = 1000,n.chains = 2)
+# MCMC
+samples = coda.samples(mod,variable.names = c("beta0","beta1"),n.iter = 10000)
+# Output
+output = MCMCsummary(samples, 
+                     params = c("beta0","beta1","beta2"),
+                     Rhat = F,
+                     n.eff = F,
+                     HPD = T,
+                     hpd_prob = 0.8,
+                     digits = 3)
+
+glm(T1Dgroup ~ gctof_33,data = pair_data,family = "binomial")
 ```
 
-```{r hc,echo=FALSE}
-# Find best model
-best_nets = apply(pairs,1,function(x){
-  methyl = as.character(x["methyl"])
-  metab = as.character(x["metab"])
-  temp = pair_data[,c("T1Dgroup",methyl,metab)]
-  temp = temp[complete.cases(temp),]
-  mod = hc(temp)
-  mod
-})
-# Tabulate model types
-arc_count = c()
-types = c()
-for(n in best_nets) {
-  # Arc count
-  arcs = as.data.frame(n$arcs,stringsAsFactors = F)
-  arc_count = c(arc_count,nrow(arcs))
-  # Rename arcs to general category
-  arcs$from = sub("T1Dgroup","T1D",arcs$from)
-  arcs$from = sub("cg.*","methyl",arcs$from)
-  arcs$from = sub("ch.*","methyl",arcs$from)
-  arcs$from = sub(".*_.*","metab",arcs$from)
-  arcs$to = sub("T1Dgroup","T1D",arcs$to)
-  arcs$to = sub("cg.*","methyl",arcs$to)
-  arcs$to = sub("ch.*","methyl",arcs$to)
-  arcs$to = sub(".*_.*","metab",arcs$to)
-  # Get arcs
-  arc1 = paste(arcs[1,1],"->",arcs[1,2])
-  arc2 = paste(arcs[2,1],"->",arcs[2,2])
-  arc3 = paste(arcs[3,1],"->",arcs[3,2])
-  if (nrow(arcs) == 3) {
-    all_arcs = c(arc1,arc2,arc3)
-    all_arcs = all_arcs[order(all_arcs)]
-    type = paste(all_arcs,collapse = ", ")
-    types = c(types, type)
-  } else if (nrow(arcs) == 2) {
-    all_arcs = c(arc1,arc2)
-    all_arcs = all_arcs[order(all_arcs)]
-    type = paste(all_arcs,collapse = ", ")
-    types = c(types, type)
-  } else if (nrow(arcs) == 1) {
-    types = c(types, arc1)
-  }
-}
-tabs = as.data.frame(table(types))
-```
-
-## Graph Structures
-
-Optimal Bayesian network structures for `r nrow(pairs)` metabolite-methylation-T1D triads (selected from linear models) were determined using a hill climbing algorithm based on BIC. There are a total of 24 possible network structures for each triad, and in total the selected triads contain `r length(unique(pairs$methyl))` unique methylation sites and `r length(unique(pairs$metab))` unique metabolites. 
-
-## Results
-
-Of the 24 possible network structures, only 10 were picked using the hill-climbing algorithm.
-
-### Three arcs
-
-```{r plots of 3 arcs,echo=FALSE}
-n_struct1 = sum(types == "metab -> methyl, T1D -> metab, T1D -> methyl")
-plot(model2network(struct1),main = paste0("n = ",n_struct1))
-
-n_struct2 = sum(types == "methyl -> metab, T1D -> metab, T1D -> methyl")
-plot(model2network(struct2),main = paste0("n = ",n_struct2))
-```
-
-Total three-arc graphs: `r as.numeric(table(arc_count)[4])`
-
-### Two arcs
-
-```{r plots of 2 arcs,echo=FALSE}
-n_struct7 = sum(types == "T1D -> metab, T1D -> methyl")
-plot(model2network(struct7),main = paste0("n = ",n_struct7))
-
-n_struct12 = sum(types == "methyl -> metab, T1D -> methyl")
-plot(model2network(struct12),main = paste0("n = ",n_struct12))
-
-n_struct14 = sum(types == "metab -> methyl, T1D -> methyl")
-plot(model2network(struct14),main = paste0("n = ",n_struct14))
-
-n_struct16 = sum(types == "metab -> methyl, T1D -> metab")
-plot(model2network(struct16),main = paste0("n = ",n_struct16))
-
-n_struct18 = sum(types == "methyl -> metab, T1D -> metab")
-plot(model2network(struct18),main = paste0("n = ",n_struct18))
-```
-
-Total two-arc graphs: `r as.numeric(table(arc_count)[3])`
-
-### One arc
-
-```{r plots of 1 arc,echo=FALSE}
-n_struct19 = sum(types == "T1D -> methyl")
-plot(model2network(struct19),main = paste0("n = ",n_struct19))
-
-n_struct20 = sum(types == "T1D -> metab")
-plot(model2network(struct20),main = paste0("n = ",n_struct20))
-
-n_struct22 = sum(types == "methyl -> metab")
-plot(model2network(struct22),main = paste0("n = ",n_struct22))
-```
-
-Total one-arc graphs: `r as.numeric(table(arc_count)[2])`
-
-### Graph Table
-
-```{r echo=FALSE}
-colnames(tabs) = c("Graph Structure","n")
-kable(tabs)
-```
