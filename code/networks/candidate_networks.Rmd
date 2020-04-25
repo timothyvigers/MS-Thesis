@@ -57,27 +57,33 @@ struct24 = "[T1Dgroup][methyl|metab][metab]"
 ```
 
 ```{r mcmc test,echo=FALSE}
+# MCMC parameters
+n_adapt = 10000
+iter = 50000
+
 methyl = "cg00287636"
 metab = "gctof_33"
-y = as.numeric(pair_data$T1Dgroup) - 1
-X = pair_data[,methyl]
-X = matrix(X[complete.cases(X)])
+temp = pair_data[,c("T1Dgroup",methyl,metab)]
+temp = temp[complete.cases(temp),]
+
+y = as.numeric(temp$T1Dgroup) - 1
+X = temp[,c(methyl,metab)]
 N = nrow(X)
 # JAGS
 jags_data = list(y=y,X=X,N=N)
 mod = jags.model("/Users/timvigers/GitHub/MS-Thesis/code/networks/logistic.jags",
                  data = jags_data, n.adapt = 1000,n.chains = 2)
 # MCMC
-samples = coda.samples(mod,variable.names = c("beta0","beta1"),n.iter = 10000)
+samples = coda.samples(mod,n.iter = iter,thin = 20,
+                       variable.names = c("beta0","beta1","beta2","gamma0","gamma1"))
 # Output
 output = MCMCsummary(samples, 
-                     params = c("beta0","beta1","beta2"),
+                     params = c("beta0","beta1","beta2","gamma0","gamma1"),
                      Rhat = F,
                      n.eff = F,
                      HPD = T,
                      hpd_prob = 0.8,
                      digits = 3)
-
-glm(T1Dgroup ~ gctof_33,data = pair_data,family = "binomial")
+MCMCtrace(samples,pdf = F,iter = iter - n_adapt)
 ```
 

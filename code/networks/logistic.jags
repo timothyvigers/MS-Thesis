@@ -1,12 +1,12 @@
 model{
 
   for (i in 1:N) {
-    metab[i] ~ dnorm(gamma*X[i,1], tau)
+    X[i,2] ~ dnorm(gamma0 + gamma1*X[i,1], tau)
     }
 
   for (i in 1:N) {
     y[i] ~ dbern(q[i])
-    logit(q[i]) <- beta0 + beta1*X[i,1] + beta2*metab[i]
+    logit(q[i]) <- beta0 + beta1*X[i,1] + beta2*X[i,2]
     }
   
 
@@ -14,7 +14,8 @@ model{
    beta0 ~ dnorm(0,0.0001)
    beta1 ~ dnorm(0,0.0001)
    beta2 ~ dnorm(0,0.0001)
-   gamma ~ dnorm(0,0.0001)
+   gamma0 ~ dnorm(0,0.0001)
+   gamma1 ~ dnorm(0,0.0001)
 
   tau ~ dgamma(0.0001, 0.0001)
   sigma2 <- 1/tau
