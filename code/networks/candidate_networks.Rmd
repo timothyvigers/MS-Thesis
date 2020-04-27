@@ -108,7 +108,7 @@ invisible(lapply(names(cinf)[2:ncol(cinf)], function(x){
 ```
 
 ```{r cit on all,echo=FALSE,cache=TRUE}
-cits = apply(pairs[1:100,], 1, function(x){
+cits = apply(pairs, 1, function(x){
   methyl = as.character(x["methyl"])
   metab = as.character(x["metab"])
   temp = pair_data[,c("T1Dgroup",methyl,metab)]
