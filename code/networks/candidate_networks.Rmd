@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir = "/Users/timvigers/GitHub/MS-Thesis")
 library(knitr)
+library(cit)
 library(bnlearn)
 library(rjags)
 library(MCMCvis)
@@ -62,7 +63,7 @@ struct24 = "[T1Dgroup][methyl|metab][metab]"
 n_adapt = 1000
 iter = 50000
 # Example nodes
-methyl = "cg00287636"
+methyl = "cg00339319"
 metab = "gctof_33"
 temp = pair_data[,c("T1Dgroup",methyl,metab)]
 temp = temp[complete.cases(temp),]
@@ -77,14 +78,51 @@ mod = jags.model("./code/networks/omics_to_t1d_methyl_to_metab.jags",
 # MCMC
 samples = coda.samples(mod,n.iter = iter,thin = 20,
                        variable.names = c("beta0","beta1","beta2","gamma0","gamma1"))
-# Output
-output = MCMCsummary(samples, 
-                     params = c("beta0","beta1","beta2","gamma0","gamma1"),
-                     Rhat = F,
-                     n.eff = F,
-                     HPD = T,
-                     hpd_prob = 0.8,
-                     digits = 3)
+# Bayes output
+output = MCMCsummary(samples,Rhat = F,HPD = T,hpd_prob = 0.8)
 MCMCtrace(samples,pdf = F,iter = iter - n_adapt)
 ```
 
+```{r cit test,echo=FALSE}
+# cit
+cinf = cit.bp(L = X[,1],G = X[,2],T = y)
+colnames(cinf) = gsub("L","methyl",colnames(cinf))
+colnames(cinf) = gsub("G","metab",colnames(cinf))
+colnames(cinf) = gsub("T","T1D",colnames(cinf))
+colnames(cinf) = gsub("assoc"," ~ ",colnames(cinf))
+colnames(cinf) = gsub("gvn"," | ",colnames(cinf))
+colnames(cinf) = gsub("ind"," indep. ",colnames(cinf))
+kable(cinf)
+# Permutation tests
+cinf = cit.bp(L = X[,1],G = X[,2],T = y,n.perm = 100,rseed = 1017)
+colnames(cinf) = gsub("L","methyl",colnames(cinf))
+colnames(cinf) = gsub("G","metab",colnames(cinf))
+colnames(cinf) = gsub("T","T1D",colnames(cinf))
+colnames(cinf) = gsub("assoc"," ~ ",colnames(cinf))
+colnames(cinf) = gsub("gvn"," | ",colnames(cinf))
+colnames(cinf) = gsub("ind"," indep. ",colnames(cinf))
+invisible(lapply(names(cinf)[2:ncol(cinf)], function(x){
+  hist(cinf[,x],main = paste("Histogram of",x))
+}))
+```
+
+```{r cit on all,echo=FALSE,cache=TRUE}
+cits = apply(pairs[1:100,], 1, function(x){
+  methyl = as.character(x["methyl"])
+  metab = as.character(x["metab"])
+  temp = pair_data[,c("T1Dgroup",methyl,metab)]
+  temp = temp[complete.cases(temp),]
+  y = as.numeric(temp$T1Dgroup) - 1
+  X = temp[,c(methyl,metab)]
+  cinf1 = cit.bp(L = X[,1],G = X[,2],T = y)
+  cinf2 = cit.bp(L = X[,2],G = X[,1],T = y)
+  if (cinf1$p_cit < 0.05 | cinf2$p_cit < 0.05) {
+    return(c(methyl,metab,min(cinf1$p_cit,cinf2$p_cit)))
+  } else {return(NA)}
+})
+# Convert to dataframe
+cits = cits[!is.na(cits)]
+cits = t(as.data.frame(cits))
+# Summarize
+
+```
