@@ -15,6 +15,7 @@ library(rjags)
 library(MCMCvis)
 library(patchwork)
 library(tidyverse)
+set.seed(1017)
 ```
 
 ```{r data import,echo=FALSE}
@@ -116,13 +117,12 @@ cits = apply(pairs[1:100,], 1, function(x){
   X = temp[,c(methyl,metab)]
   cinf1 = cit.bp(L = X[,1],G = X[,2],T = y)
   cinf2 = cit.bp(L = X[,2],G = X[,1],T = y)
-  if (cinf1$p_cit < 0.05 | cinf2$p_cit < 0.05) {
-    return(c(methyl,metab,min(cinf1$p_cit,cinf2$p_cit)))
-  } else {return(NA)}
+  p = min(cinf1$p_cit,cinf2$p_cit)
+  if (p < 0.05) {return(paste(methyl,metab,p))} else {NA}
 })
 # Convert to dataframe
-cits = cits[!is.na(cits)]
-cits = t(as.data.frame(cits))
+cits = as.data.frame(cits[!is.na(cits)])
+cits = separate(cits,"cits[!is.na(cits)]",c("methyl","metab","cit p"),sep = " ")
 # Summarize
 
 ```
