@@ -13,9 +13,7 @@ library(cit)
 library(bnlearn)
 library(rjags)
 library(MCMCvis)
-library(patchwork)
 library(tidyverse)
-set.seed(1017)
 ```
 
 ```{r data import,echo=FALSE}
@@ -59,7 +57,9 @@ struct23 = "[T1Dgroup|metab][methyl][metab]"
 struct24 = "[T1Dgroup][methyl|metab][metab]"
 ```
 
-```{r mcmc test}
+# MCMC
+
+```{r mcmc test,cache=TRUE}
 # MCMC parameters
 n_adapt = 1000
 iter = 50000
@@ -76,6 +76,8 @@ N = nrow(X)
 jags_data = list(y=y,X=X,N=N)
 mod = jags.model("./code/networks/omics_to_t1d_methyl_to_metab.jags",
                  data = jags_data, n.adapt = n_adapt,n.chains = 2)
+suppressWarnings(cat(readLines('./code/networks/omics_to_t1d_methyl_to_metab.jags'),
+                     sep = '\n'))
 # MCMC
 samples = coda.samples(mod,n.iter = iter,thin = 20,
                        variable.names = c("beta0","beta1","beta2","gamma0","gamma1"))
@@ -83,6 +85,17 @@ samples = coda.samples(mod,n.iter = iter,thin = 20,
 output = MCMCsummary(samples,Rhat = F,HPD = T,hpd_prob = 0.8)
 MCMCtrace(samples,pdf = F,iter = iter - n_adapt)
 ```
+
+# CIT Package
+
+The CIT package is able to test two mediation structures with T1D status as the outcome:
+
+```{r echo=FALSE}
+plot(model2network(struct3))
+plot(model2network(struct5))
+```
+
+CIT results from the same probe - metabolite pair as in the MCMC example above:
 
 ```{r cit test,echo=FALSE}
 # cit
@@ -93,9 +106,9 @@ colnames(cinf) = gsub("T","T1D",colnames(cinf))
 colnames(cinf) = gsub("assoc"," ~ ",colnames(cinf))
 colnames(cinf) = gsub("gvn"," | ",colnames(cinf))
 colnames(cinf) = gsub("ind"," indep. ",colnames(cinf))
-kable(cinf)
+kable(cinf,caption = "Single Permutation")
 # Permutation tests
-cinf = cit.bp(L = X[,1],G = X[,2],T = y,n.perm = 100,rseed = 1017)
+cinf = cit.bp(L = X[,1],G = X[,2],T = y,n.perm = 100)
 colnames(cinf) = gsub("L","methyl",colnames(cinf))
 colnames(cinf) = gsub("G","metab",colnames(cinf))
 colnames(cinf) = gsub("T","T1D",colnames(cinf))
@@ -106,6 +119,8 @@ invisible(lapply(names(cinf)[2:ncol(cinf)], function(x){
   hist(cinf[,x],main = paste("Histogram of",x))
 }))
 ```
+
+Distibution of p values looks reasonable across permutations. The omnibus p value is elevated because it's simply the highest of the four others.
 
 ```{r cit on all,echo=FALSE,cache=TRUE}
 cits = apply(pairs, 1, function(x){
@@ -118,11 +133,17 @@ cits = apply(pairs, 1, function(x){
   cinf1 = cit.bp(L = X[,1],G = X[,2],T = y)
   cinf2 = cit.bp(L = X[,2],G = X[,1],T = y)
   p = min(cinf1$p_cit,cinf2$p_cit)
-  if (p < 0.05) {return(paste(methyl,metab,p))} else {NA}
+  o = which.min(c(cinf1$p_cit,cinf2$p_cit))
+  o = ifelse(o == 1,">","<")
+  if (p < 0.05) {return(paste(methyl,metab,p,o))} else {NA}
 })
 # Convert to dataframe
 cits = as.data.frame(cits[!is.na(cits)])
-cits = separate(cits,"cits[!is.na(cits)]",c("methyl","metab","cit p"),sep = " ")
-# Summarize
-
+cits = separate(cits,"cits[!is.na(cits)]",c("methyl","metab","cit p","direction"),
+                sep = " ")
+cits$`cit p` = round(as.numeric(cits$`cit p`),3)
+cits = cits[order(cits$`cit p`),]
+kable(cits[1:10,],caption = "Top Ten Pairs Based on CIT")
 ```
+
+Using a threshold of p < 0.05 for the omnibus CIT test, there are `r nrow(unique(cits))` unique pairs with significant mediation. Within these pairs, there are `r length(unique(cits$methyl))` unique probes and `r length(unique(cits$metab))` unique metabolites.
