@@ -1,2 +1,0 @@
-candidate_selection/server/step_1/triad_selection_step_1_sv_unadj.R: line 3: syntax error near unexpected token `('
-candidate_selection/server/step_1/triad_selection_step_1_sv_unadj.R: line 3: `pheno <- read.csv("~/home/biostats_share/Norris/data/phenotype/ivyomicssample_noIdentifyingInfo.csv",'
