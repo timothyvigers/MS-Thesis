@@ -1,6 +1,0 @@
-./step_1.sh: line 2: syntax error near unexpected token `<<<'
-./step_1.sh: line 2: `<<<<<<< HEAD'
-
-real	0m0.007s
-user	0m0.001s
-sys	0m0.006s
