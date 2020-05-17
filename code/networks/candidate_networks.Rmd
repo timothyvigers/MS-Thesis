@@ -200,17 +200,13 @@ t = unlist(t)
 bayes_mods = lapply(t, function(x){
   temp = pair_data[,c("T1Dgroup",methyl,metab)]
   temp = temp[complete.cases(temp),]
-  # Data (X[,1] must be methylation and X[,2] must be metabolite)
   temp$T1Dgroup = as.numeric(temp$T1Dgroup) - 1
   
   form = as.formula(x)
-  mod = HydeNetwork(form)
-  mod = setNode(mod,T1Dgroup,nodeType = 'dbern',p = 0.5)
-  mod = setNode(mod,cg00339319,nodeType = 'dnorm',mu = 0,sd = 100)
-  mod = setNode(mod,gctof_33,nodeType = 'dnorm',mu = 0,sd = 100)
+  mod = HydeNetwork(form,data = temp)
   mod = compileJagsModel(mod,n.adapt = n_adapt,n.chains = 2)
-  b = HydeSim(mod,data = temp,bind = F,n.iter = iter, 
+  d = HydeSim(mod,data = temp,bind = F,n.iter = iter, 
               variable.names = c("T1Dgroup",methyl,metab))
 })
-MCMCtrace(b$codas,pdf = F,iter = iter - n_adapt)
+MCMCtrace(d$codas,pdf = F,iter = iter - n_adapt)
 ```
