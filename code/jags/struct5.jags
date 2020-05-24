@@ -1,0 +1,22 @@
+model{
+  # methyl | metab
+  for (i in 1:N) {
+    methyl[i] ~ dnorm(gamma0 + gamma*methyl[i], tau)
+    }
+  # T1D | methyl, metab
+  for (i in 1:N) {
+    t1d[i] ~ dbern(q[i])
+    logit(q[i]) <- int + beta*methyl[i] + alpha*metab[i]
+    }
+  
+   # Very flat priors
+   alpha ~ dnorm(0,0.0001)
+   beta ~ dnorm(0,0.0001)
+   int ~ dnorm(0,0.0001)
+   gamma0 ~ dnorm(0,0.0001)
+   gamma ~ dnorm(0,0.0001)
+
+  tau ~ dgamma(0.0001, 0.0001)
+  sigma2 <- 1/tau
+  }
+  

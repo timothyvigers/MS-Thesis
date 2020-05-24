@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(root.dir = "/home/tim/Documents/GitHub/MS-Thesis")
+knitr::opts_knit$set(root.dir = "/Users/timvigers/GitHub/MS-Thesis")
 library(knitr)
 library(cit)
 library(bnlearn)
@@ -26,9 +26,6 @@ pair_data$T1Dgroup = factor(pair_data$T1Dgroup)
 
 ```{r model structures,echo=FALSE}
 # Define all network structures
-# Empty graph
-net = empty.graph(c("T1Dgroup","methyl","metab"))
-# Structures
 # 3 arcs
 struct1 = "[T1Dgroup][methyl|T1Dgroup:metab][metab|T1Dgroup]"
 struct2 = "[T1Dgroup][methyl|T1Dgroup][metab|T1Dgroup:methyl]"
@@ -56,74 +53,16 @@ struct21 = "[T1Dgroup|methyl][methyl][metab]"
 struct22 = "[T1Dgroup][methyl][metab|methyl]"
 struct23 = "[T1Dgroup|metab][methyl][metab]"
 struct24 = "[T1Dgroup][methyl|metab][metab]"
-```
-
-# MCMC
-
-![DAG and local probability distributions](/Users/timvigers/GitHub/MS-Thesis/image001.png)
-
-```{r mcmc test,cache=TRUE,eval=FALSE}
-# MCMC parameters
-n_adapt = 1000
-iter = 50000
-# Example nodes
-methyl = "cg00339319"
-metab = "gctof_33"
-temp = pair_data[,c("T1Dgroup",methyl,metab)]
-temp = temp[complete.cases(temp),]
-# Data (X[,1] must be methylation and X[,2] must be metabolite)
-y = as.numeric(temp$T1Dgroup) - 1
-X = temp[,c(methyl,metab)]
-N = nrow(X)
-# JAGS
-jags_data = list(y=y,X=X,N=N)
-mod = jags.model("./code/networks/omics_to_t1d_methyl_to_metab.jags",
-                 data = jags_data, n.adapt = n_adapt,n.chains = 2,quiet = T)
-# MCMC
-samples = coda.samples(mod,n.iter = iter,thin = 20,
-                       variable.names = c("beta0","beta1","beta2","gamma0","gamma1"))
-# Bayes output
-output = MCMCsummary(samples,Rhat = F,HPD = T,hpd_prob = 0.8)
-MCMCtrace(samples,pdf = F,iter = iter - n_adapt)
+# Print all
+invisible(lapply(paste0("struct",1:24), function(x){
+  mod = get(x)
+  plot(model2network(mod),main = x)
+  }))
 ```
 
 # CIT Package
 
-The CIT package is able to test two mediation structures with T1D status as the outcome:
-
-```{r echo=FALSE}
-plot(model2network(struct3))
-plot(model2network(struct5))
-```
-
-CIT results from the same probe - metabolite pair as in the MCMC example above:
-
-```{r cit test,echo=FALSE}
-# cit
-cinf = cit.bp(L = X[,1],G = X[,2],T = y)
-colnames(cinf) = gsub("L","methyl",colnames(cinf))
-colnames(cinf) = gsub("G","metab",colnames(cinf))
-colnames(cinf) = gsub("T","T1D",colnames(cinf))
-colnames(cinf) = gsub("assoc"," ~ ",colnames(cinf))
-colnames(cinf) = gsub("gvn"," | ",colnames(cinf))
-colnames(cinf) = gsub("ind"," indep. ",colnames(cinf))
-kable(cinf,caption = "Single Permutation")
-# Permutation tests
-cinf = cit.bp(L = X[,1],G = X[,2],T = y,n.perm = 100)
-colnames(cinf) = gsub("L","methyl",colnames(cinf))
-colnames(cinf) = gsub("G","metab",colnames(cinf))
-colnames(cinf) = gsub("T","T1D",colnames(cinf))
-colnames(cinf) = gsub("assoc"," ~ ",colnames(cinf))
-colnames(cinf) = gsub("gvn"," | ",colnames(cinf))
-colnames(cinf) = gsub("ind"," indep. ",colnames(cinf))
-invisible(lapply(names(cinf)[2:ncol(cinf)], function(x){
-  hist(cinf[,x],main = paste("Histogram of",x))
-}))
-```
-
-Distibution of p values looks reasonable (I think?) across permutations. The omnibus p value is elevated because it's simply the highest of the four others.
-
-```{r cit on all,echo=FALSE,cache=TRUE}
+```{r cit on all,echo=FALSE,eval=FALSE}
 cits = apply(pairs, 1, function(x){
   methyl = as.character(x["methyl"])
   metab = as.character(x["metab"])
@@ -144,69 +83,37 @@ cits = separate(cits,"cits[!is.na(cits)]",c("methyl","direction","metab","cit p"
                 sep = " ")
 cits$`cit p` = round(as.numeric(cits$`cit p`),3)
 cits = cits[order(cits$`cit p`),]
-kable(cits[1:10,],caption = "Top Ten Pairs Based on CIT")
+# Write
+save(cits,file = "./data/networks/cits.Rdata")
+```
+
+```{r load cits,echo=FALSE}
+load("./data/networks/cits.Rdata")
 ```
 
 Using a threshold of p < 0.05 for the omnibus CIT test, there are `r nrow(unique(cits))` unique pairs with significant mediation. Within these pairs, there are `r length(unique(cits$methyl))` unique probes and `r length(unique(cits$metab))` unique metabolites.
 
-# HydeNet
+# MCMC
 
-```{r echo=FALSE}
-net1 = "~T1Dgroup+methyl|T1Dgroup+metab|T1Dgroup+methyl|metab"
-net2 = "~T1Dgroup+methyl|T1Dgroup+metab|T1Dgroup+metab|methyl"
-net3 = "~T1Dgroup|methyl+T1Dgroup|metab+metab|methyl"
-net4 = "~T1Dgroup|methyl+metab|T1Dgroup+metab|methyl"
-net5 = "~T1Dgroup|methyl+T1Dgroup|metab+methyl|metab"
-net6 = "~T1Dgroup|metab+methyl|T1Dgroup+methyl|metab"
-
-net7 = "~methyl|T1Dgroup+metab|T1Dgroup"
-net8 = "~T1Dgroup|methyl+metab|T1Dgroup"
-net9 = "~T1Dgroup|metab+methyl|T1Dgroup"
-net10 = "~T1Dgroup|metab+T1Dgroup|methyl"
-net11 = "~T1Dgroup|methyl+metab|methyl"
-net12 = "~methyl|T1Dgroup+metab|methyl"
-net13 = "~T1Dgroup|methyl+methyl|metab"
-net14 = "~methyl|T1Dgroup+methyl|metab"
-net15 = "~T1Dgroup|metab+methyl|metab"
-net16 = "~metab|T1Dgroup+methyl|metab"
-net17 = "~T1Dgroup|metab+metab|methyl"
-net18 = "~metab|T1Dgroup+metab|methyl"
-
-net19 = "~methyl|T1Dgroup+metab"
-net20 = "~metab|T1Dgroup+methyl"
-net21 = "~metab+T1Dgroup|methyl"
-net22 = "~metab|methyl+T1Dgroup"
-net23 = "~methyl+T1Dgroup|metab"
-net24 = "~methyl|metab+T1Dgroup"
-
-nets = unlist(lapply(paste0("net",1:24), get))
-```
-
-```{r echo=FALSE}
+```{r mcmc test,cache=TRUE}
 # MCMC parameters
 n_adapt = 1000
-iter = 50000
+iter = 10000
 # Example nodes
 methyl = "cg00339319"
 metab = "gctof_33"
-# Model formulas for examples
-t = lapply(nets, function(x){
-  form = paste(gsub("methyl",methyl,x),collapse = "")
-  form = gsub("metab",metab,form)
-  form
-})
-t = unlist(t)
+temp = pair_data[,c("T1Dgroup",methyl,metab)]
+temp = temp[complete.cases(temp),]
+temp$T1Dgroup = ifelse(temp$T1Dgroup == "T1D control",0,1)
+# data for jags
+N = nrow(temp)
+jags_data = list(t1d=c(temp[,"T1Dgroup"]),methyl=c(temp[,methyl]),
+                 metab=c(temp[,metab]),
+                 N=N)
+# JAGS
+mod = jags.model("./code/jags/struct2.jags",
+                 data = jags_data, n.adapt = n_adapt,n.chains = 2,quiet = T)
 # MCMC
-bayes_mods = lapply(t, function(x){
-  temp = pair_data[,c("T1Dgroup",methyl,metab)]
-  temp = temp[complete.cases(temp),]
-  temp$T1Dgroup = as.numeric(temp$T1Dgroup) - 1
-  
-  form = as.formula(x)
-  mod = HydeNetwork(form,data = temp)
-  mod = compileJagsModel(mod,n.adapt = n_adapt,n.chains = 2)
-  d = HydeSim(mod,data = temp,bind = F,n.iter = iter, 
-              variable.names = c("T1Dgroup",methyl,metab))
-})
-MCMCtrace(d$codas,pdf = F,iter = iter - n_adapt)
+dic = dic.samples(mod,n.iter = iter,thin = 20)
+dic_tot = round(sum(dic$deviance) + sum(dic$penalty),1)
 ```
