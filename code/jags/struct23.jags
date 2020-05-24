@@ -1,0 +1,15 @@
+model{
+  # T1D | metab
+  for (i in 1:N) {
+    t1d[i] ~ dbern(q[i])
+    logit(q[i]) <- alpha0 + alpha*metab[i]
+    }
+  
+  # Very flat priors
+  alpha0 ~ dnorm(0,0.0001)
+  alpha ~ dnorm(0,0.0001)
+
+  tau ~ dgamma(0.0001, 0.0001)
+  sigma2 <- 1/tau
+  }
+  
