@@ -2,7 +2,7 @@ model{
   # T1D | metab, methyl
   for (i in 1:N) {
     t1d[i] ~ dbern(q[i])
-    logit(q[i]) <- int + alpha*methyl[i] + beta*metab[i]
+    logit(q[i]) <- int + alpha*metab[i] + beta*methyl[i]
     }
   
   # Very flat priors

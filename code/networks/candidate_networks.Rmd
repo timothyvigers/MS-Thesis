@@ -15,6 +15,7 @@ library(rjags)
 library(HydeNet)
 library(MCMCvis)
 library(tidyverse)
+set.seed(1017)
 ```
 
 ```{r data import,echo=FALSE}
@@ -54,10 +55,10 @@ struct22 = "[T1Dgroup][methyl][metab|methyl]"
 struct23 = "[T1Dgroup|metab][methyl][metab]"
 struct24 = "[T1Dgroup][methyl|metab][metab]"
 # Print all
-invisible(lapply(paste0("struct",1:24), function(x){
-  mod = get(x)
-  plot(model2network(mod),main = x)
-  }))
+# invisible(lapply(paste0("struct",1:24), function(x){
+#   mod = get(x)
+#   plot(model2network(mod),main = x)
+#   }))
 ```
 
 # CIT Package
@@ -83,6 +84,7 @@ cits = separate(cits,"cits[!is.na(cits)]",c("methyl","direction","metab","cit p"
                 sep = " ")
 cits$`cit p` = round(as.numeric(cits$`cit p`),3)
 cits = cits[order(cits$`cit p`),]
+rownames(cits) = 1:nrow(cits)
 # Write
 save(cits,file = "./data/networks/cits.Rdata")
 ```
@@ -95,25 +97,35 @@ Using a threshold of p < 0.05 for the omnibus CIT test, there are `r nrow(unique
 
 # MCMC
 
-```{r mcmc test,cache=TRUE}
+```{r mcmc test,eval=FALSE}
 # MCMC parameters
 n_adapt = 1000
-iter = 10000
-# Example nodes
-methyl = "cg00339319"
-metab = "gctof_33"
-temp = pair_data[,c("T1Dgroup",methyl,metab)]
-temp = temp[complete.cases(temp),]
-temp$T1Dgroup = ifelse(temp$T1Dgroup == "T1D control",0,1)
-# data for jags
-N = nrow(temp)
-jags_data = list(t1d=c(temp[,"T1Dgroup"]),methyl=c(temp[,methyl]),
-                 metab=c(temp[,metab]),
-                 N=N)
-# JAGS
-mod = jags.model("./code/jags/struct2.jags",
-                 data = jags_data, n.adapt = n_adapt,n.chains = 2,quiet = T)
-# MCMC
-dic = dic.samples(mod,n.iter = iter,thin = 20)
-dic_tot = round(sum(dic$deviance) + sum(dic$penalty),1)
+iter = 50000
+thin = 100
+# All pairs from cit package
+all_dics = apply(cits,1,function(x){
+  methyl = x["methyl"]
+  metab = x["metab"]
+  temp = pair_data[,c("T1Dgroup",methyl,metab)]
+  temp = temp[complete.cases(temp),]
+  temp$T1Dgroup = ifelse(temp$T1Dgroup == "T1D control",0,1)
+  # data for jags
+  N = nrow(temp)
+  jags_data = list(t1d=c(temp[,"T1Dgroup"]),methyl=c(temp[,methyl]),
+                   metab=c(temp[,metab]),
+                   N=N)
+  # Test all structures
+  dics = lapply(paste0("struct",1:24), function(x){
+    mod = jags.model(paste0("./code/jags/",x,".jags"),
+                     data = jags_data, n.adapt = n_adapt,n.chains = 2,quiet = T)
+    dic = dic.samples(mod,n.iter = iter,thin = thin)
+    return(round(sum(dic$deviance) + sum(dic$penalty),1))
+  })
+  return(dics)
+})
+save(all_dics,file = "./data/networks/all_dic.Rdata")
+```
+
+```{r echo=FALSE}
+load("./data/networks/all_dic.Rdata")
 ```

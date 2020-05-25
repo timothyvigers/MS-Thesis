@@ -6,7 +6,7 @@ model{
     }
   # methyl | metab, T1D
   for (i in 1:N) {
-    methyl[i] ~ dnorm(int + gamma*methyl[i] + beta*t1d[i], tau)
+    methyl[i] ~ dnorm(int + gamma*metab[i] + beta*t1d[i], tau)
     }
   
    # Very flat priors

@@ -2,7 +2,7 @@ model{
   # T1D | metab
   for (i in 1:N) {
     t1d[i] ~ dbern(q[i])
-    logit(q[i]) <- alpha0 + alpha*methyl[i]
+    logit(q[i]) <- alpha0 + alpha*metab[i]
     }
   # methyl | T1D
   for (i in 1:N) {

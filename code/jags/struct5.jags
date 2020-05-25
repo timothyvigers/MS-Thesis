@@ -1,7 +1,7 @@
 model{
   # methyl | metab
   for (i in 1:N) {
-    methyl[i] ~ dnorm(gamma0 + gamma*methyl[i], tau)
+    methyl[i] ~ dnorm(gamma0 + gamma*metab[i], tau)
     }
   # T1D | methyl, metab
   for (i in 1:N) {
