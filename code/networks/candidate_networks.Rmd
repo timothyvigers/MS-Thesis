@@ -97,12 +97,13 @@ Using a threshold of p < 0.05 for the omnibus CIT test, there are `r nrow(unique
 
 # MCMC
 
-```{r mcmc test,eval=FALSE}
+```{r mcmc test,echo=FALSE,eval=FALSE}
 # MCMC parameters
 n_adapt = 1000
 iter = 50000
-thin = 100
+vars = c("alpha0","alpha","beta0","beta","gamma0","gamma")
 # All pairs from cit package
+# DIC for each model
 all_dics = apply(cits,1,function(x){
   methyl = x["methyl"]
   metab = x["metab"]
@@ -118,14 +119,50 @@ all_dics = apply(cits,1,function(x){
   dics = lapply(paste0("struct",1:24), function(x){
     mod = jags.model(paste0("./code/jags/",x,".jags"),
                      data = jags_data, n.adapt = n_adapt,n.chains = 2,quiet = T)
-    dic = dic.samples(mod,n.iter = iter,thin = thin)
+    dic = dic.samples(mod,n.iter = iter)
     return(round(sum(dic$deviance) + sum(dic$penalty),1))
   })
   return(dics)
 })
 save(all_dics,file = "./data/networks/all_dic.Rdata")
+# Samples for all models
+all_samples = apply(cits,1,function(x){
+  methyl = as.character(x["methyl"])
+  metab = as.character(x["metab"])
+  temp = pair_data[,c("T1Dgroup",methyl,metab)]
+  temp = temp[complete.cases(temp),]
+  temp$T1Dgroup = ifelse(temp$T1Dgroup == "T1D control",0,1)
+  # data for jags
+  N = nrow(temp)
+  jags_data = list(t1d=c(temp[,"T1Dgroup"]),methyl=c(temp[,methyl]),
+                   metab=c(temp[,metab]),
+                   N=N)
+  # Test all structures
+  samples = lapply(paste0("struct",1:24), function(x){
+    mod = jags.model(paste0("./code/jags/",x,".jags"),
+                     data = jags_data, n.adapt = n_adapt,n.chains = 2,quiet = T)
+    coda = coda.samples(mod,variable.names = vars,n.iter = iter)
+    return(coda)
+  })
+  return(samples)
+})
+save(all_samples,file = "./data/networks/all_samples.Rdata")
 ```
 
-```{r echo=FALSE}
+```{r load dics,echo=FALSE}
 load("./data/networks/all_dic.Rdata")
+#load("./data/networks/all_samples.Rdata")
+```
+
+## Structure table
+
+```{r mcmc tabs,echo=FALSE}
+Structure = unlist(lapply(all_dics, which.min))
+tabs = table(Structure)
+kable(tabs)
+invisible(lapply(names(tabs), function(x){
+  mod = get(paste0("struct",x))
+  plot(model2network(mod),main = paste("Structure",x))
+}))
+kable(cits[which(Structure == 10),],row.names = F)
 ```
