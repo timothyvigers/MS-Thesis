@@ -43,7 +43,7 @@ graph %>% render_graph()
 
 ```{r echo=FALSE}
 # Format DIC data
-# load("./data/networks/all_dic.Rdata")
+load("./data/networks/all_dic.Rdata")
 t = as.data.frame(t(all_dics))
 colnames(t) = paste0("struct",1:24)
 t <- t %>% pivot_longer(struct1:struct24)
