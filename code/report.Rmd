@@ -13,21 +13,9 @@ library(DiagrammeR)
 
 # Bayesian networks with JAGS
 
-## Potential problems
-
-### DIC
-
-- "From Bayesian perspective, DIC is not theoretically justified since it measures the fit of the model when the parameters are fixed to the posterior expectation and is not therefore an unbiased estimate of the true generalization utility." (Piironen & Vehtari, 2017)
-
-- "The numerical experiments show that the overfitting in the selection may be a potential problem and hinder the model selection considerably. This is the case especially when the dataset is small (high variance in the utility estimates) and the number of models under comparison large (large number of variables). Especially vulnerable methods for this type of overfitting are CV, WAIC, DIC and other methods that rely on data reuse and have therefore relatively high variance in the utility estimates." (Piironen & Vehtari, 2017)
-
-### Priors
-
-Tim was wrong about gamma priors causing problems. This issue is specific to logistic models with random effects, where the prior is $b_i \sim N(0,\frac{1}{\lambda})$. The Piironen paper can be a little unclear, so maybe we need a better resource.
-
 ## Network structures and models
 
-```{r net struct,echo=FALSE}
+```{r echo=FALSE}
 ndf <-
   create_node_df(
     n = 3,
@@ -49,9 +37,39 @@ graph <-
 graph %>% render_graph()
 ```
 
-```{r load dics,echo=FALSE}
-load("./data/networks/all_dic.Rdata")
+## Model comparisons
+
+### DIC distribution by network structure
+
+```{r echo=FALSE}
+# Format DIC data
+# load("./data/networks/all_dic.Rdata")
+t = as.data.frame(t(all_dics))
+colnames(t) = paste0("struct",1:24)
+t <- t %>% pivot_longer(struct1:struct24)
+# Plot
+ggplot(temp2,aes(x=name,y=value)) + geom_boxplot() + theme_bw()
 ```
+
+### DIC difference between 
+
+## Permutation tests
+
+```{r echo=FALSE}
+
+```
+
+## Potential problems
+
+### DIC
+
+- "From Bayesian perspective, DIC is not theoretically justified since it measures the fit of the model when the parameters are fixed to the posterior expectation and is not therefore an unbiased estimate of the true generalization utility." (Piironen & Vehtari, 2017)
+
+- "The numerical experiments show that the overfitting in the selection may be a potential problem and hinder the model selection considerably. This is the case especially when the dataset is small (high variance in the utility estimates) and the number of models under comparison large (large number of variables). Especially vulnerable methods for this type of overfitting are CV, WAIC, DIC and other methods that rely on data reuse and have therefore relatively high variance in the utility estimates." (Piironen & Vehtari, 2017)
+
+### Priors
+
+Tim was wrong about gamma priors causing problems. This issue is specific to logistic models with random effects, where the prior is $b_i \sim N(0,\frac{1}{\lambda})$. The Piironen paper can be a little unclear, so maybe we need a better resource.
 
 # References
 
