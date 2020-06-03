@@ -7,12 +7,11 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(root.dir = "/Users/timvigers/GitHub/MS-Thesis")
+knitr::opts_knit$set(root.dir = "/Users/timvigers/Documents/GitHub/MS-Thesis")
 library(knitr)
 library(cit)
 library(bnlearn)
 library(rjags)
-library(HydeNet)
 library(MCMCvis)
 library(tidyverse)
 set.seed(1017)
@@ -100,7 +99,7 @@ Using a threshold of p < 0.05 for the omnibus CIT test, there are `r nrow(unique
 ```{r mcmc test,echo=FALSE,eval=FALSE}
 # MCMC parameters
 n_adapt = 1000
-iter = 50000
+iter = 10000
 vars = c("alpha0","alpha","beta0","beta","gamma0","gamma")
 # All pairs from cit package
 # DIC for each model
@@ -117,9 +116,9 @@ all_dics = apply(cits,1,function(x){
                    N=N)
   # Test all structures
   dics = lapply(paste0("struct",1:24), function(x){
-    mod = jags.model(paste0("./code/jags/",x,".jags"),
-                     data = jags_data, n.adapt = n_adapt,n.chains = 2,quiet = T)
-    dic = dic.samples(mod,n.iter = iter)
+    mod = jags.model(paste0("./code/jags/",x,".jags"),quiet=T,
+                     data = jags_data, n.adapt = n_adapt,n.chains = 2)
+    dic = dic.samples(mod,n.iter = iter,progress.bar="none")
     return(round(sum(dic$deviance) + sum(dic$penalty),1))
   })
   return(dics)
@@ -139,9 +138,9 @@ all_samples = apply(cits,1,function(x){
                    N=N)
   # Test all structures
   samples = lapply(paste0("struct",1:24), function(x){
-    mod = jags.model(paste0("./code/jags/",x,".jags"),
-                     data = jags_data, n.adapt = n_adapt,n.chains = 2,quiet = T)
-    coda = coda.samples(mod,variable.names = vars,n.iter = iter)
+    mod = jags.model(paste0("./code/jags/",x,".jags"),quiet=T,
+                     data = jags_data, n.adapt = n_adapt,n.chains = 2)
+    coda = coda.samples(mod,variable.names = vars,n.iter = iter,progress.bar="none")
     return(coda)
   })
   return(samples)
@@ -151,7 +150,7 @@ save(all_samples,file = "./data/networks/all_samples.Rdata")
 
 ```{r load dics,echo=FALSE}
 load("./data/networks/all_dic.Rdata")
-#load("./data/networks/all_samples.Rdata")
+load("./data/networks/all_samples.Rdata")
 ```
 
 ## Structure table
