@@ -50,7 +50,6 @@ t <- t %>% pivot_longer(struct1:struct24)
 # Plot
 ggplot(temp2,aes(x=name,y=value)) + geom_boxplot() + theme_bw()
 ```
-
 ### DIC difference between 
 
 ## Permutation tests
