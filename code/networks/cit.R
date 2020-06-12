@@ -1,7 +1,7 @@
 library(cit)
 # Load list and data
-load("/Users/timvigers/Documents/GitHub/MS-Thesis/data/networks/pair_list.Rdata")
-load("/Users/timvigers/Documents/GitHub/MS-Thesis/data/networks/pair_data.Rdata")
+load("/Users/timvigers/GitHub/MS-Thesis/data/networks/pair_list.Rdata")
+load("/Users/timvigers/GitHub/MS-Thesis/data/networks/pair_data.Rdata")
 pair_data$T1Dgroup = factor(pair_data$T1Dgroup)
 # Run CIT package
 cits = apply(pairs, 1, function(x){
