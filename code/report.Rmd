@@ -9,18 +9,23 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir = "/Users/timvigers/GitHub/MS-Thesis")
 library(tidyverse)
+library(patchwork)
 library(DiagrammeR)
 library(knitr)
+library(bnlearn)
 ```
 
 ```{r load datasets,echo=FALSE}
 load("./data/networks/all_dic.Rdata")
 load("./data/networks/cits.Rdata")
+source("./code/networks/network_structures.R")
 ```
 
 # Bayesian networks with JAGS
 
 ## Network structures and models
+
+### Structure
 
 ```{r echo=FALSE}
 ndf <-
@@ -33,8 +38,7 @@ ndf <-
 edf <-
   create_edge_df(
     from = c(2,3,2),
-    to   = c(3, 1, 1),
-    label = c("Y = &#945;*x","&#946;","&#947; = 2")
+    to   = c(3, 1, 1)
   )
 graph <- 
   create_graph(
@@ -43,6 +47,25 @@ graph <-
   )
 graph %>% render_graph()
 ```
+
+### Models
+
+$$
+\text{T1D | Metabolite} \sim \text{Bern}(\text{logit}(\alpha_0 + \alpha_1*\text{Metabolite}))\\
+\text{Methylation | Metabolite, T1D} \sim \text{N}(\delta+\gamma*\text{Metabolite}+\beta*\text{T1D},\sigma^2)\\
+$$
+
+### Priors
+
+$$
+\alpha_0 \sim \text{N}(0,0.0001)\\
+\alpha_1 \sim \text{N}(0,0.0001)\\
+\delta \sim \text{N}(0,0.0001)\\
+\gamma \sim \text{N}(0,0.0001)\\
+\beta \sim \text{N}(0,0.0001)\\
+\sigma^2 = \frac{1}{\tau}\\
+\tau \sim \text{Gamma}(0.0001,0.0001)
+$$
 
 ## Model comparisons
 
@@ -62,7 +85,7 @@ ggplot(t,aes(x=factor(name),y=value)) +
   theme(axis.text.x = element_text(angle = 90))
 ```
 
-### DIC difference between 
+### DIC differences 
 
 ```{r echo=FALSE}
 l = 
@@ -82,23 +105,42 @@ dic_diff_table = do.call(rbind,l)
 colnames(dic_diff_table) = 
   c("Pair","Abs. Diff. Best-Second","Std. Diff. Best-Second",
     "Abs. Diff. Second-Third","Std. Diff. Second-Third")
-# Print table
-kable(dic_diff_table)
 # Plot diff. distribution
 diff_plot = dic_diff_table %>%
   pivot_longer(`Abs. Diff. Best-Second`:`Std. Diff. Second-Third`)
 # Absolute
-ggplot(diff_plot[diff_plot$name %in% c("Abs. Diff. Best-Second",
-                                       "Abs. Diff. Second-Third"),],
-       aes(x = value,fill = name)) + 
-  geom_density(alpha = 0.5) +
-  theme_bw() + ggtitle("Absolute DIC Difference")
+adp = 
+  ggplot(diff_plot[diff_plot$name %in% c("Abs. Diff. Best-Second",
+                                         "Abs. Diff. Second-Third"),]) + 
+  theme_bw() + theme(plot.title = element_text(hjust = 0.5)) + 
+  ggtitle("Absolute DIC Difference")
+# Densities
+adp + 
+  geom_density(aes(x = value,fill = name),alpha = 0.5) + 
+  theme(legend.title = element_blank())
+# Boxplots
+adp + geom_boxplot(aes(x = name,y = value,fill = name)) + 
+  theme(legend.position = "none") + xlab("")
+  
 # Standardized
-ggplot(diff_plot[diff_plot$name %in% c("Std. Diff. Best-Second",
-                                       "Std. Diff. Second-Third"),],
-       aes(x = value,fill = name)) + 
-  geom_density(alpha = 0.5) +
+adp = 
+  ggplot(diff_plot[diff_plot$name %in% c("Abs. Diff. Best-Second",
+                                         "Abs. Diff. Second-Third"),]) + 
+  theme_bw() + theme(plot.title = element_text(hjust = 0.5)) + 
+  ggtitle("Absolute DIC Difference")
+
+sdp = 
+  ggplot(diff_plot[diff_plot$name %in% c("Std. Diff. Best-Second",
+                                       "Std. Diff. Second-Third"),]) + 
+  theme_bw() + theme(plot.title = element_text(hjust = 0.5)) + 
   theme_bw() + ggtitle("Standardized DIC Difference")
+# Densities
+sdp + 
+  geom_density(aes(x = value,fill = name),alpha = 0.5) + 
+  theme(legend.title = element_blank())
+# Boxplots
+sdp + geom_boxplot(aes(x = name,y = value,fill = name)) + 
+  theme(legend.position = "none") + xlab("")
 ```
 
 ## Permutation tests
@@ -113,7 +155,7 @@ ggplot(diff_plot[diff_plot$name %in% c("Std. Diff. Best-Second",
 
 - "From Bayesian perspective, DIC is not theoretically justified since it measures the fit of the model when the parameters are fixed to the posterior expectation and is not therefore an unbiased estimate of the true generalization utility." (Piironen & Vehtari, 2017)
 
-- "The numerical experiments show that the overfitting in the selection may be a potential problem and hinder the model selection considerably. This is the case especially when the dataset is small (high variance in the utility estimates) and the number of models under comparison large (large number of variables). Especially vulnerable methods for this type of overfitting are CV, WAIC, DIC and other methods that rely on data reuse and have therefore relatively high variance in the utility estimates." (Piironen & Vehtari, 2017)
+- "The numerical experiments show that the over-fitting in the selection may be a potential problem and hinder the model selection considerably. This is the case especially when the dataset is small (high variance in the utility estimates) and the number of models under comparison large (large number of variables). Especially vulnerable methods for this type of overfitting are CV, WAIC, DIC and other methods that rely on data reuse and have therefore relatively high variance in the utility estimates." (Piironen & Vehtari, 2017)
 
 ### Priors
 
