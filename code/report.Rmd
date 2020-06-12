@@ -60,11 +60,11 @@ $$
 ### Priors
 
 $$
-\alpha_0 \sim \text{N}(0,0.0001)\\
-\alpha_1 \sim \text{N}(0,0.0001)\\
-\delta \sim \text{N}(0,0.0001)\\
-\gamma \sim \text{N}(0,0.0001)\\
-\beta \sim \text{N}(0,0.0001)\\
+\alpha_0 \sim \text{N}(0,100)\\
+\alpha_1 \sim \text{N}(0,100)\\
+\delta \sim \text{N}(0,100)\\
+\gamma \sim \text{N}(0,100)\\
+\beta \sim \text{N}(0,100)\\
 \sigma^2 = \frac{1}{\tau}\\
 \tau \sim \text{Gamma}(0.0001,0.0001)
 $$
@@ -95,7 +95,7 @@ l =
     dics = all_dics[,x]
     pair = paste(cits[as.numeric(x),1],"-",cits[as.numeric(x),3])
     structs_1_2 = order(dics)[1:2]
-    structs_2_3 = order(dics)[1:2]
+    structs_2_3 = order(dics)[2:3]
     abs_diff_1_2 = diff(sort(dics)[1:2])
     abs_diff_2_3 = diff(sort(dics)[2:3])
     st = sd(dics)
@@ -103,15 +103,28 @@ l =
     stand_diff_2_3 = abs_diff_2_3 / st
     data.frame("Pair" = pair,
                "Abs.Diff.1.2" = abs_diff_1_2,"Std.Diff.1.2" = stand_diff_1_2,
-               "Abs.Diff.2.3" = abs_diff_2_3,"Std.Diff.2.3" = stand_diff_2_3)
+               "Qual.Diff.1.2" = 
+                 all.equal(model2network(as.character(all_structs[structs_1_2[1]])),
+                           model2network(as.character(all_structs[structs_1_2[2]]))),
+               "Abs.Diff.2.3" = abs_diff_2_3,"Std.Diff.2.3" = stand_diff_2_3,
+               "Qual.Diff.2.3" = 
+                 all.equal(model2network(as.character(all_structs[structs_2_3[1]])),
+                           model2network(as.character(all_structs[structs_2_3[2]]))))
   })
 dic_diff_table = do.call(rbind,l)
 colnames(dic_diff_table) = 
   c("Pair","Abs. Diff. Best-Second","Std. Diff. Best-Second",
-    "Abs. Diff. Second-Third","Std. Diff. Second-Third")
+    "Qual. Diff. Best-Second",
+    "Abs. Diff. Second-Third","Std. Diff. Second-Third",
+    "Qual. Diff. Second-Third")
+# Print 1 - 2 and 2 - 3 differences
+kable(dic_diff_table %>% 
+        pivot_longer(c(`Qual. Diff. Best-Second`,`Qual. Diff. Second-Third`)) %>%
+        group_by(name, value) %>% count())
 # Plot diff. distribution
 diff_plot = dic_diff_table %>%
-  pivot_longer(`Abs. Diff. Best-Second`:`Std. Diff. Second-Third`)
+  pivot_longer(c(`Abs. Diff. Best-Second`,`Std. Diff. Best-Second`,
+               `Abs. Diff. Second-Third`,`Std. Diff. Second-Third`))
 # Absolute
 adp = 
   ggplot(diff_plot[diff_plot$name %in% c("Abs. Diff. Best-Second",
@@ -185,7 +198,7 @@ perm_structs =
 save(perm_structs,file = "./data/networks/perm_structs_test.Rdata")
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE,eval=FALSE}
 load("./data/networks/perm_structs_test.Rdata")
 best_perm_structs = unlist(lapply(perm_structs, which.min))
 hist(best_perm_structs,xlab = "Structure",
