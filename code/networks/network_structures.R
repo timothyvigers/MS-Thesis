@@ -26,3 +26,5 @@ struct21 = "[T1Dgroup|methyl][methyl][metab]"
 struct22 = "[T1Dgroup][methyl][metab|methyl]"
 struct23 = "[T1Dgroup|metab][methyl][metab]"
 struct24 = "[T1Dgroup][methyl|metab][metab]"
+# All
+all_structs = lapply(paste0("struct",1:24),get)
