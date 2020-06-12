@@ -9,10 +9,10 @@ model{
     }
   
    # Very flat priors
-   alpha0 ~ dnorm(0,0.0001)
-   alpha ~ dnorm(0,0.0001)
-   beta0 ~ dnorm(0,0.0001)
-   beta ~ dnorm(0,0.0001)
+   alpha0 ~ dnorm(0,100)
+   alpha ~ dnorm(0,100)
+   beta0 ~ dnorm(0,100)
+   beta ~ dnorm(0,100)
 
   tau ~ dgamma(0.0001, 0.0001)
   sigma2 <- 1/tau
