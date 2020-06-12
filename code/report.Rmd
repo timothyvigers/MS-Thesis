@@ -13,9 +13,11 @@ library(patchwork)
 library(DiagrammeR)
 library(knitr)
 library(bnlearn)
+library(rjags)
 ```
 
 ```{r load datasets,echo=FALSE}
+load("./data/networks/pair_data.Rdata")
 load("./data/networks/all_dic.Rdata")
 load("./data/networks/cits.Rdata")
 source("./code/networks/network_structures.R")
@@ -121,7 +123,7 @@ adp +
 # Boxplots
 adp + geom_boxplot(aes(x = name,y = value,fill = name)) + 
   theme(legend.position = "none") + xlab("")
-  
+
 # Standardized
 adp = 
   ggplot(diff_plot[diff_plot$name %in% c("Abs. Diff. Best-Second",
@@ -131,7 +133,7 @@ adp =
 
 sdp = 
   ggplot(diff_plot[diff_plot$name %in% c("Std. Diff. Best-Second",
-                                       "Std. Diff. Second-Third"),]) + 
+                                         "Std. Diff. Second-Third"),]) + 
   theme_bw() + theme(plot.title = element_text(hjust = 0.5)) + 
   theme_bw() + ggtitle("Standardized DIC Difference")
 # Densities
@@ -146,7 +148,38 @@ sdp + geom_boxplot(aes(x = name,y = value,fill = name)) +
 ## Permutation tests
 
 ```{r echo=FALSE}
-
+set.seed(1017)
+# Permutation and MCMC parameters
+nsim = 1000
+n_adapt = 1000
+iter = 10000
+vars = c("alpha0","alpha","beta0","beta","gamma0","gamma")
+# Data set for single pair of interest
+metab = "bc_oxylipin8"
+methyl = "cg08384146"
+temp = pair_data[,c("T1Dgroup",methyl,metab)]
+temp = temp[complete.cases(temp),]
+temp$T1Dgroup = ifelse(temp$T1Dgroup == "T1D control",0,1)
+N = nrow(temp)
+# Permutations
+perm_structs = 
+  lapply(1:1000, function(x){
+    perm = sample(nrow(temp))
+    jags_data = 
+      list(t1d=c(temp[perm,"T1Dgroup"]),methyl=c(temp[,methyl]),
+           metab=c(temp[,metab]),
+           N=N)
+    dics = 
+      suppressWarnings(lapply(paste0("struct",1:24), function(x){
+        mod = 
+          jags.model(paste0("./code/jags/",x,".jags"),quiet=T,
+                     data = jags_data, n.adapt = n_adapt,n.chains = 2)
+        dic = 
+          dic.samples(mod,n.iter = iter,progress.bar="none")
+        return(round(sum(dic$deviance) + sum(dic$penalty),1))
+      }))
+    which.min(dics)
+  })
 ```
 
 ## Potential problems
