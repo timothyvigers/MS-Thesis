@@ -7,8 +7,15 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(root.dir = "/Users/timvigers/Documents/GitHub/MS-Thesis")
+knitr::opts_knit$set(root.dir = "/Users/timvigers/GitHub/MS-Thesis")
+library(tidyverse)
 library(DiagrammeR)
+library(knitr)
+```
+
+```{r load datasets,echo=FALSE}
+load("./data/networks/all_dic.Rdata")
+load("./data/networks/cits.Rdata")
 ```
 
 # Bayesian networks with JAGS
@@ -27,7 +34,7 @@ edf <-
   create_edge_df(
     from = c(2,3,2),
     to   = c(3, 1, 1),
-    label = c("&#945;","&#946;","&#947; = 2")
+    label = c("Y = &#945;*x","&#946;","&#947; = 2")
   )
 graph <- 
   create_graph(
@@ -43,14 +50,56 @@ graph %>% render_graph()
 
 ```{r echo=FALSE}
 # Format DIC data
-load("./data/networks/all_dic.Rdata")
 t = as.data.frame(t(all_dics))
 colnames(t) = paste0("struct",1:24)
 t <- t %>% pivot_longer(struct1:struct24)
+t$name = as.numeric(gsub("struct","",t$name))
 # Plot
-ggplot(temp2,aes(x=name,y=value)) + geom_boxplot() + theme_bw()
+ggplot(t,aes(x=factor(name),y=value)) + 
+  geom_boxplot() + 
+  xlab("Structure number") + ylab("DIC") +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90))
 ```
+
 ### DIC difference between 
+
+```{r echo=FALSE}
+l = 
+  lapply(colnames(all_dics), function(x){
+    dics = all_dics[,x]
+    pair = paste(cits[as.numeric(x),1],"-",cits[as.numeric(x),3])
+    abs_diff_1_2 = diff(sort(dics)[1:2])
+    abs_diff_2_3 = diff(sort(dics)[2:3])
+    st = sd(dics)
+    stand_diff_1_2 = abs_diff_1_2 / st
+    stand_diff_2_3 = abs_diff_2_3 / st
+    data.frame("Pair" = pair,
+               "Abs.Diff.1.2" = abs_diff_1_2,"Std.Diff.1.2" = stand_diff_1_2,
+               "Abs.Diff.2.3" = abs_diff_2_3,"Std.Diff.2.3" = stand_diff_2_3)
+  })
+dic_diff_table = do.call(rbind,l)
+colnames(dic_diff_table) = 
+  c("Pair","Abs. Diff. Best-Second","Std. Diff. Best-Second",
+    "Abs. Diff. Second-Third","Std. Diff. Second-Third")
+# Print table
+kable(dic_diff_table)
+# Plot diff. distribution
+diff_plot = dic_diff_table %>%
+  pivot_longer(`Abs. Diff. Best-Second`:`Std. Diff. Second-Third`)
+# Absolute
+ggplot(diff_plot[diff_plot$name %in% c("Abs. Diff. Best-Second",
+                                       "Abs. Diff. Second-Third"),],
+       aes(x = value,fill = name)) + 
+  geom_density(alpha = 0.5) +
+  theme_bw() + ggtitle("Absolute DIC Difference")
+# Standardized
+ggplot(diff_plot[diff_plot$name %in% c("Std. Diff. Best-Second",
+                                       "Std. Diff. Second-Third"),],
+       aes(x = value,fill = name)) + 
+  geom_density(alpha = 0.5) +
+  theme_bw() + ggtitle("Standardized DIC Difference")
+```
 
 ## Permutation tests
 
