@@ -5,7 +5,7 @@ load("./data/networks/pair_data.Rdata")
 load("./data/networks/cits.Rdata")
 # MCMC parameters
 n_adapt = 1000
-iter = 10000
+iter = 20000
 vars = c("alpha0","alpha","beta0","beta","gamma0","gamma")
 # All pairs from cit package
 # DIC for each model
