@@ -1,7 +1,8 @@
 library(cit)
 # Load list and data
-load("/Users/timvigers/GitHub/MS-Thesis/data/networks/pair_list.Rdata")
-load("/Users/timvigers/GitHub/MS-Thesis/data/networks/pair_data.Rdata")
+setwd("/Users/timvigers/GitHub/MS-Thesis")
+load("./data/networks/pair_list.Rdata")
+load("./data/networks/pair_data.Rdata")
 pair_data$T1Dgroup = factor(pair_data$T1Dgroup)
 # Run CIT package
 cits = apply(pairs, 1, function(x){
@@ -13,17 +14,14 @@ cits = apply(pairs, 1, function(x){
   X = temp[,c(methyl,metab)]
   cinf1 = cit.bp(L = X[,1],G = X[,2],T = y)
   cinf2 = cit.bp(L = X[,2],G = X[,1],T = y)
-  p = min(cinf1$p_cit,cinf2$p_cit)
-  d = which.min(c(cinf1$p_cit,cinf2$p_cit))
-  d = ifelse(d == 1,">","<")
-  if (p < 0.05) {return(paste(methyl,d,metab,p))} else {NA}
+  d = rbind(cinf1,cinf2)
+  d$direction = c(">","<")
+  d$methyl = methyl
+  d$metab = metab
+  return(d[,c("methyl","direction","metab","p_cit")])
 })
-# Convert to dataframe
-cits = as.data.frame(cits[!is.na(cits)])
-cits = separate(cits,"cits[!is.na(cits)]",c("methyl","direction","metab","cit p"),
-                sep = " ")
-cits$`cit p` = round(as.numeric(cits$`cit p`),3)
-cits = cits[order(cits$`cit p`),]
-rownames(cits) = 1:nrow(cits)
+# Convert to single dataframe, remove non-significant rows
+cits = as.data.frame(do.call(rbind,cits))
+cits = cits[cits$p_cit < 0.05,]
 # Write
 save(cits,file = "./data/networks/cits.Rdata")
