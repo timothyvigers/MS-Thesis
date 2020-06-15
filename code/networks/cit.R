@@ -23,5 +23,6 @@ cits = apply(pairs, 1, function(x){
 # Convert to single dataframe, remove non-significant rows
 cits = as.data.frame(do.call(rbind,cits))
 cits = cits[cits$p_cit < 0.05,]
+rownames(cits) = c(1:nrow(cits))
 # Write
 save(cits,file = "./data/networks/cits.Rdata")
