@@ -1,6 +1,6 @@
 library(rjags)
 # Load data
-setwd("/Users/timvigers/GitHub/MS-Thesis")
+setwd("/home/vigerst/MS-Thesis")
 load("./data/networks/pair_data.Rdata")
 load("./data/networks/cits.Rdata")
 # MCMC parameters
@@ -9,7 +9,7 @@ iter = 20000
 vars = c("alpha0","alpha","beta0","beta","gamma0","gamma")
 # All pairs from cit package
 # DIC for each model
-all_dics = apply(cits,1,function(x){
+all_dics = apply(cits[1:2,],1,function(x){
   methyl = as.character(x["methyl"])
   metab = as.character(x["metab"])
   temp = pair_data[,c("T1Dgroup",methyl,metab)]
