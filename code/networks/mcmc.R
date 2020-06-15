@@ -4,9 +4,10 @@ library(parallel)
 setwd("/home/vigerst/MS-Thesis")
 load("./data/networks/pair_data.Rdata")
 load("./data/networks/cits.Rdata")
+set.seed(1017)
 # MCMC parameters
 n_adapt = 1000
-iter = 20000
+iter = 10000
 vars = c("alpha0","alpha","beta0","beta","gamma0","gamma")
 # Unique pairs from cit package
 cits = cits[!(duplicated(cits[,c("methyl","metab")])),]
