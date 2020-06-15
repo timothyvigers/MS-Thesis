@@ -1,1 +1,4 @@
-/var/spool/slurmd/job00045/slurm_script: line 6: rscript: command not found
+Loading required package: coda
+Linked to JAGS 4.3.0
+Loaded modules: basemod,bugs
+slurmstepd: error: *** JOB 46 ON localhost CANCELLED AT 2020-06-15T13:35:52 ***
