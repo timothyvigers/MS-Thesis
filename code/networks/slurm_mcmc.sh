@@ -3,4 +3,4 @@
 #SBATCH --mem=5000
 #SBATCH --job-name=tim_mcmc
 #SBATCH --output=tim_mcmc.log
-rscript $HOME/MS-Thesis/code/networks/mcmc.R
+Rscript $HOME/MS-Thesis/code/networks/mcmc.R
