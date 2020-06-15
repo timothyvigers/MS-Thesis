@@ -1,3 +1,4 @@
+# VERSION TEST
 # Data import
 # Phenotype
 pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample_noIdentifyingInfo.csv",
