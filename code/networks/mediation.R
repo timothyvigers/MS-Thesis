@@ -23,13 +23,12 @@ med = apply(cits,1,function(x){
   out.mod = glm(outform,family = "binomial",data = pair_data)
   medform = as.formula(paste(mediator,"~",exposure))
   med.mod = lm(medform,data = pair_data,weights = pair_data$weight)
-  # Check for interaction between exposure and mediator
-  
+  intform = as.formula(paste("T1Dgroup","~",exposure,"*",mediator))
+  int.mod = glm(intform,family = "binomial",data = pair_data)
   # Model estimates
   theta0 = summary(out.mod)$coefficients[1,1]
   theta1 = summary(out.mod)$coefficients[2,1]
   theta2 = summary(out.mod)$coefficients[3,1]
-  #theta3 = summary(out.mod)$coefficients[4,1]
   beta0 = summary(med.mod)$coefficients[1,1]
   beta1 = summary(med.mod)$coefficients[2,1]
   # Conditional direct and indirect effects (VanderWeele & Vansteelandt, 2010)
@@ -37,19 +36,27 @@ med = apply(cits,1,function(x){
   cie = theta2*beta1
   # Proportion mediated
   pmed = (exp(cde)*(exp(cie)-1))/((exp(cde)*exp(cie))-1)
+  # CIs
+  cde.ll = cde - 1.96*(summary(out.mod)$coefficients[2,2])
+  cde.ul = cde + 1.96*(summary(out.mod)$coefficients[2,2])
+  cie.ll = cie - 1.96*(sqrt(theta2^2*as.numeric(diag(vcov(med.mod))[2])^2)+
+                         beta1^2*as.numeric(diag(vcov(out.mod))[3])^2)
+  cie.ul = cie + 1.96*(sqrt(theta2^2*as.numeric(diag(vcov(med.mod))[2])^2)+
+                         beta1^2*as.numeric(diag(vcov(out.mod))[3])^2)
   # Results
   # Check associations - if methyl or metab not associated with outcome in 
   # multivariate model, or mediator not associated with exposure return NA
   if(any(summary(out.mod)$coefficients[2:3,4]>0.05)|
-     summary(med.mod)$coefficients[2,4]>0.05){
-    return(rep(NA,5))
+     summary(med.mod)$coefficients[2,4]>0.05|
+     summary(int.mod)$coefficients[4,4]<0.05){
+    return(rep(NA,9))
   } else {
-    return(c(methyl,metab,round(c(cde,cie,pmed),3)))
+    return(c(methyl,metab,round(c(cde,cde.ll,cde.ul,cie,cie.ll,cie.ul,pmed),3)))
   }
 })
 med = t(med)
 med = med[complete.cases(med),]
-colnames(med) = c("CpG","Metabolite","DE","IE","Prop. Mediated")
+colnames(med) = c("CpG","Metabolite","DE","DE.LL","DE.Ul","IE","IE.LL","IE.Ul","Prop. Mediated")
 # Questions
 # 1. To extend this when there are interaction effects, do we need to pick a level 
 # of the mediator (m) to evaluate at? Would the mean be best?
