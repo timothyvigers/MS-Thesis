@@ -6,7 +6,7 @@ pair_data$T1Dgroup = ifelse(pair_data$T1Dgroup == "T1D control",0,1)
 # Weights for case-control study (because outcome is not rare in this cohort)
 p = sum(pair_data$T1Dgroup) / nrow(pair_data)
 # Pi is T1D prevalence
-pi = 0.003
+pi = 0.03847
 pair_data$weight = ifelse(pair_data$T1Dgroup == 0,(1-pi)/(1-p),pi/p)
 # For each pair significant by cit, use mediation package to estimate ACME, etc.
 med = apply(cits,1,function(x){
@@ -53,7 +53,3 @@ colnames(med) = c("CpG","Metabolite","DE","IE","Prop. Mediated")
 # Questions
 # 1. To extend this when there are interaction effects, do we need to pick a level 
 # of the mediator (m) to evaluate at? Would the mean be best?
-# 2. What about treatment? The paper uses a binary treatment (a = therapy vs. 
-# a* = no therapy), but it seems like the approach can be generalized. 
-# 3. Why am I getting negative and > 1 proportions? Is it because the outcome 
-# isn't rare in this cohort?
