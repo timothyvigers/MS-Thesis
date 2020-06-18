@@ -1,3 +1,4 @@
+set.seed(1017)
 setwd("/Users/timvigers/GitHub/MS-Thesis")
 # Load cit results, data, and annotations
 load("./data/networks/cits.Rdata")
