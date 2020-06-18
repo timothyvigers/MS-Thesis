@@ -95,7 +95,7 @@ med[,4:ncol(med)] = lapply(med[,4:ncol(med)],function(x){round(as.numeric(x),4)}
 # Annotate
 anno$CpG = rownames(anno)
 
-gctof_anno = gctof_anno[,c("feature_name","BinBase.name","mass.spec","ret.index")]
+gctof_anno = gctof_anno[,c("feature_name","BinBase.name","quant.mz","ret.index")]
 colnames(gctof_anno) = c("Metabolite","Name","Mass","Ret.")
 
 lipid_anno = lipid_anno[,c("feature_name","Metabolite.name","row.m.z","row.retention.time")]
