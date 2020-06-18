@@ -1,6 +1,6 @@
 library(boot)
 set.seed(1017)
-setwd("/Users/timvigers/GitHub/MS-Thesis/")
+setwd("/home/vigerst/MS-Thesis/")
 # Load cit results, data, and annotations
 load("./data/networks/cits.Rdata")
 load("./data/networks/pair_data.Rdata")
