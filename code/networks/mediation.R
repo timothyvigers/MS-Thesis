@@ -7,17 +7,11 @@ load("./data/networks/pair_data.Rdata")
 load("./data/candidate_selection/annotation.850K.Rdata")
 gctof_anno = read.csv("./data/metabolomics/gctof.featureAnno.csv",
                       stringsAsFactors = F,na.strings = "")
-# hilic_anno = read.csv("./data/metabolomics/hilic.featureAnno.csv",
-#                       stringsAsFactors = F,na.strings = "")
 lipid_anno = read.csv("./data/metabolomics/lipid.featureAnno.csv",
                       stringsAsFactors = F,na.strings = "")
-# oxylipin_anno = read.csv("./data/metabolomics/oxylipin.featureAnno.csv",
-#                          stringsAsFactors = F,na.strings = "")
-# vitd_anno = read.csv("./data/metabolomics/vitd.featureAnno.csv",
-#                      stringsAsFactors = F,na.strings = "")
 # 0 and 1 outcome
 pair_data$T1Dgroup = ifelse(pair_data$T1Dgroup == "T1D control",0,1)
-# Weights for case-control study (because outcome is not rare in this cohort)
+# Weights for case-control study (because outcome more rare than in this cohort)
 p = sum(pair_data$T1Dgroup) / nrow(pair_data)
 # Pi is T1D prevalence
 pi = 0.03847
@@ -25,11 +19,13 @@ pair_data$weight = ifelse(pair_data$T1Dgroup == 0,(1-pi)/(1-p),pi/p)
 # Mediation function
 mediate <- function(data,i){
   data = data[i,]
+  # Regress outcome on exposure and mediator
   outform = as.formula(paste("T1Dgroup","~",exposure,"+",mediator))
   out.mod = glm(outform,family = "binomial",data = data)
+  # Regress mediator on exposure
   medform = as.formula(paste(mediator,"~",exposure))
   med.mod = lm(medform,data = data,weights = data$weight)
-  # Model estimates
+  # Get model estimates
   theta0 = summary(out.mod)$coefficients[1,1]
   theta1 = summary(out.mod)$coefficients[2,1]
   theta2 = summary(out.mod)$coefficients[3,1]
@@ -41,11 +37,10 @@ mediate <- function(data,i){
   # Proportion mediated
   pmed = (exp(cde)*(exp(cie)-1))/((exp(cde)*exp(cie))-1)
   # Results
-  # Check associations - if methyl or metab not associated with outcome in 
-  # multivariate model, or mediator not associated with exposure return NA
   return(c(cde,cie,pmed))
 }
-# For each pair significant by cit, use mediation package to estimate ACME, etc.
+# For each pair significant by cit, bootstrap mediation estimates
+# Results dataframe
 med = data.frame(matrix(ncol = 15,nrow = 0))
 for (r in 1:nrow(cits)) {
   x = cits[r,]
@@ -59,6 +54,7 @@ for (r in 1:nrow(cits)) {
     exposure = metab
     mediator = methyl
   }
+  # Check mediation assumptions. If violated, next.
   outform = as.formula(paste("T1Dgroup","~",exposure,"+",mediator))
   out.mod = glm(outform,family = "binomial",data = pair_data)
   medform = as.formula(paste(mediator,"~",exposure))
@@ -70,11 +66,13 @@ for (r in 1:nrow(cits)) {
      summary(int.mod)$coefficients[4,4]<0.05){
     next()
   }
+  # Bootstrap data
   b <- boot(pair_data,mediate,R=1000)
   # Bootstrap CIs
   cde.ci = boot.ci(b,conf = 0.95, type = c("norm"), index=1)
   cie.ci = boot.ci(b,conf = 0.95, type = c("norm"), index=2)
   pmed.ci = boot.ci(b,conf = 0.95, type = c("norm"), index=3)
+  # Results
   out = c(methyl,d,metab,
           cde.ci$t0,cde.ci$normal[2],cde.ci$normal[3],
           pnorm(abs((2*b$t0[1] - mean(b$t[,1]) )) / sqrt(var(b$t[, 1])), 
@@ -86,8 +84,10 @@ for (r in 1:nrow(cits)) {
           pnorm(abs((2*b$t0[3] - mean(b$t[,3]) )) / sqrt(var(b$t[, 3])), 
                 lower.tail=F)*2)
   names(out) = colnames(med)
+  # Add to results dataframe
   med = rbind(med,out)
 }
+# Format results
 colnames(med) = 
   c("CpG","Direction","Metabolite","DE","DE.LL","DE.UL","DE p value",
     "IE","IE.LL","IE.UL","IE p value",
