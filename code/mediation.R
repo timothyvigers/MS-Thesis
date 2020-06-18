@@ -58,7 +58,8 @@ for (r in 1:nrow(cits)) {
     exposure = metab
     mediator = methyl
   }
-  # Check mediation assumptions. If violated, next.
+  # Check mediation assumptions (mediator associated with exposure, no interaction). 
+  # If violated, next.
   medform = as.formula(paste(mediator,"~",exposure))
   med.mod = lm(medform,data = pair_data,weights = pair_data$weight)
   intform = as.formula(paste("T1Dgroup","~",exposure,"*",mediator))
