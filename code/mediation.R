@@ -67,7 +67,7 @@ for (r in 1:nrow(cits)) {
     next()
   }
   # Bootstrap data
-  b <- boot(pair_data,mediate,R=1000)
+  b <- boot(pair_data,mediate,R=10)
   # Bootstrap CIs
   cde.ci = boot.ci(b,conf = 0.95, type = c("norm"), index=1)
   cie.ci = boot.ci(b,conf = 0.95, type = c("norm"), index=2)
