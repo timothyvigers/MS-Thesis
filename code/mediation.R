@@ -41,7 +41,11 @@ mediate <- function(data,i){
 }
 # For each pair significant by cit, bootstrap mediation estimates
 # Results dataframe
-med = data.frame(matrix(ncol = 15,nrow = 0))
+med = list()
+result_names = 
+  c("CpG","Direction","Metabolite","DE","DE.LL","DE.UL","DE p value",
+    "IE","IE.LL","IE.UL","IE p value",
+    "Prop. Med.","Prop. Med. LL","Prop. Med. UL","Prop. Med. p value")
 for (r in 1:nrow(cits)) {
   x = cits[r,]
   d = cits[r,"direction"]
@@ -67,7 +71,7 @@ for (r in 1:nrow(cits)) {
     next()
   }
   # Bootstrap data
-  b <- boot(pair_data,mediate,R=10)
+  b <- boot(pair_data,mediate,R=1000)
   # Bootstrap CIs
   cde.ci = boot.ci(b,conf = 0.95, type = c("norm"), index=1)
   cie.ci = boot.ci(b,conf = 0.95, type = c("norm"), index=2)
@@ -83,16 +87,16 @@ for (r in 1:nrow(cits)) {
           pmed.ci$t0,pmed.ci$normal[2],pmed.ci$normal[3],
           pnorm(abs((2*b$t0[3] - mean(b$t[,3]) )) / sqrt(var(b$t[, 3])), 
                 lower.tail=F)*2)
-  names(out) = colnames(med)
+  names(out) = result_names
   # Add to results dataframe
-  med = rbind(med,out)
+  med[[r]] = out
 }
+med = as.data.frame(do.call(rbind,med))
 # Format results
-colnames(med) = 
-  c("CpG","Direction","Metabolite","DE","DE.LL","DE.UL","DE p value",
-    "IE","IE.LL","IE.UL","IE p value",
-    "Prop. Med.","Prop. Med. LL","Prop. Med. UL","Prop. Med. p value")
-med[,4:ncol(med)] = lapply(med[,4:ncol(med)],function(x){round(as.numeric(x),4)})
+med[,4:ncol(med)] = 
+  lapply(med[,4:ncol(med)],function(x){
+    round(as.numeric(as.character(x)),4)
+  })
 # Annotate
 anno$CpG = rownames(anno)
 
