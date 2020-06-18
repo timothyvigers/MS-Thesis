@@ -3,11 +3,16 @@ setwd("/Users/timvigers/GitHub/MS-Thesis")
 load("./data/networks/cits.Rdata")
 load("./data/networks/pair_data.Rdata")
 load("./data/candidate_selection/annotation.850K.Rdata")
-gctof_anno = read.csv("./data/metabolomics/gctof.featureAnno.csv")
-hilic_anno = read.csv("./data/metabolomics/hilic.featureAnno.csv")
-lipid_anno = read.csv("./data/metabolomics/lipid.featureAnno.csv")
-oxylipin_anno = read.csv("./data/metabolomics/oxylipin.featureAnno.csv")
-vitd_anno = read.csv("./data/metabolomics/vitd.featureAnno.csv")
+gctof_anno = read.csv("./data/metabolomics/gctof.featureAnno.csv",
+                      stringsAsFactors = F)
+hilic_anno = read.csv("./data/metabolomics/hilic.featureAnno.csv",
+                      stringsAsFactors = F)
+lipid_anno = read.csv("./data/metabolomics/lipid.featureAnno.csv",
+                      stringsAsFactors = F)
+oxylipin_anno = read.csv("./data/metabolomics/oxylipin.featureAnno.csv",
+                         stringsAsFactors = F)
+vitd_anno = read.csv("./data/metabolomics/vitd.featureAnno.csv",
+                     stringsAsFactors = F)
 # 0 and 1 outcome
 pair_data$T1Dgroup = ifelse(pair_data$T1Dgroup == "T1D control",0,1)
 # Weights for case-control study (because outcome is not rare in this cohort)
@@ -88,3 +93,16 @@ colnames(med) =
     "Prop. Med.","Prop. Med. LL","Prop. Med. UL","Prop. Med. p value")
 med[,4:ncol(med)] = lapply(med[,4:ncol(med)],function(x){round(as.numeric(x),4)})
 # Annotate
+anno$CpG = rownames(anno)
+
+gctof_anno = gctof_anno[,c("feature_name","BinBase.name","mass.spec","ret.index")]
+colnames(gctof_anno) = c("Metabolite","Name","Mass","Ret.")
+
+lipid_anno = lipid_anno[,c("feature_name","Metabolite.name","row.m.z","row.retention.time")]
+colnames(lipid_anno) = c("Metabolite","Name","Mass","Ret.")
+
+metabs = rbind(gctof_anno,lipid_anno)
+
+med = merge(med,anno[,c("CpG","UCSC_RefGene_Name","chr","pos")],by = "CpG")
+
+med = merge(med,metabs,by = "Metabolite")
