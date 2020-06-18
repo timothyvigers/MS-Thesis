@@ -70,9 +70,9 @@ for (r in 1:nrow(cits)) {
   # Bootstrap data
   b <- boot(pair_data,mediate,R=1000)
   # Bootstrap CIs
-  cde.ci = boot.ci(b,conf = 0.95, type = c("norm"), index=1)
-  cie.ci = boot.ci(b,conf = 0.95, type = c("norm"), index=2)
-  pmed.ci = boot.ci(b,conf = 0.95, type = c("norm"), index=3)
+  cde.ci = boot.ci(b,conf = 0.95, type = "perc", index=1)
+  cie.ci = boot.ci(b,conf = 0.95, type = "perc", index=2)
+  pmed.ci = boot.ci(b,conf = 0.95, type = "perc", index=3)
   # Results
   out = c(methyl,d,metab,
           cde.ci$t0,cde.ci$normal[2],cde.ci$normal[3],
