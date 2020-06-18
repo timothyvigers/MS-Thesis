@@ -112,5 +112,4 @@ med = merge(med,metabs,by = "Metabolite",sort = F)
 med = med[,c(2,3,1,4:ncol(med))]
 
 # Save
-
 save(med,file = "./data/mediation.Rdata")
