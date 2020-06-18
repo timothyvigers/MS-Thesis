@@ -10,12 +10,11 @@ pi = 0.03847
 pair_data$weight = ifelse(pair_data$T1Dgroup == 0,(1-pi)/(1-p),pi/p)
 # Mediation function
 mediate <- function(data,i){
+  data = data[i,]
   outform = as.formula(paste("T1Dgroup","~",exposure,"+",mediator))
   out.mod = glm(outform,family = "binomial",data = data)
   medform = as.formula(paste(mediator,"~",exposure))
   med.mod = lm(medform,data = data,weights = data$weight)
-  intform = as.formula(paste("T1Dgroup","~",exposure,"*",mediator))
-  int.mod = glm(intform,family = "binomial",data = data)
   # Model estimates
   theta0 = summary(out.mod)$coefficients[1,1]
   theta1 = summary(out.mod)$coefficients[2,1]
@@ -30,16 +29,12 @@ mediate <- function(data,i){
   # Results
   # Check associations - if methyl or metab not associated with outcome in 
   # multivariate model, or mediator not associated with exposure return NA
-  if(any(summary(out.mod)$coefficients[2:3,4]>0.05)|
-     summary(med.mod)$coefficients[2,4]>0.05|
-     summary(int.mod)$coefficients[4,4]<0.05){
-    return(rep(NA,5))
-  } else {
-    return(c(methyl,metab,round(c(cde,cie,pmed),3)))
-  }
+  return(c(cde,cie,pmed))
 }
 # For each pair significant by cit, use mediation package to estimate ACME, etc.
-med = apply(cits,1,function(x){
+med = data.frame(matrix(ncol = 12,nrow = 0))
+for (r in 1:nrow(cits)) {
+  x = cits[r,]
   methyl = as.character(x["methyl"])
   metab = as.character(x["metab"])
   if (x["direction"] == ">"){
@@ -49,18 +44,33 @@ med = apply(cits,1,function(x){
     exposure = metab
     mediator = methyl
   }
+  outform = as.formula(paste("T1Dgroup","~",exposure,"+",mediator))
+  out.mod = glm(outform,family = "binomial",data = data)
+  medform = as.formula(paste(mediator,"~",exposure))
+  med.mod = lm(medform,data = data,weights = data$weight)
+  intform = as.formula(paste("T1Dgroup","~",exposure,"*",mediator))
+  int.mod = glm(intform,family = "binomial",data = data)
+  if(any(summary(out.mod)$coefficients[2:3,4]>0.05)|
+     summary(med.mod)$coefficients[2,4]>0.05|
+     summary(int.mod)$coefficients[4,4]<0.05){
+    next()
+  }
   b <- boot(pair_data,mediate,R=10)
-  # CIs from paper
-  # cde.ll = cde - 1.96*(summary(out.mod)$coefficients[2,2])
-  # cde.ul = cde + 1.96*(summary(out.mod)$coefficients[2,2])
-  # cie.ll = cie - 1.96*(sqrt(theta2^2*as.numeric(diag(vcov(med.mod))[2])^2)+
-  #                        beta1^2*as.numeric(diag(vcov(out.mod))[3])^2)
-  # cie.ul = cie + 1.96*(sqrt(theta2^2*as.numeric(diag(vcov(med.mod))[2])^2)+
-  #                        beta1^2*as.numeric(diag(vcov(out.mod))[3])^2)
-})
-med = t(med)
-med = med[complete.cases(med),]
-colnames(med) = c("CpG","Metabolite","DE","DE.LL","DE.Ul","IE","IE.LL","IE.Ul","Prop. Mediated")
+  # Bootstrap CIs
+  c(cde,cie,pmed)
+  cde.ci = boot.ci(b,conf = 0.95, type = c("norm"), index=1)
+  cie.ci = boot.ci(b,conf = 0.95, type = c("norm"), index=2)
+  pmed.ci = boot.ci(b,conf = 0.95, type = c("norm"), index=3)
+  out = c(methyl,metab,
+          cde.ci$t0,cde.ci$normal[2],cde.ci$normal[3],pnorm(abs((b$t0[1] - mean(b$t[,1]) )) / sqrt(var(b$t[, 1])), lower.tail=F)*2,
+          cie.ci$t0,cie.ci$normal[2],cie.ci$normal[3],
+          pmed.ci$t0,pmed.ci$normal[2],pmed.ci$normal[3])
+  names(out) = colnames(med)
+  med = rbind(med,out)
+}
+colnames(med) = 
+  c("CpG","Metabolite","DE","DE.LL","DE.UL","p","IE","IE.LL","IE.UL",
+    "Prop. Med.","Prop. Med. LL","Prop. Med. UL")
 # Questions
 # 1. To extend this when there are interaction effects, do we need to pick a level 
 # of the mediator (m) to evaluate at? Would the mean be best?
