@@ -46,7 +46,7 @@ result_names =
   c("CpG","Direction","Metabolite","DE","DE.LL","DE.UL","DE p value",
     "IE","IE.LL","IE.UL","IE p value",
     "Prop. Med.","Prop. Med. LL","Prop. Med. UL","Prop. Med. p value")
-for (r in 1:2) {
+for (r in 1:nrow(cits)) {
   x = cits[r,]
   d = cits[r,"direction"]
   methyl = as.character(x["methyl"])
