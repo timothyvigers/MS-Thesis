@@ -1,7 +1,14 @@
 setwd("/Users/timvigers/GitHub/MS-Thesis")
-# Load cit results and data
+# Load cit results, data, and annotations
 load("./data/networks/cits.Rdata")
 load("./data/networks/pair_data.Rdata")
+load("./data/candidate_selection/annotation.850K.Rdata")
+gctof_anno = read.csv("./data/metabolomics/gctof.featureAnno.csv")
+hilic_anno = read.csv("./data/metabolomics/hilic.featureAnno.csv")
+lipid_anno = read.csv("./data/metabolomics/lipid.featureAnno.csv")
+oxylipin_anno = read.csv("./data/metabolomics/oxylipin.featureAnno.csv")
+vitd_anno = read.csv("./data/metabolomics/vitd.featureAnno.csv")
+# 0 and 1 outcome
 pair_data$T1Dgroup = ifelse(pair_data$T1Dgroup == "T1D control",0,1)
 # Weights for case-control study (because outcome is not rare in this cohort)
 p = sum(pair_data$T1Dgroup) / nrow(pair_data)
@@ -32,9 +39,10 @@ mediate <- function(data,i){
   return(c(cde,cie,pmed))
 }
 # For each pair significant by cit, use mediation package to estimate ACME, etc.
-med = data.frame(matrix(ncol = 12,nrow = 0))
+med = data.frame(matrix(ncol = 15,nrow = 0))
 for (r in 1:nrow(cits)) {
   x = cits[r,]
+  d = cits[r,"direction"]
   methyl = as.character(x["methyl"])
   metab = as.character(x["metab"])
   if (x["direction"] == ">"){
@@ -61,16 +69,22 @@ for (r in 1:nrow(cits)) {
   cde.ci = boot.ci(b,conf = 0.95, type = c("norm"), index=1)
   cie.ci = boot.ci(b,conf = 0.95, type = c("norm"), index=2)
   pmed.ci = boot.ci(b,conf = 0.95, type = c("norm"), index=3)
-  out = c(methyl,metab,
-          cde.ci$t0,cde.ci$normal[2],cde.ci$normal[3],pnorm(abs((b$t0[1] - mean(b$t[,1]) )) / sqrt(var(b$t[, 1])), lower.tail=F)*2,
+  out = c(methyl,d,metab,
+          cde.ci$t0,cde.ci$normal[2],cde.ci$normal[3],
+          pnorm(abs((2*b$t0[1] - mean(b$t[,1]) )) / sqrt(var(b$t[, 1])), 
+                lower.tail=F)*2,
           cie.ci$t0,cie.ci$normal[2],cie.ci$normal[3],
-          pmed.ci$t0,pmed.ci$normal[2],pmed.ci$normal[3])
+          pnorm(abs((2*b$t0[2] - mean(b$t[,2]) )) / sqrt(var(b$t[, 2])), 
+                lower.tail=F)*2,
+          pmed.ci$t0,pmed.ci$normal[2],pmed.ci$normal[3],
+          pnorm(abs((2*b$t0[3] - mean(b$t[,3]) )) / sqrt(var(b$t[, 3])), 
+                lower.tail=F)*2)
   names(out) = colnames(med)
   med = rbind(med,out)
 }
 colnames(med) = 
-  c("CpG","Metabolite","DE","DE.LL","DE.UL","p","IE","IE.LL","IE.UL",
-    "Prop. Med.","Prop. Med. LL","Prop. Med. UL")
-# Questions
-# 1. To extend this when there are interaction effects, do we need to pick a level 
-# of the mediator (m) to evaluate at? Would the mean be best?
+  c("CpG","Direction","Metabolite","DE","DE.LL","DE.UL","DE p value",
+    "IE","IE.LL","IE.UL","IE p value",
+    "Prop. Med.","Prop. Med. LL","Prop. Med. UL","Prop. Med. p value")
+med[,4:ncol(med)] = lapply(med[,4:ncol(med)],function(x){round(as.numeric(x),4)})
+# Annotate
