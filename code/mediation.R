@@ -70,8 +70,8 @@ for (r in 1:nrow(cits)) {
   # Bootstrap data
   b <- boot(pair_data,mediate,R=1000)
   # Bootstrap CIs
-  cde.ci = boot.ci(b,conf = 0.95, type = "perc", index=1)
-  cie.ci = boot.ci(b,conf = 0.95, type = "perc", index=2)
+  cde.ci = boot.ci(b,conf = 0.95, type = "norm", index=1)
+  cie.ci = boot.ci(b,conf = 0.95, type = "norm", index=2)
   pmed.ci = boot.ci(b,conf = 0.95, type = "perc", index=3)
   # Results
   out = c(methyl,d,metab,
@@ -81,7 +81,7 @@ for (r in 1:nrow(cits)) {
           cie.ci$t0,cie.ci$normal[2],cie.ci$normal[3],
           pnorm(abs((2*b$t0[2] - mean(b$t[,2]) )) / sqrt(var(b$t[, 2])), 
                 lower.tail=F)*2,
-          pmed.ci$t0,pmed.ci$normal[2],pmed.ci$normal[3],
+          pmed.ci$t0,pmed.ci$percent[4],pmed.ci$percent[5],
           pnorm(abs((2*b$t0[3] - mean(b$t[,3]) )) / sqrt(var(b$t[, 3])), 
                 lower.tail=F)*2)
   names(out) = result_names
