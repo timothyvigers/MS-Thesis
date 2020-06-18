@@ -1,6 +1,6 @@
 library(boot)
 set.seed(1017)
-setwd("/home/vigerst/MS-Thesis/")
+setwd("/Users/timvigers/GitHub/MS-Thesis/")
 # Load cit results, data, and annotations
 load("./data/networks/cits.Rdata")
 load("./data/networks/pair_data.Rdata")
@@ -46,7 +46,7 @@ result_names =
   c("CpG","Direction","Metabolite","DE","DE.LL","DE.UL","DE p value",
     "IE","IE.LL","IE.UL","IE p value",
     "Prop. Med.","Prop. Med. LL","Prop. Med. UL","Prop. Med. p value")
-for (r in 1:nrow(cits)) {
+for (r in 1:2) {
   x = cits[r,]
   d = cits[r,"direction"]
   methyl = as.character(x["methyl"])
@@ -59,14 +59,11 @@ for (r in 1:nrow(cits)) {
     mediator = methyl
   }
   # Check mediation assumptions. If violated, next.
-  outform = as.formula(paste("T1Dgroup","~",exposure,"+",mediator))
-  out.mod = glm(outform,family = "binomial",data = pair_data)
   medform = as.formula(paste(mediator,"~",exposure))
   med.mod = lm(medform,data = pair_data,weights = pair_data$weight)
   intform = as.formula(paste("T1Dgroup","~",exposure,"*",mediator))
   int.mod = glm(intform,family = "binomial",data = pair_data)
-  if(any(summary(out.mod)$coefficients[2:3,4]>0.05)|
-     summary(med.mod)$coefficients[2,4]>0.05|
+  if(summary(med.mod)$coefficients[2,4]>0.05 |
      summary(int.mod)$coefficients[4,4]<0.05){
     next()
   }
