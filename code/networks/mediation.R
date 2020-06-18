@@ -1,19 +1,20 @@
+library(boot)
 set.seed(1017)
-setwd("/Users/timvigers/GitHub/MS-Thesis")
+setwd("/MS-Thesis/")
 # Load cit results, data, and annotations
 load("./data/networks/cits.Rdata")
 load("./data/networks/pair_data.Rdata")
 load("./data/candidate_selection/annotation.850K.Rdata")
 gctof_anno = read.csv("./data/metabolomics/gctof.featureAnno.csv",
-                      stringsAsFactors = F)
-hilic_anno = read.csv("./data/metabolomics/hilic.featureAnno.csv",
-                      stringsAsFactors = F)
+                      stringsAsFactors = F,na.strings = "")
+# hilic_anno = read.csv("./data/metabolomics/hilic.featureAnno.csv",
+#                       stringsAsFactors = F,na.strings = "")
 lipid_anno = read.csv("./data/metabolomics/lipid.featureAnno.csv",
-                      stringsAsFactors = F)
-oxylipin_anno = read.csv("./data/metabolomics/oxylipin.featureAnno.csv",
-                         stringsAsFactors = F)
-vitd_anno = read.csv("./data/metabolomics/vitd.featureAnno.csv",
-                     stringsAsFactors = F)
+                      stringsAsFactors = F,na.strings = "")
+# oxylipin_anno = read.csv("./data/metabolomics/oxylipin.featureAnno.csv",
+#                          stringsAsFactors = F,na.strings = "")
+# vitd_anno = read.csv("./data/metabolomics/vitd.featureAnno.csv",
+#                      stringsAsFactors = F,na.strings = "")
 # 0 and 1 outcome
 pair_data$T1Dgroup = ifelse(pair_data$T1Dgroup == "T1D control",0,1)
 # Weights for case-control study (because outcome is not rare in this cohort)
@@ -59,19 +60,18 @@ for (r in 1:nrow(cits)) {
     mediator = methyl
   }
   outform = as.formula(paste("T1Dgroup","~",exposure,"+",mediator))
-  out.mod = glm(outform,family = "binomial",data = data)
+  out.mod = glm(outform,family = "binomial",data = pair_data)
   medform = as.formula(paste(mediator,"~",exposure))
-  med.mod = lm(medform,data = data,weights = data$weight)
+  med.mod = lm(medform,data = pair_data,weights = pair_data$weight)
   intform = as.formula(paste("T1Dgroup","~",exposure,"*",mediator))
-  int.mod = glm(intform,family = "binomial",data = data)
+  int.mod = glm(intform,family = "binomial",data = pair_data)
   if(any(summary(out.mod)$coefficients[2:3,4]>0.05)|
      summary(med.mod)$coefficients[2,4]>0.05|
      summary(int.mod)$coefficients[4,4]<0.05){
     next()
   }
-  b <- boot(pair_data,mediate,R=10)
+  b <- boot(pair_data,mediate,R=1000)
   # Bootstrap CIs
-  c(cde,cie,pmed)
   cde.ci = boot.ci(b,conf = 0.95, type = c("norm"), index=1)
   cie.ci = boot.ci(b,conf = 0.95, type = c("norm"), index=2)
   pmed.ci = boot.ci(b,conf = 0.95, type = c("norm"), index=3)
@@ -104,6 +104,13 @@ colnames(lipid_anno) = c("Metabolite","Name","Mass","Ret.")
 
 metabs = rbind(gctof_anno,lipid_anno)
 
-med = merge(med,anno[,c("CpG","UCSC_RefGene_Name","chr","pos")],by = "CpG")
+med = merge(med,anno[,c("CpG","UCSC_RefGene_Name","chr","pos")],
+            by = "CpG",sort = F)
 
-med = merge(med,metabs,by = "Metabolite")
+med = merge(med,metabs,by = "Metabolite",sort = F)
+
+med = med[,c(2,3,1,4:ncol(med))]
+
+# Save
+
+save(med,file = "./data/mediation.Rdata")
