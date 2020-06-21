@@ -12,7 +12,7 @@ vars = c("alpha0","alpha","beta0","beta","gamma0","gamma")
 # Unique pairs from cit package
 cits = cits[!(duplicated(cits[,c("methyl","metab")])),]
 # DIC for each model
-all_dics = parApply(cl=cl,cits[1,],1,function(x){
+all_dics = apply(cits,1,function(x){
   methyl = as.character(x["methyl"])
   metab = as.character(x["metab"])
   temp = pair_data[,c("T1Dgroup",methyl,metab)]
@@ -24,25 +24,25 @@ all_dics = parApply(cl=cl,cits[1,],1,function(x){
   cl <- makeCluster(no_cores,type = "FORK")
   # Permutations
   perm_structs = 
-    parLapply(cl=cl,1:5, function(x){
+    parLapply(cl=cl,1:nsim, function(x){
       perm = sample(nrow(temp))
       # data for jags
-      jags_data = 
+      jags_data =
         list(t1d=c(temp[perm,"T1Dgroup"]),methyl=c(temp[,methyl]),
              metab=c(temp[,metab]),
              N=N)
-      dics = 
+      dics =
         suppressWarnings(lapply(paste0("struct",1:24), function(x){
-          mod = 
+          mod =
             jags.model(paste0("./code/jags/",x,".jags"),quiet=T,
                        data = jags_data, n.adapt = n_adapt,n.chains = 2)
-          dic = 
+          dic =
             dic.samples(mod,n.iter = iter,progress.bar="none")
           return(round(sum(dic$deviance) + sum(dic$penalty),1))
         }))
       unlist(dics)
     })
-  return()
+  stopCluster(cl)
+  return(perm_structs)
 })
-
 save(perm_structs,file = "./data/networks/perm_structs_test.Rdata")
