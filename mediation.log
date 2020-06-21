@@ -1,3 +1,0 @@
-Error in names(out) <- result_names : 
-  'names' attribute [15] must be the same length as the vector [9]
-Execution halted
