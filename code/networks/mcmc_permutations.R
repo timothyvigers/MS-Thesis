@@ -5,7 +5,7 @@ setwd("/home/vigerst/MS-Thesis")
 load("./data/networks/pair_data.Rdata")
 load("./data/networks/cits.Rdata")
 # Permutation and MCMC parameters
-nsim = 1000
+nsim = 100
 n_adapt = 1000
 iter = 10000
 vars = c("alpha0","alpha","beta0","beta","gamma0","gamma")
@@ -45,4 +45,4 @@ all_dics = apply(cits,1,function(x){
   stopCluster(cl)
   return(perm_structs)
 })
-save(perm_structs,file = "./data/networks/perm_structs_test.Rdata")
+save(perm_structs,file = "./data/networks/perm_structs.Rdata")
