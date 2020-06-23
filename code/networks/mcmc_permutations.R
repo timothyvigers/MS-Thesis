@@ -5,14 +5,14 @@ setwd("/home/vigerst/MS-Thesis")
 load("./data/networks/pair_data.Rdata")
 load("./data/networks/cits.Rdata")
 # Permutation and MCMC parameters
-nsim = 1000
+nsim = 100
 n_adapt = 1000
 iter = 10000
 vars = c("alpha0","alpha","beta0","beta","gamma0","gamma")
 # Unique pairs from cit package
 cits = cits[!(duplicated(cits[,c("methyl","metab")])),]
-# DIC for each model
-all_dics = apply(cits,1,function(x){
+# DIC for each model with permutation tests
+all_perms = apply(cits,1,function(x){
   methyl = as.character(x["methyl"])
   metab = as.character(x["metab"])
   temp = pair_data[,c("T1Dgroup",methyl,metab)]
@@ -45,4 +45,4 @@ all_dics = apply(cits,1,function(x){
   stopCluster(cl)
   return(perm_structs)
 })
-save(perm_structs,file = "./data/networks/perm_structs.Rdata")
+save(all_perms,file = "./data/networks/mcmc_perms.Rdata")
