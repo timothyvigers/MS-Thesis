@@ -1,4 +1,6 @@
 Loading required package: coda
 Linked to JAGS 4.3.0
 Loaded modules: basemod,bugs
-slurmstepd: error: *** JOB 62 ON localhost CANCELLED AT 2020-06-23T08:53:00 ***
+Error in save(perm_structs, file = "./data/networks/perm_structs.Rdata") : 
+  object ‘perm_structs’ not found
+Execution halted
