@@ -5,14 +5,14 @@ setwd("/home/vigerst/MS-Thesis")
 load("./data/networks/pair_data.Rdata")
 load("./data/networks/cits.Rdata")
 # Permutation and MCMC parameters
-nsim = 10
+nsim = 1000
 n_adapt = 1000
 iter = 10000
 vars = c("alpha0","alpha","beta0","beta","gamma0","gamma")
 # Unique pairs from cit package
 cits = cits[!(duplicated(cits[,c("methyl","metab")])),]
 # DIC for each model
-all_dics = apply(cits[1:10,],1,function(x){
+all_dics = apply(cits,1,function(x){
   methyl = as.character(x["methyl"])
   metab = as.character(x["metab"])
   temp = pair_data[,c("T1Dgroup",methyl,metab)]
