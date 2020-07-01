@@ -1,5 +1,6 @@
 Loading required package: coda
 Linked to JAGS 4.3.0
 Loaded modules: basemod,bugs
-slurmstepd: error: *** JOB 65 ON localhost CANCELLED AT 2020-07-01T13:17:01 ***
-slurmstepd: error: *** JOB 66 ON localhost CANCELLED AT 2020-07-01T13:38:27 ***
+Error in `[.data.frame`(cits, 1:10) : undefined columns selected
+Calls: apply -> [ -> [.data.frame
+Execution halted
