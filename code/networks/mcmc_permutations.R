@@ -12,7 +12,7 @@ vars = c("alpha0","alpha","beta0","beta","gamma0","gamma")
 # Unique pairs from cit package
 cits = cits[!(duplicated(cits[,c("methyl","metab")])),]
 # DIC for each model with permutation tests
-all_perms = apply(cits,1,function(x){
+all_perms = apply(cits[1:10],1,function(x){
   methyl = as.character(x["methyl"])
   metab = as.character(x["metab"])
   pair = pair_data[,c("T1Dgroup",methyl,metab)]
