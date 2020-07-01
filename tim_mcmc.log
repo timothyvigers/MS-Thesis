@@ -1,6 +1,0 @@
-Loading required package: coda
-Linked to JAGS 4.3.0
-Loaded modules: basemod,bugs
-Error in `[.data.frame`(cits, 1:10) : undefined columns selected
-Calls: apply -> [ -> [.data.frame
-Execution halted
