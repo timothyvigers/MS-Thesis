@@ -3,12 +3,11 @@ model{
   for (i in 1:N) {
     methyl[i] ~ dnorm(gamma0 + gamma*metab[i], tau)
     }
-  
+
   # Very flat priors
-  gamma0 ~ dnorm(0,100)
-  gamma ~ dnorm(0,100)
+  gamma0 ~ dnorm(0,0.001)
+  gamma ~ dnorm(0,0.001)
 
   tau ~ dgamma(0.0001, 0.0001)
   sigma2 <- 1/tau
   }
-  

@@ -3,12 +3,11 @@ model{
   for (i in 1:N) {
     metab[i] ~ dnorm(alpha0 + alpha*t1d[i], tau)
     }
-  
+
   # Very flat priors
-  alpha0 ~ dnorm(0,100)
-  alpha ~ dnorm(0,100)
+  alpha0 ~ dnorm(0,0.001)
+  alpha ~ dnorm(0,0.001)
 
   tau ~ dgamma(0.0001, 0.0001)
   sigma2 <- 1/tau
   }
-  

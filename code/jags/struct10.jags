@@ -4,13 +4,12 @@ model{
     t1d[i] ~ dbern(q[i])
     logit(q[i]) <- int + alpha*metab[i] + beta*methyl[i]
     }
-  
+
   # Very flat priors
-  int ~ dnorm(0,100)
-  alpha ~ dnorm(0,100)
-  beta ~ dnorm(0,100)
+  int ~ dnorm(0,0.001)
+  alpha ~ dnorm(0,0.001)
+  beta ~ dnorm(0,0.001)
 
   tau ~ dgamma(0.0001, 0.0001)
   sigma2 <- 1/tau
   }
-  
