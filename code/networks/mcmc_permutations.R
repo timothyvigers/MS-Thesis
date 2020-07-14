@@ -1,7 +1,7 @@
 library(rjags)
 library(parallel)
 # Load data
-setwd("/home/vigerst/MS-Thesis")
+setwd("/Users/timvigers/GitHub/MS-Thesis")
 load("./data/networks/pair_data.Rdata")
 load("./data/networks/cits.Rdata")
 # Permutation and MCMC parameters
@@ -20,8 +20,13 @@ all_perms = apply(cits,1,function(x){
   pair$T1Dgroup = ifelse(pair$T1Dgroup == "T1D control",0,1)
   # Permutation datasets
   dfs <- lapply(1:nsim,function(x){
+    print(x)
     set.seed(x)
-    df <- cbind.data.frame(pair$T1Dgroup,sample(pair[,methyl]),sample(pair[,metab]))
+    if (x == 1){
+      df <- pair
+    } else {
+      df <- cbind.data.frame(pair$T1Dgroup,sample(pair[,methyl]),sample(pair[,metab]))
+    }
     colnames(df) <- colnames(pair)
     return(df)
   })
