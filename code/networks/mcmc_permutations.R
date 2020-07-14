@@ -20,11 +20,10 @@ all_perms = apply(cits,1,function(x){
   pair$T1Dgroup = ifelse(pair$T1Dgroup == "T1D control",0,1)
   # Permutation datasets
   dfs <- lapply(1:nsim,function(x){
-    print(x)
-    set.seed(x)
     if (x == 1){
       df <- pair
     } else {
+      set.seed(x)
       df <- cbind.data.frame(pair$T1Dgroup,sample(pair[,methyl]),sample(pair[,metab]))
     }
     colnames(df) <- colnames(pair)
