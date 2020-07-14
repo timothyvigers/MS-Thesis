@@ -1,7 +1,7 @@
 library(rjags)
 library(parallel)
 # Load data
-setwd("/Users/timvigers/GitHub/MS-Thesis")
+setwd("/home/vigerst/MS-Thesis")
 load("./data/networks/pair_data.Rdata")
 load("./data/networks/cits.Rdata")
 # Permutation and MCMC parameters
