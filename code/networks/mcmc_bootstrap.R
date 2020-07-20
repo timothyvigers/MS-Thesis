@@ -34,5 +34,6 @@ get_dic <- function(methyl,metab,data = pair_data,indices) {
   return(unlist(dics))
 }
 # Bootstrap
-test <- boot(data = pair,statistic = get_dic,R=10,parallel = "multicore",
-             methyl = "cg01793374",metab = "gctof_235")
+test <- boot(data = pair,statistic = get_dic,R=10,
+             methyl = "cg01793374",metab = "gctof_235",
+             parallel = "multicore",ncpus = 4)
