@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(root.dir = "/Users/timvigers/GitHub/MS-Thesis")
+knitr::opts_knit$set(root.dir = "/Users/timvigers/Documents/GitHub/MS-Thesis")
 library(tidyverse)
 library(patchwork)
 library(DiagrammeR)
@@ -21,60 +21,71 @@ load("./data/networks/pair_data.Rdata")
 load("./data/networks/all_dic.Rdata")
 load("./data/networks/cits.Rdata")
 load("./data/networks/all_mcmc_perms.Rdata")
+load("./data/networks/deal_best_models.Rdata")
 source("./code/networks/network_structures.R")
 ```
 
-# Bayesian networks with JAGS
-
-## Network structures and models
-
-### Structure
+# Best models based on the deal package structure learning
 
 ```{r echo=FALSE}
-ndf <-
-  create_node_df(
-    n = 3,
-    label = c("Methylation","Metabolite","T1D Status"),
-    shape = c("oval", "oval","oval"),
-    fixedsize=F
-  )
-edf <-
-  create_edge_df(
-    from = c(2,3,2),
-    to   = c(3, 1, 1)
-  )
-graph <- 
-  create_graph(
-    nodes_df = ndf,
-    edges_df = edf
-  )
-graph %>% render_graph()
+c <- deal_best_models %>% count(model) %>% arrange(desc(n))
+invisible(apply(c,1,function(x){
+  perc <- round(as.numeric(x["n"]) / sum(c$n) * 100,2)
+  plot(model2network(as.character(x["model"])),main = paste0(perc," %"," (n =",x["n"],")"," with this structure"))
+}))
 ```
 
-### Models
+<!-- # Bayesian networks with JAGS -->
 
-$$
-\text{T1D | Metabolite} \sim \text{Bern}(\text{logit}(\alpha_0 + \alpha_1*\text{Metabolite}))\\
-\text{Methylation | Metabolite, T1D} \sim \text{N}(\delta+\gamma*\text{Metabolite}+\beta*\text{T1D},\sigma^2)\\
-$$
+<!-- ## Network structures and models -->
 
-### Priors
+<!-- ### Structure -->
 
-$$
-\alpha_0 \sim \text{N}(0,100)\\
-\alpha_1 \sim \text{N}(0,100)\\
-\delta \sim \text{N}(0,100)\\
-\gamma \sim \text{N}(0,100)\\
-\beta \sim \text{N}(0,100)\\
-\sigma^2 = \frac{1}{\tau}\\
-\tau \sim \text{Gamma}(0.0001,0.0001)
-$$
+<!-- ```{r echo=FALSE} -->
+<!-- ndf <- -->
+<!--   create_node_df( -->
+<!--     n = 3, -->
+<!--     label = c("Methylation","Metabolite","T1D Status"), -->
+<!--     shape = c("oval", "oval","oval"), -->
+<!--     fixedsize=F -->
+<!--   ) -->
+<!-- edf <- -->
+<!--   create_edge_df( -->
+<!--     from = c(2,3,2), -->
+<!--     to   = c(3, 1, 1) -->
+<!--   ) -->
+<!-- graph <-  -->
+<!--   create_graph( -->
+<!--     nodes_df = ndf, -->
+<!--     edges_df = edf -->
+<!--   ) -->
+<!-- graph %>% render_graph() -->
+<!-- ``` -->
 
-```{r echo=FALSE}
-invisible(lapply(paste0("struct",1:24), function(x){
-  plot(model2network(get(x)),main = x)
-  }))
-```
+<!-- ### Models -->
+
+<!-- $$ -->
+<!-- \text{T1D | Metabolite} \sim \text{Bern}(\text{logit}(\alpha_0 + \alpha_1*\text{Metabolite}))\\ -->
+<!-- \text{Methylation | Metabolite, T1D} \sim \text{N}(\delta+\gamma*\text{Metabolite}+\beta*\text{T1D},\sigma^2)\\ -->
+<!-- $$ -->
+
+<!-- ### Priors -->
+
+<!-- $$ -->
+<!-- \alpha_0 \sim \text{N}(0,100)\\ -->
+<!-- \alpha_1 \sim \text{N}(0,100)\\ -->
+<!-- \delta \sim \text{N}(0,100)\\ -->
+<!-- \gamma \sim \text{N}(0,100)\\ -->
+<!-- \beta \sim \text{N}(0,100)\\ -->
+<!-- \sigma^2 = \frac{1}{\tau}\\ -->
+<!-- \tau \sim \text{Gamma}(0.0001,0.0001) -->
+<!-- $$ -->
+
+<!-- ```{r echo=FALSE} -->
+<!-- invisible(lapply(paste0("struct",1:24), function(x){ -->
+<!--   plot(model2network(get(x)),main = x) -->
+<!--   })) -->
+<!-- ``` -->
 
 <!-- ## Model comparisons -->
 
