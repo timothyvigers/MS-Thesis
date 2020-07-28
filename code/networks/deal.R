@@ -5,11 +5,8 @@ setwd("/home/vigerst/MS-Thesis")
 load("./data/networks/pair_data.Rdata")
 load("./data/networks/cits.Rdata")
 load("./data/networks/pair_list.Rdata")
-# Unique pairs from cit package
-cits = cits[!(duplicated(cits[,c("methyl","metab")])),]
 # Iterate through pairs
 best <- apply(pairs,1,function(x){
-  print(x)
   # Prepare data with no missing
   methyl = as.character(x["methyl"])
   metab = as.character(x["metab"])
@@ -27,6 +24,7 @@ best <- apply(pairs,1,function(x){
   # Calculate BIC from score (score = loglikelihood)
   search_t <- as.data.frame(search$table)
   search_t$score <- as.numeric(search_t$score)
+  search_t$model <- as.character(search_t$model)
   # Get number of parameters
   arcs <- lapply(search_t$model, function(m){nrow(arcs(bnlearn::model2network(m)))})
   search_t$d <- unlist(arcs)
@@ -36,6 +34,7 @@ best <- apply(pairs,1,function(x){
   check <- heuristic(search$nw, pair)
   check_t <- as.data.frame(search$table)
   check_t$score <- as.numeric(check_t$score)
+  check_t$model <- as.character(check_t$model)
   # Get number of parameters
   arcs <- lapply(check_t$model, function(m){nrow(arcs(bnlearn::model2network(m)))})
   check_t$d <- unlist(arcs)
