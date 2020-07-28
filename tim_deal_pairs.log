@@ -1,0 +1,24 @@
+
+Attaching package: ‘bnlearn’
+
+The following object is masked from ‘package:stats’:
+
+    sigma
+
+
+Attaching package: ‘deal’
+
+The following objects are masked from ‘package:bnlearn’:
+
+    modelstring, nodes, nodes<-, score
+
+        methyl          metab          Value        p.value 
+  "cg00287636"    "gctof_235"  " 0.10244888" "5.969398e-04" 
+Imaginary sample size: 4 
+[Autosearch Imaginary sample size: 4 
+(1) -316.5104 [T1Dgroup][cg00287636][gctof_235|T1Dgroup]
+(2) -313.0468 [T1Dgroup][cg00287636|gctof_235][gctof_235|T1Dgroup]
+Total 0.057 add 0.012 rem 0.001 turn 0.001 sort 0 choose 0.001 rest 0.042 ]
+Error in check.modelstring(string) : string must be a character string.
+Calls: apply ... check.bn.or.fit -> is -> %in% -> <Anonymous> -> check.modelstring
+Execution halted
