@@ -31,7 +31,7 @@ best <- apply(pairs,1,function(x){
   d <- nrow(arcs)
   search_t$BIC <- search_t$score - (search_t$d/2) * log(nrow(pair))
   # Same for perturbation check
-  check <- heuristic(search$nw, pair)
+  check <- heuristic(search$nw, pair, restart = 24)
   check_t <- as.data.frame(search$table)
   check_t$score <- as.numeric(check_t$score)
   check_t$model <- as.character(check_t$model)
