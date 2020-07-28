@@ -49,5 +49,5 @@ best <- apply(pairs,1,function(x){
   }
 })
 # Format output and write
-best <- do.call(rbind,best)
-save(best,file = "./data/networks/deal_best_models.Rdata")
+deal_best_models <- do.call(rbind,best)
+save(deal_best_models,file = "./data/networks/deal_best_models.Rdata")
