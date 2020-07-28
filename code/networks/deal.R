@@ -1,7 +1,7 @@
 library(bnlearn)
 library(deal)
 # Load data
-setwd("/home/vigerst/MS-Thesis")
+setwd("/Users/timvigers/Documents/GitHub/MS-Thesis")
 load("./data/networks/pair_data.Rdata")
 load("./data/networks/cits.Rdata")
 load("./data/networks/pair_list.Rdata")
@@ -42,7 +42,10 @@ best <- apply(pairs,1,function(x){
   check_t$BIC <- check_t$score - (check_t$d/2) * log(nrow(pair))
   # Return best model and score
   if (all(search_t[which.max(search_t$BIC),] == check_t[which.max(check_t$BIC),])){
-    return(search_t[which.max(search_t$BIC),])
+    r <- search_t[which.max(search_t$BIC),]
+    r$model <- gsub(methyl,"methyl",r$model)
+    r$model <- gsub(metab,"metab",r$model)
+    return(r)
   } else {
     return(rep(NA,4))
   }
