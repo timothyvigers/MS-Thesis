@@ -1,7 +1,7 @@
 library(bnlearn)
 library(deal)
 # Load data
-setwd("/Users/timvigers/Documents/GitHub/MS-Thesis")
+setwd("/home/vigerst/MS-Thesis")
 load("./data/networks/pair_data.Rdata")
 load("./data/networks/cits.Rdata")
 load("./data/networks/pair_list.Rdata")
