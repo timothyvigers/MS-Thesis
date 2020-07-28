@@ -21,6 +21,6 @@ net <- network(pair)
 net_prior <- jointprior(net) 
 # Learn parameters to get score for empty network
 learned <- learn(net,pair)$nw
-# Greedy search
+# Greedy search - based on Bayes factor
 search <- autosearch(learned,pair)
 
