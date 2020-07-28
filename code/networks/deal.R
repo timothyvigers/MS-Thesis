@@ -23,7 +23,7 @@ best <- apply(pairs,1,function(x){
   search <- autosearch(learned,pair)
   # Calculate BIC from score (score = loglikelihood)
   search_t <- as.data.frame(search$table)
-  search_t$score <- as.numeric(search_t$score)
+  search_t$score <- as.numeric(as.character(search_t$score))
   search_t$model <- as.character(search_t$model)
   # Get number of parameters
   arcs <- lapply(search_t$model, function(m){nrow(arcs(bnlearn::model2network(m)))})
@@ -33,7 +33,7 @@ best <- apply(pairs,1,function(x){
   # Same for perturbation check
   check <- heuristic(search$nw, pair, restart = 24)
   check_t <- as.data.frame(search$table)
-  check_t$score <- as.numeric(check_t$score)
+  check_t$score <- as.numeric(as.character(check_t$score))
   check_t$model <- as.character(check_t$model)
   # Get number of parameters
   arcs <- lapply(check_t$model, function(m){nrow(arcs(bnlearn::model2network(m)))})
