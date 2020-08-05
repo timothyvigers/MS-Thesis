@@ -1,0 +1,4 @@
+Loading required package: coda
+Linked to JAGS 4.3.0
+Loaded modules: basemod,bugs
+slurmstepd: error: *** JOB 83 ON localhost CANCELLED AT 2020-08-05T14:13:40 ***
