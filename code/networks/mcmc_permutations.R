@@ -4,13 +4,17 @@ library(parallel)
 setwd("/home/vigerst/MS-Thesis")
 load("./data/networks/pair_data.Rdata")
 load("./data/networks/pair_list.Rdata")
+load("./data/networks/cits.Rdata")
 # Permutation and MCMC parameters
-nsim = 1000
+nsim = 100
 n_adapt = 1000
 iter = 10000
 vars = c("alpha0","alpha","beta0","beta","gamma0","gamma")
-# DIC for each model with permutation tests
-all_perms = apply(pairs,1,function(x){
+# DIC for each model with permutation tests 
+pairs = pairs[!(pairs$methyl %in% cits$methyl),]
+pairs = pairs[!(pairs$metab %in% cits$metab),]
+subset_n = 100
+all_perms = apply(pairs[sample(1:nrow(pairs),subset_n),],1,function(x){
   methyl = as.character(x["methyl"])
   metab = as.character(x["metab"])
   pair = pair_data[,c("T1Dgroup",methyl,metab)]
@@ -29,7 +33,7 @@ all_perms = apply(pairs,1,function(x){
   })
   # Parallel - make cluster
   no_cores = detectCores()
-  cl <- makeCluster(no_cores,type = "FORK")
+  cl <- makeCluster(no_cores/4,type = "FORK")
   # MCMC on each permuted set
   mcmc_perms <- parLapply(cl=cl,dfs,function(x){
     jags_data =
@@ -49,4 +53,4 @@ all_perms = apply(pairs,1,function(x){
   stopCluster(cl)
   return(mcmc_perms)
 })
-save(all_perms,file = "./data/networks/all_mcmc_perms.Rdata")
+save(all_perms,file = "./data/networks/subset_mcmc_perms.Rdata")
