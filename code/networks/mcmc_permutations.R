@@ -5,6 +5,7 @@ setwd("/home/vigerst/MS-Thesis")
 load("./data/networks/pair_data.Rdata")
 load("./data/networks/pair_list.Rdata")
 load("./data/networks/cits.Rdata")
+set.seed(1017)
 # Permutation and MCMC parameters
 nsim = 100
 n_adapt = 1000
