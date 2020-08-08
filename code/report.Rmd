@@ -33,7 +33,7 @@ source("./code/networks/network_structures.R")
 
 ### Structure
 
-```{r}
+```{r warning=FALSE}
 ndf <-
   create_node_df(
     n = 3,
@@ -41,17 +41,25 @@ ndf <-
     shape = c("oval", "oval","oval"),
     fixedsize=F
   )
-edf <-
+edf1 <-
   create_edge_df(
-    from = c(2,3,2),
-    to   = c(3, 1, 1)
+    from = c(2,1),
+    to   = c(3,3),
+    label = c("p < 0.05","p < 0.05")
+  )
+edf2 <-
+  create_edge_df(
+    from = 2,
+    to   = 1,
+    label = c("p < 0.001"),
+    dir = "none"
   )
 graph <-
   create_graph(
     nodes_df = ndf,
-    edges_df = edf
+    edges_df = combine_edfs(edf1,edf2)
   )
-graph %>% render_graph()
+graph %>% render_graph(layout = "kk")
 ```
 
 ### Models
@@ -73,10 +81,60 @@ $$
 \tau \sim \text{Gamma}(0.0001,0.0001)
 $$
 
-```{r}
+```{r eval=FALSE}
+# Plot all structures with DiagrammR
+l <- lapply(paste0("struct",1:24), function(x){
+  net <- model2network(get(x))
+  d <- as.data.frame(net$arcs)
+  d[d == "methyl"] <- 1
+  d[d == "metab"] <- 2
+  d[d == "T1Dgroup"] <- 3
+  edf <- create_edge_df(from = c(d$from),to = d$to)
+  graph <- 
+    create_graph(
+      nodes_df = ndf,
+      edges_df = edf
+    )
+  return(graph)
+})
+l[[1]] %>% render_graph(layout = "kk",as_svg = T)
+l[[2]] %>% render_graph(layout = "kk",as_svg = T)
+l[[3]] %>% render_graph(layout = "kk",as_svg = T)
+l[[4]] %>% render_graph(layout = "kk",as_svg = T)
+l[[5]] %>% render_graph(layout = "kk",as_svg = T)
+l[[6]] %>% render_graph(layout = "kk",as_svg = T)
+l[[7]] %>% render_graph(layout = "kk",as_svg = T)
+l[[8]] %>% render_graph(layout = "kk",as_svg = T)
+l[[9]] %>% render_graph(layout = "kk",as_svg = T)
+l[[10]] %>% render_graph(layout = "kk",as_svg = T)
+l[[11]] %>% render_graph(layout = "kk",as_svg = T)
+l[[12]] %>% render_graph(layout = "kk",as_svg = T)
+l[[13]] %>% render_graph(layout = "kk",as_svg = T)
+l[[14]] %>% render_graph(layout = "kk",as_svg = T)
+l[[15]] %>% render_graph(layout = "kk",as_svg = T)
+l[[16]] %>% render_graph(layout = "kk",as_svg = T)
+l[[17]] %>% render_graph(layout = "kk",as_svg = T)
+l[[18]] %>% render_graph(layout = "kk",as_svg = T)
+l[[19]] %>% render_graph(layout = "kk",as_svg = T)
+l[[20]] %>% render_graph(layout = "kk",as_svg = T)
+l[[21]] %>% render_graph(layout = "kk",as_svg = T)
+l[[22]] %>% render_graph(layout = "kk",as_svg = T)
+l[[23]] %>% render_graph(layout = "kk",as_svg = T)
+l[[24]] %>% render_graph(layout = "kk",as_svg = T)
+```
+
+```{r message=FALSE,fig.height=12,fig.width=14}
+par(mar=c(1,1,1,1))
+par(mfrow=c(6,4),lty="solid")
 invisible(lapply(paste0("struct",1:24), function(x){
-  plot(model2network(get(x)),main = x)
-  }))
+  m <- get(x)
+  m <- gsub("methyl","Methylation",m)
+  m <- gsub("metab","Metabolite",m)
+  m <- gsub("T1Dgroup","T1D Status",m)
+  net <- model2network(m)
+  graphviz.plot(net,main = sub("struct","Structure ",x),
+                shape = "ellipse")
+}))
 ```
 
 ## Model comparisons
@@ -166,7 +224,7 @@ kable(dic_diff_table %>%
 # Plot diff. distribution
 diff_plot = dic_diff_table %>%
   pivot_longer(c(`Abs. Diff. Best-Second`,`Std. Diff. Best-Second`,
-               `Abs. Diff. Second-Third`,`Std. Diff. Second-Third`))
+                 `Abs. Diff. Second-Third`,`Std. Diff. Second-Third`))
 # Absolute
 adp =
   ggplot(diff_plot[diff_plot$name %in% c("Abs. Diff. Best-Second",
