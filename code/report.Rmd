@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 knitr::opts_knit$set(root.dir = "/Users/timvigers/Documents/GitHub/MS-Thesis")
 library(tidyverse)
 library(patchwork)
@@ -16,189 +16,213 @@ library(bnlearn)
 library(rjags)
 ```
 
-```{r load datasets,echo=FALSE}
+```{r load datasets}
 load("./data/networks/pair_data.Rdata")
 load("./data/networks/all_dic.Rdata")
 load("./data/networks/cits.Rdata")
+load("./data/networks/subset_mcmc_perms.Rdata")
+subset_perms <- all_perms
 load("./data/networks/all_mcmc_perms.Rdata")
 load("./data/networks/deal_best_models.Rdata")
 source("./code/networks/network_structures.R")
 ```
 
-# Best models based on the deal package structure learning
+# Bayesian networks with JAGS
 
-```{r echo=FALSE}
-c <- deal_best_models %>% count(model) %>% arrange(desc(n))
-invisible(apply(c,1,function(x){
-  perc <- round(as.numeric(x["n"]) / sum(c$n) * 100,2)
-  plot(model2network(as.character(x["model"])),main = paste0(perc," %"," (n =",x["n"],")"," with this structure"))
-}))
+## Network structures and models
+
+### Structure
+
+```{r}
+ndf <-
+  create_node_df(
+    n = 3,
+    label = c("Methylation","Metabolite","T1D Status"),
+    shape = c("oval", "oval","oval"),
+    fixedsize=F
+  )
+edf <-
+  create_edge_df(
+    from = c(2,3,2),
+    to   = c(3, 1, 1)
+  )
+graph <-
+  create_graph(
+    nodes_df = ndf,
+    edges_df = edf
+  )
+graph %>% render_graph()
 ```
 
-<!-- # Bayesian networks with JAGS -->
+### Models
 
-<!-- ## Network structures and models -->
+$$
+\text{T1D | Metabolite} \sim \text{Bern}(\text{logit}(\alpha_0 + \alpha_1*\text{Metabolite}))\\
+\text{Methylation | Metabolite, T1D} \sim \text{N}(\delta+\gamma*\text{Metabolite}+\beta*\text{T1D},\sigma^2)\\
+$$
 
-<!-- ### Structure -->
+### Priors
 
-<!-- ```{r echo=FALSE} -->
-<!-- ndf <- -->
-<!--   create_node_df( -->
-<!--     n = 3, -->
-<!--     label = c("Methylation","Metabolite","T1D Status"), -->
-<!--     shape = c("oval", "oval","oval"), -->
-<!--     fixedsize=F -->
-<!--   ) -->
-<!-- edf <- -->
-<!--   create_edge_df( -->
-<!--     from = c(2,3,2), -->
-<!--     to   = c(3, 1, 1) -->
-<!--   ) -->
-<!-- graph <-  -->
-<!--   create_graph( -->
-<!--     nodes_df = ndf, -->
-<!--     edges_df = edf -->
-<!--   ) -->
-<!-- graph %>% render_graph() -->
-<!-- ``` -->
+$$
+\alpha_0 \sim \text{N}(0,100)\\
+\alpha_1 \sim \text{N}(0,100)\\
+\delta \sim \text{N}(0,100)\\
+\gamma \sim \text{N}(0,100)\\
+\beta \sim \text{N}(0,100)\\
+\sigma^2 = \frac{1}{\tau}\\
+\tau \sim \text{Gamma}(0.0001,0.0001)
+$$
 
-<!-- ### Models -->
+```{r}
+invisible(lapply(paste0("struct",1:24), function(x){
+  plot(model2network(get(x)),main = x)
+  }))
+```
 
-<!-- $$ -->
-<!-- \text{T1D | Metabolite} \sim \text{Bern}(\text{logit}(\alpha_0 + \alpha_1*\text{Metabolite}))\\ -->
-<!-- \text{Methylation | Metabolite, T1D} \sim \text{N}(\delta+\gamma*\text{Metabolite}+\beta*\text{T1D},\sigma^2)\\ -->
-<!-- $$ -->
+## Model comparisons
 
-<!-- ### Priors -->
+### DIC distribution by network structure
 
-<!-- $$ -->
-<!-- \alpha_0 \sim \text{N}(0,100)\\ -->
-<!-- \alpha_1 \sim \text{N}(0,100)\\ -->
-<!-- \delta \sim \text{N}(0,100)\\ -->
-<!-- \gamma \sim \text{N}(0,100)\\ -->
-<!-- \beta \sim \text{N}(0,100)\\ -->
-<!-- \sigma^2 = \frac{1}{\tau}\\ -->
-<!-- \tau \sim \text{Gamma}(0.0001,0.0001) -->
-<!-- $$ -->
+#### Candidates from cits package
 
-<!-- ```{r echo=FALSE} -->
-<!-- invisible(lapply(paste0("struct",1:24), function(x){ -->
-<!--   plot(model2network(get(x)),main = x) -->
-<!--   })) -->
-<!-- ``` -->
+```{r}
+# Count best structures
+kable(table(unlist(lapply(as.data.frame(all_dics), function(x){
+  which.min(x)
+}))),caption = "Number of Pairs Where Structure Is Best")
+# Format DIC data
+t = as.data.frame(t(all_dics))
+colnames(t) = paste0("struct",1:24)
+# Melt for plotting
+t <- t %>% pivot_longer(struct1:struct24)
+t$name = as.numeric(gsub("struct","",t$name))
+# Plot
+ggplot(t,aes(x=factor(name),y=value)) +
+  geom_boxplot() +
+  xlab("Structure number") + ylab("DIC") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  ylim(-250,1000)
+```
 
-<!-- ## Model comparisons -->
+#### Non-cits pairs
 
-<!-- ### DIC distribution by network structure -->
+```{r}
+# Get correct DICs (first permutation is with our data)
+t <- sapply(subset_perms,"[",1)
+t <- do.call(rbind,t)
+t = as.data.frame(t)
+colnames(t) = paste0("struct",1:24)
+# Count best structures
+kable(table(unlist(lapply(as.data.frame(t(t)), function(x){
+  which.min(x)
+}))),caption = "Number of Pairs Where Structure Is Best")
+# Melt for plotting
+t <- t %>% pivot_longer(struct1:struct24)
+t$name = as.numeric(gsub("struct","",t$name))
+# Plot
+ggplot(t,aes(x=factor(name),y=value)) +
+  geom_boxplot() +
+  xlab("Structure number") + ylab("DIC") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  ylim(-250,1000)
+```
 
-<!-- ```{r echo=FALSE} -->
-<!-- # Format DIC data -->
-<!-- t = as.data.frame(t(all_dics)) -->
-<!-- colnames(t) = paste0("struct",1:24) -->
-<!-- t <- t %>% pivot_longer(struct1:struct24) -->
-<!-- t$name = as.numeric(gsub("struct","",t$name)) -->
-<!-- # Plot -->
-<!-- ggplot(t,aes(x=factor(name),y=value)) +  -->
-<!--   geom_boxplot() +  -->
-<!--   xlab("Structure number") + ylab("DIC") + -->
-<!--   theme_bw() +  -->
-<!--   theme(axis.text.x = element_text(angle = 90)) -->
-<!-- ``` -->
+### DIC differences
 
-<!-- ### DIC differences  -->
+```{r}
+l =
+  lapply(colnames(all_dics), function(x){
+    dics = all_dics[,x]
+    pair = paste(cits[as.numeric(x),1],"-",cits[as.numeric(x),3])
+    structs_1_2 = order(dics)[1:2]
+    structs_2_3 = order(dics)[2:3]
+    abs_diff_1_2 = diff(sort(dics)[1:2])
+    abs_diff_2_3 = diff(sort(dics)[2:3])
+    st = sd(dics)
+    stand_diff_1_2 = abs_diff_1_2 / st
+    stand_diff_2_3 = abs_diff_2_3 / st
+    data.frame("Pair" = pair,
+               "Abs.Diff.1.2" = abs_diff_1_2,"Std.Diff.1.2" = stand_diff_1_2,
+               "Qual.Diff.1.2" =
+                 all.equal(model2network(as.character(all_structs[structs_1_2[1]])),
+                           model2network(as.character(all_structs[structs_1_2[2]]))),
+               "Abs.Diff.2.3" = abs_diff_2_3,"Std.Diff.2.3" = stand_diff_2_3,
+               "Qual.Diff.2.3" =
+                 all.equal(model2network(as.character(all_structs[structs_2_3[1]])),
+                           model2network(as.character(all_structs[structs_2_3[2]]))))
+  })
+dic_diff_table = do.call(rbind,l)
+colnames(dic_diff_table) =
+  c("Pair","Abs. Diff. Best-Second","Std. Diff. Best-Second",
+    "Qual. Diff. Best-Second",
+    "Abs. Diff. Second-Third","Std. Diff. Second-Third",
+    "Qual. Diff. Second-Third")
+# Print 1 - 2 and 2 - 3 differences
+kable(dic_diff_table %>%
+        pivot_longer(c(`Qual. Diff. Best-Second`,`Qual. Diff. Second-Third`)) %>%
+        group_by(name, value) %>% count())
+# Plot diff. distribution
+diff_plot = dic_diff_table %>%
+  pivot_longer(c(`Abs. Diff. Best-Second`,`Std. Diff. Best-Second`,
+               `Abs. Diff. Second-Third`,`Std. Diff. Second-Third`))
+# Absolute
+adp =
+  ggplot(diff_plot[diff_plot$name %in% c("Abs. Diff. Best-Second",
+                                         "Abs. Diff. Second-Third"),]) +
+  theme_bw() + theme(plot.title = element_text(hjust = 0.5)) +
+  ggtitle("Absolute DIC Difference")
+# Densities
+adp +
+  geom_density(aes(x = value,fill = name),alpha = 0.5) +
+  theme(legend.title = element_blank())
+# Boxplots
+adp + geom_boxplot(aes(x = name,y = value,fill = name)) +
+  theme(legend.position = "none") + xlab("")
 
-<!-- ```{r echo=FALSE} -->
-<!-- l =  -->
-<!--   lapply(colnames(all_dics), function(x){ -->
-<!--     dics = all_dics[,x] -->
-<!--     pair = paste(cits[as.numeric(x),1],"-",cits[as.numeric(x),3]) -->
-<!--     structs_1_2 = order(dics)[1:2] -->
-<!--     structs_2_3 = order(dics)[2:3] -->
-<!--     abs_diff_1_2 = diff(sort(dics)[1:2]) -->
-<!--     abs_diff_2_3 = diff(sort(dics)[2:3]) -->
-<!--     st = sd(dics) -->
-<!--     stand_diff_1_2 = abs_diff_1_2 / st -->
-<!--     stand_diff_2_3 = abs_diff_2_3 / st -->
-<!--     data.frame("Pair" = pair, -->
-<!--                "Abs.Diff.1.2" = abs_diff_1_2,"Std.Diff.1.2" = stand_diff_1_2, -->
-<!--                "Qual.Diff.1.2" =  -->
-<!--                  all.equal(model2network(as.character(all_structs[structs_1_2[1]])), -->
-<!--                            model2network(as.character(all_structs[structs_1_2[2]]))), -->
-<!--                "Abs.Diff.2.3" = abs_diff_2_3,"Std.Diff.2.3" = stand_diff_2_3, -->
-<!--                "Qual.Diff.2.3" =  -->
-<!--                  all.equal(model2network(as.character(all_structs[structs_2_3[1]])), -->
-<!--                            model2network(as.character(all_structs[structs_2_3[2]])))) -->
-<!--   }) -->
-<!-- dic_diff_table = do.call(rbind,l) -->
-<!-- colnames(dic_diff_table) =  -->
-<!--   c("Pair","Abs. Diff. Best-Second","Std. Diff. Best-Second", -->
-<!--     "Qual. Diff. Best-Second", -->
-<!--     "Abs. Diff. Second-Third","Std. Diff. Second-Third", -->
-<!--     "Qual. Diff. Second-Third") -->
-<!-- # Print 1 - 2 and 2 - 3 differences -->
-<!-- kable(dic_diff_table %>%  -->
-<!--         pivot_longer(c(`Qual. Diff. Best-Second`,`Qual. Diff. Second-Third`)) %>% -->
-<!--         group_by(name, value) %>% count()) -->
-<!-- # Plot diff. distribution -->
-<!-- diff_plot = dic_diff_table %>% -->
-<!--   pivot_longer(c(`Abs. Diff. Best-Second`,`Std. Diff. Best-Second`, -->
-<!--                `Abs. Diff. Second-Third`,`Std. Diff. Second-Third`)) -->
-<!-- # Absolute -->
-<!-- adp =  -->
-<!--   ggplot(diff_plot[diff_plot$name %in% c("Abs. Diff. Best-Second", -->
-<!--                                          "Abs. Diff. Second-Third"),]) +  -->
-<!--   theme_bw() + theme(plot.title = element_text(hjust = 0.5)) +  -->
-<!--   ggtitle("Absolute DIC Difference") -->
-<!-- # Densities -->
-<!-- adp +  -->
-<!--   geom_density(aes(x = value,fill = name),alpha = 0.5) +  -->
-<!--   theme(legend.title = element_blank()) -->
-<!-- # Boxplots -->
-<!-- adp + geom_boxplot(aes(x = name,y = value,fill = name)) +  -->
-<!--   theme(legend.position = "none") + xlab("") -->
+# Standardized
+adp =
+  ggplot(diff_plot[diff_plot$name %in% c("Abs. Diff. Best-Second",
+                                         "Abs. Diff. Second-Third"),]) +
+  theme_bw() + theme(plot.title = element_text(hjust = 0.5)) +
+  ggtitle("Absolute DIC Difference")
 
-<!-- # Standardized -->
-<!-- adp =  -->
-<!--   ggplot(diff_plot[diff_plot$name %in% c("Abs. Diff. Best-Second", -->
-<!--                                          "Abs. Diff. Second-Third"),]) +  -->
-<!--   theme_bw() + theme(plot.title = element_text(hjust = 0.5)) +  -->
-<!--   ggtitle("Absolute DIC Difference") -->
+sdp =
+  ggplot(diff_plot[diff_plot$name %in% c("Std. Diff. Best-Second",
+                                         "Std. Diff. Second-Third"),]) +
+  theme_bw() + theme(plot.title = element_text(hjust = 0.5)) +
+  theme_bw() + ggtitle("Standardized DIC Difference")
+# Densities
+sdp +
+  geom_density(aes(x = value,fill = name),alpha = 0.5) +
+  theme(legend.title = element_blank())
+# Boxplots
+sdp + geom_boxplot(aes(x = name,y = value,fill = name)) +
+  theme(legend.position = "none") + xlab("")
+```
 
-<!-- sdp =  -->
-<!--   ggplot(diff_plot[diff_plot$name %in% c("Std. Diff. Best-Second", -->
-<!--                                          "Std. Diff. Second-Third"),]) +  -->
-<!--   theme_bw() + theme(plot.title = element_text(hjust = 0.5)) +  -->
-<!--   theme_bw() + ggtitle("Standardized DIC Difference") -->
-<!-- # Densities -->
-<!-- sdp +  -->
-<!--   geom_density(aes(x = value,fill = name),alpha = 0.5) +  -->
-<!--   theme(legend.title = element_blank()) -->
-<!-- # Boxplots -->
-<!-- sdp + geom_boxplot(aes(x = name,y = value,fill = name)) +  -->
-<!--   theme(legend.position = "none") + xlab("") -->
-<!-- ``` -->
+## Permutation tests
 
-<!-- ## Permutation tests -->
+```{r,eval=FALSE}
+l = lapply(all_perms, function(x){
+  t = t(as.data.frame(x))
+  t
+})
+```
 
-<!-- ```{r echo=FALSE,eval=FALSE} -->
-<!-- l = lapply(all_perms, function(x){ -->
-<!--   t = t(as.data.frame(x)) -->
-<!--   t -->
-<!-- }) -->
-<!-- ``` -->
+## Potential problems
 
-<!-- ## Potential problems -->
+### DIC
 
-<!-- ### DIC -->
+- "From Bayesian perspective, DIC is not theoretically justified since it measures the fit of the model when the parameters are fixed to the posterior expectation and is not therefore an unbiased estimate of the true generalization utility." (Piironen & Vehtari, 2017)
 
-<!-- - "From Bayesian perspective, DIC is not theoretically justified since it measures the fit of the model when the parameters are fixed to the posterior expectation and is not therefore an unbiased estimate of the true generalization utility." (Piironen & Vehtari, 2017) -->
+- "The numerical experiments show that the over-fitting in the selection may be a potential problem and hinder the model selection considerably. This is the case especially when the dataset is small (high variance in the utility estimates) and the number of models under comparison large (large number of variables). Especially vulnerable methods for this type of overfitting are CV, WAIC, DIC and other methods that rely on data reuse and have therefore relatively high variance in the utility estimates." (Piironen & Vehtari, 2017)
 
-<!-- - "The numerical experiments show that the over-fitting in the selection may be a potential problem and hinder the model selection considerably. This is the case especially when the dataset is small (high variance in the utility estimates) and the number of models under comparison large (large number of variables). Especially vulnerable methods for this type of overfitting are CV, WAIC, DIC and other methods that rely on data reuse and have therefore relatively high variance in the utility estimates." (Piironen & Vehtari, 2017) -->
+### Priors
 
-<!-- ### Priors -->
+Tim was wrong about gamma priors causing problems. This issue is specific to logistic models with random effects, where the prior is $b_i \sim N(0,\frac{1}{\lambda})$. The Piironen paper can be a little unclear, so maybe we need a better resource.
 
-<!-- Tim was wrong about gamma priors causing problems. This issue is specific to logistic models with random effects, where the prior is $b_i \sim N(0,\frac{1}{\lambda})$. The Piironen paper can be a little unclear, so maybe we need a better resource. -->
+# References
 
-<!-- # References -->
-
-<!-- - Piironen, J., & Vehtari, A. (2017). Comparison of Bayesian predictive methods for model selection. Statistics and Computing, 27(3), 711–735. https://doi.org/10.1007/s11222-016-9649-y -->
+- Piironen, J., & Vehtari, A. (2017). Comparison of Bayesian predictive methods for model selection. Statistics and Computing, 27(3), 711–735. https://doi.org/10.1007/s11222-016-9649-y
