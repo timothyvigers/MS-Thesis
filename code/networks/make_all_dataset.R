@@ -14,7 +14,6 @@ key_epic$platform = "EPIC"
 key = rbind(key_450k,key_epic)
 # Make final methylation dataset
 methyl$samplekey = key$samplekey[match(rownames(methyl),key$array)]
-methyl = methyl[,c("samplekey",unique(pairs$methyl))]
 # Import metabolites and scale
 gctof = read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.bc.csv",stringsAsFactors = F)
 gctof = gctof[gctof$samplekey %in% pheno$samplekey,]
