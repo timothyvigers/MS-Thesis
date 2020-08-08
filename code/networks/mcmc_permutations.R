@@ -14,7 +14,7 @@ vars = c("alpha0","alpha","beta0","beta","gamma0","gamma")
 # DIC for each model with permutation tests 
 pairs = pairs[!(pairs$methyl %in% cits$methyl),]
 pairs = pairs[!(pairs$metab %in% cits$metab),]
-subset_n = 100
+subset_n = 139
 all_perms = apply(pairs[sample(1:nrow(pairs),subset_n),],1,function(x){
   methyl = as.character(x["methyl"])
   metab = as.character(x["metab"])
