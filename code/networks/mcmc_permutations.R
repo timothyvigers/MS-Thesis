@@ -11,11 +11,10 @@ nsim = 100
 n_adapt = 1000
 iter = 10000
 vars = c("alpha0","alpha","beta0","beta","gamma0","gamma")
+# Unique pairs from cit package
+cits = cits[!(duplicated(cits[,c("methyl","metab")])),]
 # DIC for each model with permutation tests 
-pairs = pairs[!(pairs$methyl %in% cits$methyl),]
-pairs = pairs[!(pairs$metab %in% cits$metab),]
-subset_n = 139
-all_perms = apply(pairs[sample(1:nrow(pairs),subset_n),],1,function(x){
+all_perms = apply(cits,1,function(x){
   methyl = as.character(x["methyl"])
   metab = as.character(x["metab"])
   pair = pair_data[,c("T1Dgroup",methyl,metab)]
@@ -54,4 +53,4 @@ all_perms = apply(pairs[sample(1:nrow(pairs),subset_n),],1,function(x){
   stopCluster(cl)
   return(mcmc_perms)
 })
-save(all_perms,file = "./data/networks/subset_mcmc_perms.Rdata")
+save(all_perms,file = "./data/networks/all_mcmc_perms.Rdata")
