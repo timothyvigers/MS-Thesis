@@ -25,10 +25,11 @@ subset_n = 139
 pairs = pairs[1:subset_n,]
 pairs$methyl <- sample(methyls,subset_n)
 pairs$metab <- sample(metabs,subset_n)
-
-all_perms = apply(pairs[1,],1,function(x){
+# Iterate
+all_perms = apply(pairs,1,function(x){
   methyl = as.character(x["methyl"])
   metab = as.character(x["metab"])
+  print(paste(methyl,"and",metab))
   pair = all_data[,c("T1Dgroup",methyl,metab)]
   pair = pair[complete.cases(pair),]
   pair$T1Dgroup = ifelse(pair$T1Dgroup == "T1D control",0,1)
