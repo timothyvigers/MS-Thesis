@@ -66,4 +66,5 @@ all_perms = apply(pairs,1,function(x){
   stopCluster(cl)
   return(mcmc_perms)
 })
-save(all_perms,file = "./data/networks/subset_mcmc_perms.Rdata")
+subset_mcmc_perms = all_perms
+save(subset_mcmc_perms,file = "./data/networks/subset_mcmc_perms.Rdata")
