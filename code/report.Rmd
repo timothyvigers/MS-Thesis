@@ -24,6 +24,8 @@ load("./data/networks/subset_mcmc_perms.Rdata")
 subset_perms <- all_perms
 load("./data/networks/all_mcmc_perms.Rdata")
 load("./data/networks/pair_list.Rdata")
+load("./data/networks/bnlearn_discretized.Rdata")
+load("./data/networks/bnlearn_cit_discretized.Rdata")
 source("./code/networks/network_structures.R")
 ```
 
@@ -232,6 +234,58 @@ kable(table(unlist(permuted)),caption = "# of Pairs With a Given % of DIC Below 
 ```
 
 This feels like more of a sanity check that the permutations tests are working, but I'm not sure if it answers our questions about picking the best model. 
+
+# bnlearn with discretized variables
+
+Continuous variables discretized into 5 intervals of equal size. Network structure learned using a hill-climbing algorithm based on AIC.
+
+```{r}
+# Count number of arcs
+arcs <- lapply(all_learned, function(x){
+  n <- nrow(arcs(x))
+  return(n)
+})
+kable(table(unlist(arcs)),caption = "# of Pairs With a Given Number of Arcs")
+# Number with arcs to T1D
+to_t1d <- lapply(all_learned, function(x){
+  a <- as.data.frame(arcs(x))
+  if("T1Dgroup" %in% a$to){
+    return(x)
+  } else {NULL}
+})
+```
+
+There are `r length(compact(to_t1d))` total pairs with at least one arc directed to T1D status, which is also a good sanity check. 
+
+## Cit-selected pairs only
+
+```{r}
+# Count number of arcs
+arcs <- lapply(cit_learned, function(x){
+  n <- nrow(arcs(x))
+  return(n)
+})
+n_table <- as.data.frame(table(unlist(arcs)))
+kable(n_table,caption = "# of Pairs With a Given Number of Arcs")
+# Number with arcs to T1D
+to_t1d <- lapply(cit_learned, function(x){
+  a <- as.data.frame(arcs(x))
+  if("T1Dgroup" %in% a$to){
+    return(x)
+  } else {NULL}
+})
+# Plot 2 arcs
+invisible(lapply(cit_learned, function(x){
+  a <- as.data.frame(arcs(x))
+  if(nrow(a) == 2){
+    plot(x)
+  }
+}))
+```
+
+There are `r length(compact(to_t1d))` cit-selected pairs with at least one arc directed to T1D status (out of a total `r n_table$Freq[n_table$Var1 == 2]` 2-arc graphs).
+
+If it's okay to disctretize the variables, the next step would probably be to look at how much overlap there is between the 2-arc graphs (e.g. are they all the same metabolite but 76 different methylation probes?). If there are too many nodes to put into a larger graph, we could pick based on arc strength?
 
 ## Potential problems
 
