@@ -6,3 +6,4 @@ data/*
 .Rproj.user
 *.Rdata
 *.Rhistory
+code/report.html
