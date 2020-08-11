@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE,dpi = 600)
 knitr::opts_knit$set(root.dir = "/Users/timvigers/Documents/GitHub/MS-Thesis")
 library(tidyverse)
 library(patchwork)
@@ -18,12 +18,12 @@ library(rjags)
 
 ```{r load datasets}
 load("./data/networks/pair_data.Rdata")
-load("./data/networks/all_dic.Rdata")
 load("./data/networks/cits.Rdata")
+cits = cits[!(duplicated(cits[,c("methyl","metab")])),]
 load("./data/networks/subset_mcmc_perms.Rdata")
 subset_perms <- all_perms
 load("./data/networks/all_mcmc_perms.Rdata")
-load("./data/networks/deal_best_models.Rdata")
+load("./data/networks/pair_list.Rdata")
 source("./code/networks/network_structures.R")
 ```
 
@@ -33,7 +33,7 @@ source("./code/networks/network_structures.R")
 
 ### Structure
 
-```{r warning=FALSE}
+```{r eval=FALSE}
 ndf <-
   create_node_df(
     n = 3,
@@ -59,7 +59,7 @@ graph <-
     nodes_df = ndf,
     edges_df = combine_edfs(edf1,edf2)
   )
-graph %>% render_graph(layout = "kk")
+graph %>% render_graph(layout = "kk",as_svg = T)
 ```
 
 ### Models
@@ -141,13 +141,21 @@ invisible(lapply(paste0("struct",1:24), function(x){
 
 ### DIC distribution by network structure
 
-#### Candidates from cits package
+#### Cit-selected pairs
 
 ```{r}
+all_dics <- sapply(all_perms,"[",1)
+all_dics <- t(do.call(rbind,all_dics))
 # Count best structures
 kable(table(unlist(lapply(as.data.frame(all_dics), function(x){
   which.min(x)
 }))),caption = "Number of Pairs Where Structure Is Best")
+best <- lapply(as.data.frame(all_dics),function(x){
+  min <- min(x)
+  best <- which(x-min <=2)
+  return(best)
+})
+kable(table(unlist(best)),caption = "Number of Pairs Where Structure Is Best or Within 2 DIC")
 # Format DIC data
 t = as.data.frame(t(all_dics))
 colnames(t) = paste0("struct",1:24)
@@ -155,26 +163,31 @@ colnames(t) = paste0("struct",1:24)
 t <- t %>% pivot_longer(struct1:struct24)
 t$name = as.numeric(gsub("struct","",t$name))
 # Plot
-ggplot(t,aes(x=factor(name),y=value)) +
+ggplot(t[t$value<2000,],aes(x=factor(name),y=value)) +
   geom_boxplot() +
   xlab("Structure number") + ylab("DIC") +
   theme_bw() +
-  theme(axis.text.x = element_text(angle = 90)) +
-  ylim(-250,1000)
+  ylim(-200,1200)
 ```
 
-#### Non-cits pairs
+#### Non-cit pairs
 
-```{r}
+```{r warning=FALSE}
 # Get correct DICs (first permutation is with our data)
 t <- sapply(subset_perms,"[",1)
 t <- do.call(rbind,t)
 t = as.data.frame(t)
 colnames(t) = paste0("struct",1:24)
 # Count best structures
+best <- apply(t,1,function(x){
+  min <- min(x)
+  best <- which(x-min <=2)
+  return(best)
+})
 kable(table(unlist(lapply(as.data.frame(t(t)), function(x){
   which.min(x)
 }))),caption = "Number of Pairs Where Structure Is Best")
+kable(table(unlist(best)),caption = "Number of Pairs Where Structure Is Best or Within 2 DIC")
 # Melt for plotting
 t <- t %>% pivot_longer(struct1:struct24)
 t$name = as.numeric(gsub("struct","",t$name))
@@ -183,91 +196,42 @@ ggplot(t,aes(x=factor(name),y=value)) +
   geom_boxplot() +
   xlab("Structure number") + ylab("DIC") +
   theme_bw() +
-  theme(axis.text.x = element_text(angle = 90)) +
-  ylim(-250,1000)
-```
-
-### DIC differences
-
-```{r}
-l =
-  lapply(colnames(all_dics), function(x){
-    dics = all_dics[,x]
-    pair = paste(cits[as.numeric(x),1],"-",cits[as.numeric(x),3])
-    structs_1_2 = order(dics)[1:2]
-    structs_2_3 = order(dics)[2:3]
-    abs_diff_1_2 = diff(sort(dics)[1:2])
-    abs_diff_2_3 = diff(sort(dics)[2:3])
-    st = sd(dics)
-    stand_diff_1_2 = abs_diff_1_2 / st
-    stand_diff_2_3 = abs_diff_2_3 / st
-    data.frame("Pair" = pair,
-               "Abs.Diff.1.2" = abs_diff_1_2,"Std.Diff.1.2" = stand_diff_1_2,
-               "Qual.Diff.1.2" =
-                 all.equal(model2network(as.character(all_structs[structs_1_2[1]])),
-                           model2network(as.character(all_structs[structs_1_2[2]]))),
-               "Abs.Diff.2.3" = abs_diff_2_3,"Std.Diff.2.3" = stand_diff_2_3,
-               "Qual.Diff.2.3" =
-                 all.equal(model2network(as.character(all_structs[structs_2_3[1]])),
-                           model2network(as.character(all_structs[structs_2_3[2]]))))
-  })
-dic_diff_table = do.call(rbind,l)
-colnames(dic_diff_table) =
-  c("Pair","Abs. Diff. Best-Second","Std. Diff. Best-Second",
-    "Qual. Diff. Best-Second",
-    "Abs. Diff. Second-Third","Std. Diff. Second-Third",
-    "Qual. Diff. Second-Third")
-# Print 1 - 2 and 2 - 3 differences
-kable(dic_diff_table %>%
-        pivot_longer(c(`Qual. Diff. Best-Second`,`Qual. Diff. Second-Third`)) %>%
-        group_by(name, value) %>% count())
-# Plot diff. distribution
-diff_plot = dic_diff_table %>%
-  pivot_longer(c(`Abs. Diff. Best-Second`,`Std. Diff. Best-Second`,
-                 `Abs. Diff. Second-Third`,`Std. Diff. Second-Third`))
-# Absolute
-adp =
-  ggplot(diff_plot[diff_plot$name %in% c("Abs. Diff. Best-Second",
-                                         "Abs. Diff. Second-Third"),]) +
-  theme_bw() + theme(plot.title = element_text(hjust = 0.5)) +
-  ggtitle("Absolute DIC Difference")
-# Densities
-adp +
-  geom_density(aes(x = value,fill = name),alpha = 0.5) +
-  theme(legend.title = element_blank())
-# Boxplots
-adp + geom_boxplot(aes(x = name,y = value,fill = name)) +
-  theme(legend.position = "none") + xlab("")
-
-# Standardized
-adp =
-  ggplot(diff_plot[diff_plot$name %in% c("Abs. Diff. Best-Second",
-                                         "Abs. Diff. Second-Third"),]) +
-  theme_bw() + theme(plot.title = element_text(hjust = 0.5)) +
-  ggtitle("Absolute DIC Difference")
-
-sdp =
-  ggplot(diff_plot[diff_plot$name %in% c("Std. Diff. Best-Second",
-                                         "Std. Diff. Second-Third"),]) +
-  theme_bw() + theme(plot.title = element_text(hjust = 0.5)) +
-  theme_bw() + ggtitle("Standardized DIC Difference")
-# Densities
-sdp +
-  geom_density(aes(x = value,fill = name),alpha = 0.5) +
-  theme(legend.title = element_blank())
-# Boxplots
-sdp + geom_boxplot(aes(x = name,y = value,fill = name)) +
-  theme(legend.position = "none") + xlab("")
+  ylim(-200,1200)
 ```
 
 ## Permutation tests
 
 ```{r,eval=FALSE}
-l = lapply(all_perms, function(x){
+# For the cit-selected pairs, see how often the real DIC is significantly lower 
+# than the median permuted DIC
+real = lapply(all_perms, function(x){
   t = t(as.data.frame(x))
-  t
+  # Get DIC for non-permuted data
+  real_dics = t[1,]
+  # Get median permuted DICs
+  t = as.data.frame(t[2:24,])
+  meds = lapply(t, median)
+  # Check how often the real DIC is lower than the median
+  perc <- length(which(unlist(meds) - real_dics > 2)) / 24
+  return(perc)
 })
+kable(table(unlist(real)),caption = "# of Pairs With a Given % of DIC Below Median")
+# Same for non-selected pairs
+permuted = lapply(subset_perms, function(x){
+  t = t(as.data.frame(x))
+  # Get DIC for non-permuted data
+  real_dics = t[1,]
+  # Get median permuted DICs
+  t = as.data.frame(t[2:24,])
+  meds = lapply(t, median)
+  # Check how often the real DIC is lower than the median
+  perc <- length(which(unlist(meds) - real_dics > 2)) / 24
+  return(perc)
+})
+kable(table(unlist(permuted)),caption = "# of Pairs With a Given % of DIC Below Median")
 ```
+
+This feels like more of a sanity check that the permutations tests are working, but I'm not sure if it answers our questions about picking the best model. 
 
 ## Potential problems
 
