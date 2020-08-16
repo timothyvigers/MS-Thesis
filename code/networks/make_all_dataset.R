@@ -6,6 +6,8 @@ pheno = pheno[pheno$Visit_Type == "SV",]
 # Methylation
 load("/home/biostats_share/Norris/data/methylation/Mmatrix.platformAdj.regressOut.Rdata")
 methyl = as.data.frame(t(M.adj))
+# Scale 
+methyl = lapply(methyl, scale)
 # Keys
 key_450k = read.csv("/home/biostats_share/Norris/data/methylation/key.450K.csv",stringsAsFactors = F)
 key_450k$platform = "450K"
@@ -44,4 +46,4 @@ df = merge(df,oxylipin,by = "samplekey",all.x = T)
 df = merge(df,vitd,by = "samplekey",all.x = T)
 all_data = df
 # Save
-save(all_data,file = "~/MS-Thesis/data/networks/all_data.Rdata")
+save(all_data,file = "~/MS-Thesis/data/networks/all_data_methyl_scaled.Rdata")
