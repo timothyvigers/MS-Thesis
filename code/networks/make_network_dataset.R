@@ -40,7 +40,7 @@ pheno = pheno[!is.na(pheno$T1Dgroup),]
 pheno = pheno[pheno$Visit_Type == "SV",]
 # Code from candidate selection
 # Methylation
-load("/home/biostats_share/Norris/data/methylation/Mmatrix.platformAdj.Rdata")
+load("/home/biostats_share/Norris/data/methylation/Mmatrix.platformAdj.regressOut.Rdata")
 methyl = as.data.frame(t(M.adj))
 # Scale
 methyl = lapply(methyl, scale)
