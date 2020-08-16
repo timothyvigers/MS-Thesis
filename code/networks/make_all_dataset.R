@@ -46,6 +46,6 @@ df = merge(df,hilic,by = "samplekey",all.x = T)
 df = merge(df,lipid,by = "samplekey",all.x = T)
 df = merge(df,oxylipin,by = "samplekey",all.x = T)
 df = merge(df,vitd,by = "samplekey",all.x = T)
-all_data_methyl_scaled = df
+all_data_methyl_scaled = df[unique(df),]
 # Save
 save(all_data_methyl_scaled,file = "~/MS-Thesis/data/networks/all_data_methyl_scaled.Rdata")
