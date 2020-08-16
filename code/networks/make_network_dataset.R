@@ -41,9 +41,11 @@ pheno = pheno[pheno$Visit_Type == "SV",]
 # Code from candidate selection
 # Methylation
 load("/home/biostats_share/Norris/data/methylation/Mmatrix.platformAdj.regressOut.Rdata")
+names = colnames(M.adj)
 methyl = as.data.frame(t(M.adj))
+rownames(methyl) = names
 # Scale
-methyl1 = as.data.frame(lapply(methyl, scale))
+methyl = as.data.frame(lapply(methyl, scale))
 # Keys
 key_450k = read.csv("/home/biostats_share/Norris/data/methylation/key.450K.csv",stringsAsFactors = F)
 key_450k$platform = "450K"
@@ -81,6 +83,6 @@ df = merge(df,hilic,by = "samplekey",all.x = T)
 df = merge(df,lipid,by = "samplekey",all.x = T)
 df = merge(df,oxylipin,by = "samplekey",all.x = T)
 df = merge(df,vitd,by = "samplekey",all.x = T)
-pair_data = df
+pair_data_methyl_scaled = df
 # Save
-save(pair_data,file = "~/MS-Thesis/data/networks/pair_data_methyl_scaled.Rdata")
+save(pair_data_methyl_scaled,file = "~/MS-Thesis/data/networks/pair_data_methyl_scaled.Rdata")
