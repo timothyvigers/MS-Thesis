@@ -1,7 +1,0 @@
-Error in (function (..., row.names = NULL, check.rows = FALSE, check.names = TRUE,  : 
-  arguments imply differing number of rows: 1162, 0
-Calls: merge ... as.data.frame -> as.data.frame.list -> do.call -> <Anonymous>
-Execution halted
-Error in methyl[, c("samplekey", unique(pairs$methyl))] : 
-  incorrect number of dimensions
-Execution halted
