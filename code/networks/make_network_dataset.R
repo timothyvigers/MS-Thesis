@@ -43,9 +43,9 @@ pheno = pheno[pheno$Visit_Type == "SV",]
 load("/home/biostats_share/Norris/data/methylation/Mmatrix.platformAdj.regressOut.Rdata")
 names = colnames(M.adj)
 methyl = as.data.frame(t(M.adj))
-rownames(methyl) = names
 # Scale
 methyl = as.data.frame(lapply(methyl, scale))
+rownames(methyl) = names
 # Keys
 key_450k = read.csv("/home/biostats_share/Norris/data/methylation/key.450K.csv",stringsAsFactors = F)
 key_450k$platform = "450K"
