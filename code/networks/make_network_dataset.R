@@ -43,8 +43,6 @@ pheno = pheno[pheno$Visit_Type == "SV",]
 load("/home/biostats_share/Norris/data/methylation/Mmatrix.platformAdj.regressOut.Rdata")
 names = colnames(M.adj)
 methyl = as.data.frame(t(M.adj))
-# Scale
-methyl = as.data.frame(lapply(methyl, scale))
 rownames(methyl) = names
 # Keys
 key_450k = read.csv("/home/biostats_share/Norris/data/methylation/key.450K.csv",stringsAsFactors = F)
@@ -59,23 +57,18 @@ methyl = methyl[,c("samplekey",unique(pairs$methyl))]
 gctof = read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.bc.csv",stringsAsFactors = F)
 gctof = gctof[gctof$samplekey %in% pheno$samplekey,]
 gctof = gctof[,c("samplekey",colnames(gctof)[which(colnames(gctof) %in% unique(pairs$metab))])]
-gctof[,2:ncol(gctof)] = lapply(gctof[,2:ncol(gctof)],scale)
 hilic = read.csv("/home/biostats_share/Norris/data/metabolomics/hilic.bc.csv",stringsAsFactors = F)
 hilic = hilic[hilic$samplekey %in% pheno$samplekey,]
 hilic = hilic[,c("samplekey","hilic_12")]
-hilic$hilic_12 = scale(hilic$hilic_12)
 lipid = read.csv("/home/biostats_share/Norris/data/metabolomics/lipid.bc.csv",stringsAsFactors = F)
 lipid = lipid[lipid$samplekey %in% pheno$samplekey,]
 lipid = lipid[,c("samplekey",colnames(lipid)[which(colnames(lipid) %in% unique(pairs$metab))])]
-lipid[,2:ncol(lipid)] = lapply(lipid[,2:ncol(lipid)],scale)
 oxylipin = read.csv("/home/biostats_share/Norris/data/metabolomics/oxylipin.bc.csv",stringsAsFactors = F)
 oxylipin = oxylipin[oxylipin$samplekey %in% pheno$samplekey,]
 oxylipin = oxylipin[,c("samplekey",colnames(oxylipin)[which(colnames(oxylipin) %in% unique(pairs$metab))])]
-oxylipin[,2:ncol(oxylipin)] = lapply(oxylipin[,2:ncol(oxylipin)],scale)
 vitd = read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv",stringsAsFactors = F)
 vitd = vitd[vitd$samplekey %in% pheno$samplekey,]
 vitd = vitd[,c("samplekey",colnames(vitd)[which(colnames(vitd) %in% unique(pairs$metab))])]
-vitd[,2:ncol(vitd)] = lapply(vitd[,2:ncol(vitd)],scale)
 # Merge
 df = merge(pheno,methyl,by = "samplekey",all.x = T)
 df = merge(df,gctof,by = "samplekey",all.x = T)
@@ -83,6 +76,10 @@ df = merge(df,hilic,by = "samplekey",all.x = T)
 df = merge(df,lipid,by = "samplekey",all.x = T)
 df = merge(df,oxylipin,by = "samplekey",all.x = T)
 df = merge(df,vitd,by = "samplekey",all.x = T)
-pair_data_methyl_scaled = df[unique(df),]
+df = df[!duplicated(df$samplekey),]
+# Scale
+vars = min(grep("cg",colnames(df))):ncol(df)
+df[,vars] = lapply(df[,vars], scale)
 # Save
+pair_data_methyl_scaled = as.data.frame(df)
 save(pair_data_methyl_scaled,file = "~/MS-Thesis/data/networks/pair_data_methyl_scaled.Rdata")

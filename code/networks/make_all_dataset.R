@@ -7,8 +7,6 @@ pheno = pheno[pheno$Visit_Type == "SV",]
 load("/home/biostats_share/Norris/data/methylation/Mmatrix.platformAdj.regressOut.Rdata")
 names = colnames(M.adj)
 methyl = as.data.frame(t(M.adj))
-# Scale 
-methyl = as.data.frame(lapply(methyl, scale))
 rownames(methyl) = names
 # Keys
 key_450k = read.csv("/home/biostats_share/Norris/data/methylation/key.450K.csv",stringsAsFactors = F)
@@ -46,6 +44,10 @@ df = merge(df,hilic,by = "samplekey",all.x = T)
 df = merge(df,lipid,by = "samplekey",all.x = T)
 df = merge(df,oxylipin,by = "samplekey",all.x = T)
 df = merge(df,vitd,by = "samplekey",all.x = T)
-all_data_methyl_scaled = df[unique(df),]
+df = df[!duplicated(df$samplekey),]
+# Scale
+vars = min(grep("cg",colnames(df))):ncol(df)
+df[,vars] = lapply(df[,vars], scale)
 # Save
+all_data_methyl_scaled = df[unique(df),]
 save(all_data_methyl_scaled,file = "~/MS-Thesis/data/networks/all_data_methyl_scaled.Rdata")
