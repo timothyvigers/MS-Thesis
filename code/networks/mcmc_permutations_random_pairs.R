@@ -36,7 +36,7 @@ subset_n = 139
 pairs = pairs[sample(1:nrow(pairs),subset_n),]
 # DIC for each model with permutation tests 
 # Permutation and MCMC parameters
-nsim = 1
+nsim = 100
 n_adapt = 1000
 iter = 10000
 vars = c("alpha0","alpha","beta0","beta","gamma0","gamma")
