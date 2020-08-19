@@ -1,5 +1,4 @@
 Loading required package: coda
 Linked to JAGS 4.3.0
 Loaded modules: basemod,bugs
-Error: object 'metab_step3' not found
-Execution halted
+[1] "cg01080368 and bc_oxylipin18"
