@@ -1,4 +1,5 @@
 Loading required package: coda
 Linked to JAGS 4.3.0
 Loaded modules: basemod,bugs
-slurmstepd: error: *** JOB 100 ON localhost CANCELLED AT 2020-08-19T12:54:25 ***
+Error: object 'metab_step3' not found
+Execution halted
