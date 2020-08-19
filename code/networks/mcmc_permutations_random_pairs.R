@@ -14,7 +14,6 @@ step1 = rbind(gctof_step1,hilic_step1)
 step1 = rbind(step1,lipid_step1)
 step1 = rbind(step1,oxylipin_step1)
 step1 = rbind(step1,vitd_step1)
-step1 = metab_step3[order(metab_step3$p.value),]
 # Import methylation association with T1D
 methyl_step2 = read.csv("./data/candidate_selection/step_2/methyl_adj.csv",stringsAsFactors = F)
 # Import metabolite associations with T1D
