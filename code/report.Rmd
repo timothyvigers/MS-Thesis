@@ -26,6 +26,7 @@ load("./data/networks/all_mcmc_perms.Rdata")
 load("./data/networks/pair_list.Rdata")
 load("./data/networks/bnlearn_discretized.Rdata")
 load("./data/networks/bnlearn_cit_discretized.Rdata")
+load("./data/networks/all_mcmc_perms_methyl_scaled.Rdata")
 source("./code/networks/network_structures.R")
 ```
 
@@ -143,10 +144,39 @@ invisible(lapply(paste0("struct",1:24), function(x){
 
 ### DIC distribution by network structure
 
-#### Cit-selected pairs
+#### Cit-selected pairs - Unscaled
 
 ```{r}
 all_dics <- sapply(all_perms,"[",1)
+all_dics <- t(do.call(rbind,all_dics))
+# Count best structures
+kable(table(unlist(lapply(as.data.frame(all_dics), function(x){
+  which.min(x)
+}))),caption = "Number of Pairs Where Structure Is Best")
+best <- lapply(as.data.frame(all_dics),function(x){
+  min <- min(x)
+  best <- which(x-min <=2)
+  return(best)
+})
+kable(table(unlist(best)),caption = "Number of Pairs Where Structure Is Best or Within 2 DIC")
+# Format DIC data
+t = as.data.frame(t(all_dics))
+colnames(t) = paste0("struct",1:24)
+# Melt for plotting
+t <- t %>% pivot_longer(struct1:struct24)
+t$name = as.numeric(gsub("struct","",t$name))
+# Plot
+ggplot(t[t$value<2000,],aes(x=factor(name),y=value)) +
+  geom_boxplot() +
+  xlab("Structure number") + ylab("DIC") +
+  theme_bw() +
+  ylim(-200,1200)
+```
+
+#### Cit-selected pairs - Scaled Methylation
+
+```{r}
+all_dics <- sapply(all_perms_methyl_scaled,"[",1)
 all_dics <- t(do.call(rbind,all_dics))
 # Count best structures
 kable(table(unlist(lapply(as.data.frame(all_dics), function(x){
