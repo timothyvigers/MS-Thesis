@@ -1,8 +1,0 @@
-Loading required package: coda
-Linked to JAGS 4.3.0
-Loaded modules: basemod,bugs
-[1] "cg12344862 and bc_oxylipin3"
-[1] "cg01080368 and bc_oxylipin18"
-Error in FUN(newX[, i], ...) : object 'all_data_methyl_scaled' not found
-Calls: apply -> FUN
-Execution halted
