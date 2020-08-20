@@ -1,0 +1,6 @@
+Loading required package: coda
+Linked to JAGS 4.3.0
+Loaded modules: basemod,bugs
+Error in setwd("/Users/timvigers/Documents/GitHub/MS-Thesis") : 
+  cannot change working directory
+Execution halted
