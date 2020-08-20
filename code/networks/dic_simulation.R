@@ -1,6 +1,6 @@
 library(rjags)
 library(parallel)
-setwd("/Users/timvigers/Documents/GitHub/MS-Thesis")
+setwd("/home/vigerst/MS-Thesis")
 set.seed(1017)
 
 # Sample size
