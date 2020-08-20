@@ -3,7 +3,7 @@ library(parallel)
 set.seed(1017)
 setwd("/home/vigerst/MS-Thesis")
 # Load data
-load("./data/networks/all_data.Rdata")
+load("./data/networks/all_data_methyl_scaled.Rdata")
 # Methyl and metabolite associations
 gctof_step1 = read.csv("./data/candidate_selection/step_1/sv/gctof_SV_unadj_scaled.csv",stringsAsFactors = F)
 hilic_step1 = read.csv("./data/candidate_selection/step_1/sv/hilic_SV_unadj_scaled.csv",stringsAsFactors = F)
