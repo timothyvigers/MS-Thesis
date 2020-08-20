@@ -44,7 +44,7 @@ all_perms = apply(pairs,1,function(x){
   methyl = as.character(x["methyl"])
   metab = as.character(x["metab"])
   print(paste(methyl,"and",metab))
-  pair = all_data[,c("T1Dgroup",methyl,metab)]
+  pair = all_data_methyl_scaled[,c("T1Dgroup",methyl,metab)]
   pair = pair[complete.cases(pair),]
   pair$T1Dgroup = ifelse(pair$T1Dgroup == "T1D control",0,1)
   # Permutation datasets
@@ -80,5 +80,5 @@ all_perms = apply(pairs,1,function(x){
   stopCluster(cl)
   return(mcmc_perms)
 })
-subset_mcmc_perms = all_perms
-save(subset_mcmc_perms,file = "./data/networks/subset_mcmc_perms.Rdata")
+subset_mcmc_perms_methyl_scaled = all_perms
+save(subset_mcmc_perms_methyl_scaled,file = "./data/networks/subset_mcmc_perms_methyl_scaled.Rdata")
