@@ -173,7 +173,7 @@ ggplot(t[t$value<2000,],aes(x=factor(name),y=value)) +
   ylim(-200,1200)
 ```
 
-#### Cit-selected pairs - Scaled Methylation
+#### Cit-selected pairs - scaled methylation
 
 ```{r}
 all_dics <- sapply(all_perms_methyl_scaled,"[",1)
@@ -207,6 +207,35 @@ ggplot(t[t$value<2000,],aes(x=factor(name),y=value)) +
 ```{r warning=FALSE}
 # Get correct DICs (first permutation is with our data)
 t <- sapply(subset_perms,"[",1)
+t <- do.call(rbind,t)
+t = as.data.frame(t)
+colnames(t) = paste0("struct",1:24)
+# Count best structures
+best <- apply(t,1,function(x){
+  min <- min(x)
+  best <- which(x-min <=2)
+  return(best)
+})
+kable(table(unlist(lapply(as.data.frame(t(t)), function(x){
+  which.min(x)
+}))),caption = "Number of Pairs Where Structure Is Best")
+kable(table(unlist(best)),caption = "Number of Pairs Where Structure Is Best or Within 2 DIC")
+# Melt for plotting
+t <- t %>% pivot_longer(struct1:struct24)
+t$name = as.numeric(gsub("struct","",t$name))
+# Plot
+ggplot(t,aes(x=factor(name),y=value)) +
+  geom_boxplot() +
+  xlab("Structure number") + ylab("DIC") +
+  theme_bw() +
+  ylim(-200,1200)
+```
+
+#### Non-cit pairs - scaled methylation
+
+```{r warning=FALSE}
+# Get correct DICs (first permutation is with our data)
+t <- sapply(subset_mcmc_perms_methyl_scaled,"[",1)
 t <- do.call(rbind,t)
 t = as.data.frame(t)
 colnames(t) = paste0("struct",1:24)
