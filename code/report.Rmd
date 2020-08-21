@@ -27,6 +27,10 @@ load("./data/networks/pair_list.Rdata")
 load("./data/networks/bnlearn_discretized.Rdata")
 load("./data/networks/bnlearn_cit_discretized.Rdata")
 load("./data/networks/all_mcmc_perms_methyl_scaled.Rdata")
+load("./data/networks/subset_mcmc_perms_methyl_scaled.Rdata")
+load("./data/networks/mcmc_sim_perms.Rdata")
+load("./data/networks/mcmc_sim_perms_metab_scaled.Rdata")
+load("./data/networks/mcmc_sim_perms_both_scaled.Rdata")
 source("./code/networks/network_structures.R")
 ```
 
@@ -146,6 +150,8 @@ invisible(lapply(paste0("struct",1:24), function(x){
 
 #### Cit-selected pairs - Unscaled
 
+First, I looked at the distribution of DIC for all 139 methylation - metabolite pairs selected using the cit package. It appears that structures 14, 19, and 24 tend to be the best, all of which have one or two arrows pointing towards the methylation node. Interestingly, although structure 19 tended to have lower DIC when looking at all the pairs together, it was never selected as the best structure.
+
 ```{r}
 all_dics <- sapply(all_perms,"[",1)
 all_dics <- t(do.call(rbind,all_dics))
@@ -174,6 +180,8 @@ ggplot(t[t$value<2000,],aes(x=factor(name),y=value)) +
 ```
 
 #### Cit-selected pairs - scaled methylation
+ 
+Because the structures with arrows pointing towards methylation tended to have lower DIC, I repeated these tests with a scaled methylation variable. The idea was that perhaps methylation was "outweighing" the metabolites because only the metabolites were scaled. Scaling the methylation variables appears to reduce the variability in DIC, and results in structures 10, 21, and 23 being consistently the "best."
 
 ```{r}
 all_dics <- sapply(all_perms_methyl_scaled,"[",1)
@@ -204,6 +212,8 @@ ggplot(t[t$value<2000,],aes(x=factor(name),y=value)) +
 
 #### Non-cit pairs
 
+Next, I selected metabolite - methylation pairs that were not associated with each other or with T1D status (p >= 0.5). I checked which structures were most often selected when there is no relationship between the three variables. The results look pretty similar to what we see with the selected pairs, which is somewhat concerning.
+
 ```{r warning=FALSE}
 # Get correct DICs (first permutation is with our data)
 t <- sapply(subset_perms,"[",1)
@@ -233,6 +243,8 @@ ggplot(t,aes(x=factor(name),y=value)) +
 
 #### Non-cit pairs - scaled methylation
 
+Scaling methylation in the unrelated pairs has a similar effect to scaling the selected pairs.
+
 ```{r warning=FALSE}
 # Get correct DICs (first permutation is with our data)
 t <- sapply(subset_mcmc_perms_methyl_scaled,"[",1)
@@ -260,104 +272,119 @@ ggplot(t,aes(x=factor(name),y=value)) +
   ylim(-200,1200)
 ```
 
-## Permutation tests
+### DIC simulations
 
-```{r,eval=FALSE}
-# For the cit-selected pairs, see how often the real DIC is significantly lower 
-# than the median permuted DIC
-real = lapply(all_perms, function(x){
-  t = t(as.data.frame(x))
-  # Get DIC for non-permuted data
-  real_dics = t[1,]
-  # Get median permuted DICs
-  t = as.data.frame(t[2:24,])
-  meds = lapply(t, median)
-  # Check how often the real DIC is lower than the median
-  perc <- length(which(unlist(meds) - real_dics > 2)) / 24
-  return(perc)
-})
-kable(table(unlist(real)),caption = "# of Pairs With a Given % of DIC Below Median")
-# Same for non-selected pairs
-permuted = lapply(subset_perms, function(x){
-  t = t(as.data.frame(x))
-  # Get DIC for non-permuted data
-  real_dics = t[1,]
-  # Get median permuted DICs
-  t = as.data.frame(t[2:24,])
-  meds = lapply(t, median)
-  # Check how often the real DIC is lower than the median
-  perc <- length(which(unlist(meds) - real_dics > 2)) / 24
-  return(perc)
-})
-kable(table(unlist(permuted)),caption = "# of Pairs With a Given % of DIC Below Median")
+Data were simulated for a single triad with nodes relating to each other according to network structure 1. 
+
+#### "Correct" DIC for simulated struture 1
+
+JAGS code was applied to the simulated data, and DIC results are below. Interestingly, we would fail to pick the correct network structure based on DIC, although it's possible we would select a similar 3 arc structure. However, the 2 arc structure 18 is significantly better than 4, and also has two arrows pointing towards the metabolite node.
+
+```{r warning=FALSE}
+# Get correct DICs (first permutation is with our data)
+t = as.data.frame(rbind(mcmc_sim_perms[[1]]))
+colnames(t) = paste0("struct",1:24)
+# Melt for plotting
+t <- t %>% pivot_longer(struct1:struct24)
+t$name = as.numeric(gsub("struct","",t$name))
+# Plot
+ggplot(t,aes(x=factor(name),y=value)) +
+  geom_boxplot() +
+  xlab("Structure number") + ylab("DIC") +
+  theme_bw()
 ```
 
-This feels like more of a sanity check that the permutations tests are working, but I'm not sure if it answers our questions about picking the best model. 
+#### "Incorrect" permutations with simulated data for structure 1
 
-# bnlearn with discretized variables
+The same permutation approach was applied to simulated data. For each permutation, the metabolite and methylation columns were sampled randomly without replacement, and DIC calculated using the permuted data. DIC appears to favor structures 10, 21, and 23 whene there is no real relationship between the three variables, which is interesting considering that we occasionally see these structures picked in our real data.
 
-Continuous variables discretized into 5 intervals of equal size. Network structure learned using a hill-climbing algorithm based on AIC.
-
-```{r}
-# Count number of arcs
-arcs <- lapply(all_learned, function(x){
-  n <- nrow(arcs(x))
-  return(n)
-})
-kable(table(unlist(arcs)),caption = "# of Pairs With a Given Number of Arcs")
-# Number with arcs to T1D
-to_t1d <- lapply(all_learned, function(x){
-  a <- as.data.frame(arcs(x))
-  if("T1Dgroup" %in% a$to){
-    return(x)
-  } else {NULL}
-})
+```{r warning=FALSE}
+# Get correct DICs (first permutation is with our data)
+t <- do.call(rbind,mcmc_sim_perms)
+t = as.data.frame(t)
+t = t[-c(1),]
+colnames(t) = paste0("struct",1:24)
+# Melt for plotting
+t <- t %>% pivot_longer(struct1:struct24)
+t$name = as.numeric(gsub("struct","",t$name))
+# Plot
+ggplot(t,aes(x=factor(name),y=value)) +
+  geom_boxplot() +
+  xlab("Structure number") + ylab("DIC") +
+  theme_bw()
 ```
 
-There are `r length(compact(to_t1d))` total pairs with at least one arc directed to T1D status, which is also a good sanity check. 
+#### "Correct" DIC for simulated struture 1, metabolite data scaled
 
-## Cit-selected pairs only
+Because some of the permutation testing suggests that scaling the data can affect DIC, the same simulations were run with the metabolomic data scaled to n(0,1), like our real data. There are some slight changes to DIC, but the overall pattern remains essentially the same (and we would still pick the wrong structure bases on DIC).
 
-```{r}
-# Count number of arcs
-arcs <- lapply(cit_learned, function(x){
-  n <- nrow(arcs(x))
-  return(n)
-})
-n_table <- as.data.frame(table(unlist(arcs)))
-kable(n_table,caption = "# of Pairs With a Given Number of Arcs")
-# Number with arcs to T1D
-to_t1d <- lapply(cit_learned, function(x){
-  a <- as.data.frame(arcs(x))
-  if("T1Dgroup" %in% a$to){
-    return(x)
-  } else {NULL}
-})
-# Plot 2 arcs
-invisible(lapply(cit_learned, function(x){
-  a <- as.data.frame(arcs(x))
-  if(nrow(a) == 2){
-    plot(x)
-  }
-}))
+```{r,warning=FALSE}
+# Get correct DICs (first permutation is with our data)
+t = as.data.frame(rbind(mcmc_sim_perms_metab_scaled[[1]]))
+colnames(t) = paste0("struct",1:24)
+# Melt for plotting
+t <- t %>% pivot_longer(struct1:struct24)
+t$name = as.numeric(gsub("struct","",t$name))
+# Plot
+ggplot(t,aes(x=factor(name),y=value)) +
+  geom_boxplot() +
+  xlab("Structure number") + ylab("DIC") +
+  theme_bw()
 ```
 
-There are `r length(compact(to_t1d))` cit-selected pairs with at least one arc directed to T1D status (out of a total `r n_table$Freq[n_table$Var1 == 2]` 2-arc graphs).
+#### "Incorrect" permutations with simulated data for structure 1, metabolite data scaled
 
-If it's okay to disctretize the variables, the next step would probably be to look at how much overlap there is between the 2-arc graphs (e.g. are they all the same metabolite but 76 different methylation probes?). If there are too many nodes to put into a larger graph, we could pick based on arc strength?
+```{r warning=FALSE}
+# Get correct DICs (first permutation is with our data)
+t <- do.call(rbind,mcmc_sim_perms_metab_scaled)
+t = as.data.frame(t)
+t = t[-c(1),]
+colnames(t) = paste0("struct",1:24)
+# Melt for plotting
+t <- t %>% pivot_longer(struct1:struct24)
+t$name = as.numeric(gsub("struct","",t$name))
+# Plot
+ggplot(t,aes(x=factor(name),y=value)) +
+  geom_boxplot() +
+  xlab("Structure number") + ylab("DIC") +
+  theme_bw()
+```
 
-## Potential problems
+#### "Correct" DIC for simulated struture 1, metabolite and methylation data scaled
 
-### DIC
+I also simulated with both metabolite and methylation scaled, to see if that made a difference. Interestingly, the network we would select this way is close to correct, with two arrows pointing towards the methylation node. However, DIC is still not selecting the correct three arc network.
 
-- "From Bayesian perspective, DIC is not theoretically justified since it measures the fit of the model when the parameters are fixed to the posterior expectation and is not therefore an unbiased estimate of the true generalization utility." (Piironen & Vehtari, 2017)
+```{r warning=FALSE}
+# Get correct DICs (first permutation is with our data)
+t = as.data.frame(rbind(mcmc_sim_perms_both_scaled[[1]]))
+colnames(t) = paste0("struct",1:24)
+# Melt for plotting
+t <- t %>% pivot_longer(struct1:struct24)
+t$name = as.numeric(gsub("struct","",t$name))
+# Plot
+ggplot(t,aes(x=factor(name),y=value)) +
+  geom_boxplot() +
+  xlab("Structure number") + ylab("DIC") +
+  theme_bw()
+```
 
-- "The numerical experiments show that the over-fitting in the selection may be a potential problem and hinder the model selection considerably. This is the case especially when the dataset is small (high variance in the utility estimates) and the number of models under comparison large (large number of variables). Especially vulnerable methods for this type of overfitting are CV, WAIC, DIC and other methods that rely on data reuse and have therefore relatively high variance in the utility estimates." (Piironen & Vehtari, 2017)
+#### "Incorrect" permutations with simulated data for structure 1, metabolite and methylation data scaled
 
-### Priors
+With both variables scaled, we see the same pattern in the "incorrect" permutation tests.
 
-Tim was wrong about gamma priors causing problems. This issue is specific to logistic models with random effects, where the prior is $b_i \sim N(0,\frac{1}{\lambda})$. The Piironen paper can be a little unclear, so maybe we need a better resource.
+```{r warning=FALSE}
+# Get correct DICs (first permutation is with our data)
+t <- do.call(rbind,mcmc_sim_perms_both_scaled)
+t = as.data.frame(t)
+t = t[-c(1),]
+colnames(t) = paste0("struct",1:24)
+# Melt for plotting
+t <- t %>% pivot_longer(struct1:struct24)
+t$name = as.numeric(gsub("struct","",t$name))
+# Plot
+ggplot(t,aes(x=factor(name),y=value)) +
+  geom_boxplot() +
+  xlab("Structure number") + ylab("DIC") +
+  theme_bw()
+```
 
-# References
-
-- Piironen, J., & Vehtari, A. (2017). Comparison of Bayesian predictive methods for model selection. Statistics and Computing, 27(3), 711–735. https://doi.org/10.1007/s11222-016-9649-y
