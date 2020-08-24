@@ -6,45 +6,38 @@ set.seed(1017)
 # Sample size
 n = 160
 
+# Permutation and MCMC parameters
+nsim = 1000
+n_adapt = 1000
+iter = 10000
+vars = c("alpha0","alpha","beta0","beta","gamma0","gamma")
+
 # Structure 1: metabolite depends on T1D, methylation depends on T1D and metabolite
+## True values
 ## T1D -> metab
 alpha0 <- 5 # Intercept
 alpha <- 2 # Slope
-t1d <- rbinom(n,1,prob = 0.5) # Generate T1D cases and controls - our dataset is evenly split
-metab <- rnorm(n, mean = alpha0 + alpha*t1d, sd = 1) # Outcome
+
 ## methyl | T1D, metab
 int <- 10 # True intercept
 beta <- 8 # T1D effect
 gamma <- 5 # Metab effect
 
-methyl <- rnorm(n, mean = int + beta*t1d + gamma*metab, sd = 1) # Outcome
-
-df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
-
-summary(lm(methyl~t1d+metab,df)) # Sanity check
-
-# Permutation and MCMC parameters
-nsim = 100
-n_adapt = 1000
-iter = 10000
-vars = c("alpha0","alpha","beta0","beta","gamma0","gamma")
-
-# Permutation tests
+# Multiple simulations
 dfs <- lapply(1:nsim,function(x){
-  if (x == 1){
-    d <- df
-  } else {
-    set.seed(x)
-    d <- cbind.data.frame(df$t1d,sample(df$methyl),sample(df$metab))
-  }
-  colnames(d) <- colnames(df)
-  return(d)
+  set.seed(1016 + x)
+  # Simulate data
+  t1d <- rbinom(n,1,prob = 0.5) # Generate T1D cases and controls - our dataset is evenly split
+  metab <- rnorm(n, mean = alpha0 + alpha*t1d, sd = 1) # Outcome
+  methyl <- rnorm(n, mean = int + beta*t1d + gamma*metab, sd = 1) # Outcome
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
 })
 # Parallel - make cluster
 no_cores = detectCores()
 cl <- makeCluster(no_cores/4,type = "FORK")
 # MCMC on each permuted set
-mcmc_sim_perms <- parLapply(cl,dfs,function(x){
+mcmc_sim <- parLapply(cl,dfs,function(x){
   jags_data =
     list(t1d=c(x$t1d),methyl=c(x$methyl),
          metab=c(x$metab),N=n)
@@ -60,25 +53,24 @@ mcmc_sim_perms <- parLapply(cl,dfs,function(x){
   unlist(dics)
 })
 stopCluster(cl)
-save(mcmc_sim_perms,file = "./data/networks/mcmc_sim_perms.Rdata")
+save(mcmc_sim,file = "./data/networks/mcmc_sim.Rdata")
 
 # Try with scaled metabolites (like our real data)
-df$metab <- scale(df$metab)
 # Permutations
 dfs <- lapply(1:nsim,function(x){
-  if (x == 1){
-    d <- df
-  } else {
-    set.seed(x)
-    d <- cbind.data.frame(df$t1d,sample(df$methyl),sample(df$metab))
-  }
-  colnames(d) <- colnames(df)
-  return(d)
+  set.seed(1016 + x)
+  # Simulate data
+  t1d <- rbinom(n,1,prob = 0.5) # Generate T1D cases and controls - our dataset is evenly split
+  metab <- rnorm(n, mean = alpha0 + alpha*t1d, sd = 1) # Outcome
+  methyl <- rnorm(n, mean = int + beta*t1d + gamma*metab, sd = 1) # Outcome
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  df$metab <- scale(df$metab)
+  return(df)
 })
 # Parallel - make cluster
 cl <- makeCluster(no_cores/4,type = "FORK")
 # MCMC on each permuted set
-mcmc_sim_perms_metab_scaled <- parLapply(cl,dfs,function(x){
+mcmc_sim_metab_scaled <- parLapply(cl,dfs,function(x){
   jags_data =
     list(t1d=c(x$t1d),methyl=c(x$methyl),
          metab=c(x$metab),N=n)
@@ -94,25 +86,24 @@ mcmc_sim_perms_metab_scaled <- parLapply(cl,dfs,function(x){
   unlist(dics)
 })
 stopCluster(cl)
-save(mcmc_sim_perms_metab_scaled,file = "./data/networks/mcmc_sim_perms_metab_scaled.Rdata")
+save(mcmc_sim_metab_scaled,file = "./data/networks/mcmc_sim_metab_scaled.Rdata")
 
 # Try with both scaled
-df$methyl <- scale(df$methyl)
-# Permutations
 dfs <- lapply(1:nsim,function(x){
-  if (x == 1){
-    d <- df
-  } else {
-    set.seed(x)
-    d <- cbind.data.frame(df$t1d,sample(df$methyl),sample(df$metab))
-  }
-  colnames(d) <- colnames(df)
-  return(d)
+  set.seed(1016 + x)
+  # Simulate data
+  t1d <- rbinom(n,1,prob = 0.5) # Generate T1D cases and controls - our dataset is evenly split
+  metab <- rnorm(n, mean = alpha0 + alpha*t1d, sd = 1) # Outcome
+  methyl <- rnorm(n, mean = int + beta*t1d + gamma*metab, sd = 1) # Outcome
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  df$metab <- scale(df$metab)
+  df$methyl <- scale(df$methyl)
+  return(df)
 })
 # Parallel - make cluster
 cl <- makeCluster(no_cores/4,type = "FORK")
 # MCMC on each permuted set
-mcmc_sim_perms_both_scaled <- parLapply(cl,dfs,function(x){
+mcmc_sim_both_scaled <- parLapply(cl,dfs,function(x){
   jags_data =
     list(t1d=c(x$t1d),methyl=c(x$methyl),
          metab=c(x$metab),N=n)
@@ -128,4 +119,4 @@ mcmc_sim_perms_both_scaled <- parLapply(cl,dfs,function(x){
   unlist(dics)
 })
 stopCluster(cl)
-save(mcmc_sim_perms_both_scaled,file = "./data/networks/mcmc_sim_perms_both_scaled.Rdata")
+save(mcmc_sim_both_scaled,file = "./data/networks/mcmc_sim_both_scaled.Rdata")
