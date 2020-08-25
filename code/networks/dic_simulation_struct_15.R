@@ -6,7 +6,7 @@ setwd("/home/vigerst/MS-Thesis")
 n = 160
 
 # Permutation and MCMC parameters
-nsim = 1000
+nsim = 100
 n_adapt = 1000
 iter = 10000
 vars = c("alpha0","alpha","beta0","beta","gamma0","gamma")
