@@ -1,7 +1,6 @@
 library(rjags)
 library(parallel)
 setwd("/home/vigerst/MS-Thesis")
-set.seed(1017)
 
 # Sample size
 n = 160
@@ -48,7 +47,7 @@ mcmc_sim <- parLapply(cl,dfs,function(x){
                    data = jags_data, n.adapt = n_adapt,n.chains = 2)
       dic =
         dic.samples(mod,n.iter = iter,progress.bar="none")
-      return(round(sum(dic$deviance) + sum(dic$penalty),1))
+      return(round(sum(dic$deviance) + sum(dic$penalty,na.rm = T),1))
     })
   unlist(dics)
 })
@@ -81,7 +80,7 @@ mcmc_sim_metab_scaled <- parLapply(cl,dfs,function(x){
                    data = jags_data, n.adapt = n_adapt,n.chains = 2)
       dic =
         dic.samples(mod,n.iter = iter,progress.bar="none")
-      return(round(sum(dic$deviance) + sum(dic$penalty),1))
+      return(round(sum(dic$deviance) + sum(dic$penalty,na.rm = T),1))
     })
   unlist(dics)
 })
@@ -114,7 +113,7 @@ mcmc_sim_both_scaled <- parLapply(cl,dfs,function(x){
                    data = jags_data, n.adapt = n_adapt,n.chains = 2)
       dic =
         dic.samples(mod,n.iter = iter,progress.bar="none")
-      return(round(sum(dic$deviance) + sum(dic$penalty),1))
+      return(round(sum(dic$deviance) + sum(dic$penalty,na.rm = T),1))
     })
   unlist(dics)
 })
