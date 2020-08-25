@@ -47,7 +47,8 @@ mcmc_sim <- parLapply(cl,dfs,function(x){
                    data = jags_data, n.adapt = n_adapt,n.chains = 2)
       dic =
         dic.samples(mod,n.iter = iter,progress.bar="none")
-      return(round(sum(dic$deviance) + sum(dic$penalty,na.rm = T),1))
+      keep <- as.numeric(which(!is.nan(dic$penalty)))
+      return(round(sum(dic$deviance[keep]) + sum(dic$penalty[keep]),1))
     })
   unlist(dics)
 })
@@ -80,7 +81,8 @@ mcmc_sim_metab_scaled <- parLapply(cl,dfs,function(x){
                    data = jags_data, n.adapt = n_adapt,n.chains = 2)
       dic =
         dic.samples(mod,n.iter = iter,progress.bar="none")
-      return(round(sum(dic$deviance) + sum(dic$penalty,na.rm = T),1))
+      keep <- as.numeric(which(!is.nan(dic$penalty)))
+      return(round(sum(dic$deviance[keep]) + sum(dic$penalty[keep]),1))
     })
   unlist(dics)
 })
@@ -113,7 +115,8 @@ mcmc_sim_both_scaled <- parLapply(cl,dfs,function(x){
                    data = jags_data, n.adapt = n_adapt,n.chains = 2)
       dic =
         dic.samples(mod,n.iter = iter,progress.bar="none")
-      return(round(sum(dic$deviance) + sum(dic$penalty,na.rm = T),1))
+      keep <- as.numeric(which(!is.nan(dic$penalty)))
+      return(round(sum(dic$deviance[keep]) + sum(dic$penalty[keep]),1))
     })
   unlist(dics)
 })
