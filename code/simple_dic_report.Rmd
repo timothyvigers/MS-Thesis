@@ -1,0 +1,191 @@
+---
+title: "Simple DIC Simulations"
+author: "Tim Vigers"
+date: "8/25/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,warning = FALSE)
+library(DiagrammeR)
+```
+
+```{r load data}
+load("/Users/timvigers/Documents/GitHub/MS-Thesis/data/networks/mcmc_simple_omics_scaled.Rdata")
+load("/Users/timvigers/Documents/GitHub/MS-Thesis/data/networks/mcmc_simple_omics.Rdata")
+load("/Users/timvigers/Documents/GitHub/MS-Thesis/data/networks/mcmc_simple_t1d.Rdata")
+```
+
+## Methylation -> T1D
+
+First, I simulated a dataset where the probability of developing T1D depended on the value of methylation. Then I used jags to find the DIC of three structures:
+
+### 19 (Reversed Arc)
+
+```{r}
+ndf <-
+  create_node_df(
+    n = 3,
+    label = c("Methylation","Metabolite","T1D Status"),
+    shape = c("oval", "oval","oval"),
+    fixedsize=F
+  )
+edf1 <-
+  create_edge_df(
+    from = c(3),
+    to   = c(1)
+  )
+graph <-
+  create_graph(
+    nodes_df = ndf,
+    edges_df = edf1
+  )
+graph %>% render_graph(layout = "kk",as_svg = T)
+```
+
+### 21 (Correct)
+
+```{r}
+ndf <-
+  create_node_df(
+    n = 3,
+    label = c("Methylation","Metabolite","T1D Status"),
+    shape = c("oval", "oval","oval"),
+    fixedsize=F
+  )
+edf1 <-
+  create_edge_df(
+    from = c(1),
+    to   = c(3)
+  )
+graph <-
+  create_graph(
+    nodes_df = ndf,
+    edges_df = edf1
+  )
+graph %>% render_graph(layout = "kk",as_svg = T)
+```
+
+### 23 ("Null")
+
+```{r}
+ndf <-
+  create_node_df(
+    n = 3,
+    label = c("Methylation","Metabolite","T1D Status"),
+    shape = c("oval", "oval","oval"),
+    fixedsize=F
+  )
+edf1 <-
+  create_edge_df(
+    from = c(2),
+    to   = c(3)
+  )
+graph <-
+  create_graph(
+    nodes_df = ndf,
+    edges_df = edf1
+  )
+graph %>% render_graph(layout = "kk",as_svg = T)
+```
+
+Interestingly, DIC was the lowest for the correct structure every time:
+
+```{r}
+plot <- do.call(rbind,mcmc_simple_t1d)
+colnames(plot) <- c(19,21,23)
+boxplot(plot)
+```
+
+## Methylation -> Metabolite
+
+However, when I simulated a methylation to metabolite arc, DIC did not do well. I tested structures:
+
+### 21 ("Null")
+
+```{r}
+ndf <-
+  create_node_df(
+    n = 3,
+    label = c("Methylation","Metabolite","T1D Status"),
+    shape = c("oval", "oval","oval"),
+    fixedsize=F
+  )
+edf1 <-
+  create_edge_df(
+    from = c(1),
+    to   = c(3)
+  )
+graph <-
+  create_graph(
+    nodes_df = ndf,
+    edges_df = edf1
+  )
+graph %>% render_graph(layout = "kk",as_svg = T)
+```
+
+### 22 (Correct)
+
+```{r}
+ndf <-
+  create_node_df(
+    n = 3,
+    label = c("Methylation","Metabolite","T1D Status"),
+    shape = c("oval", "oval","oval"),
+    fixedsize=F
+  )
+edf1 <-
+  create_edge_df(
+    from = c(1),
+    to   = c(2)
+  )
+graph <-
+  create_graph(
+    nodes_df = ndf,
+    edges_df = edf1
+  )
+graph %>% render_graph(layout = "kk",as_svg = T)
+```
+
+### 24 (Reversed Arc)
+
+```{r}
+ndf <-
+  create_node_df(
+    n = 3,
+    label = c("Methylation","Metabolite","T1D Status"),
+    shape = c("oval", "oval","oval"),
+    fixedsize=F
+  )
+edf1 <-
+  create_edge_df(
+    from = c(2),
+    to   = c(1)
+  )
+graph <-
+  create_graph(
+    nodes_df = ndf,
+    edges_df = edf1
+  )
+graph %>% render_graph(layout = "kk",as_svg = T)
+```
+
+and DIC consistently picked structure 24, where the relationship is the opposite of the truth.
+
+```{r}
+plot <- do.call(rbind,mcmc_simple_omics)
+colnames(plot) <- c(21,22,24)
+boxplot(plot)
+```
+
+I also tried scaling both the metabolite and methylation data, because I thought that in this case DIC might be driven by some sort of effect size issue. With scaled data, DIC was unable to distinguish between structure 22 and 24 (the correct and "reversed" structures). The DIC was exactly the same for both structures in every each simulation.
+
+```{r}
+plot <- do.call(rbind,mcmc_simple_omics_scaled)
+colnames(plot) <- c(21,22,24)
+boxplot(plot)
+```
+
+# Conclusions
+
+I think that DIC probably does work okay for simple structures, but is highly dependent on how "large" the data are and is therefore not ideal for picking the direction of arcs. Also, I think that it just doesn't really work for more complex networks, and should probably only be used for selecting regression models where you "know" what the outcome is. 
