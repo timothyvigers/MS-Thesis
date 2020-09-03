@@ -18,3 +18,4 @@ struct1_jags <- function(){
   tau ~ dgamma(0.0001, 0.0001)
   sigma2 <- 1/tau
 }
+
