@@ -1,7 +1,7 @@
 library(R2jags)
 library(parallel)
 # Load data
-setwd("/Users/timvigers/Documents/GitHub/MS-Thesis")
+setwd("C:/Users/timbv/Documents/GitHub/MS-Thesis")
 load("./data/networks/pair_data.Rdata")
 load("./data/networks/cits.Rdata")
 set.seed(1017)
@@ -27,7 +27,9 @@ all_dics = parApply(cl=cl,cits,1,function(x){
                    metab=c(temp[,metab]),
                    N=N)
   # R2jags
-  fit_lm1 <- jags(data = jags_data, parameters.to.save = vars, model.file = struct1_jags,
+  fit_lm1 <- jags(data = jags_data, 
+                  parameters.to.save = vars, 
+                  model.file = struct3_jags,
                   n.chains = 2, n.iter = 10000, n.burnin = 1000)
   # data for jags
  
