@@ -48,7 +48,7 @@ struct3_jags <- function(){
     t1d[i] ~ dbern(q[i])
     logit(q[i]) <- int + alpha*metab[i] + beta*methyl[i]
     # Log likelihood for the network
-    #LogLik[i] <- log(dbern(t1d[i],logit(int + alpha*t1d[i] + gamma*methyl[i]), tau))
+    LogLik[i] <- log(dbin(t1d[i],q[i],1))
   }
   # Very flat priors
   int ~ dnorm(0,0.001)
