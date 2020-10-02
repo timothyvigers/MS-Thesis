@@ -1,24 +1,9 @@
-functions{
-     int numLevels(int[] m) {
-        int sorted[num_elements(m)];
-        int count = 1;
-        sorted = sort_asc(m);
-        for (i in 2:num_elements(sorted)) {
-          if (sorted[i] != sorted[i-1])
-             count = count + 1;
-        }
-        return(count);
-     }
-}
 data{
      // Define variables in data
      int<lower=1> Nobs;   // Number of observations (an integer)
      real methyl[Nobs];   // outcome variable
      real metab[Nobs];
      int<lower=0,upper=1> t1d[Nobs];
-}
-transformed data{
-     // Define transformed data
 }
 parameters{
      // Define parameters to estimate
@@ -63,4 +48,3 @@ generated quantities {
        log_lik_methyl[i] = normal_lpdf(methyl[i] | mu_methyl[i], sigma_methyl);
      }
 }
-

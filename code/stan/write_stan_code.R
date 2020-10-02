@@ -6,7 +6,7 @@ setwd("C:/Users/timbv/Documents/GitHub/MS-Thesis")
 base <- bayesvl()
 base <- bvl_addNode(base, "methyl", "norm")
 base <- bvl_addNode(base, "metab", "norm")
-base <- bvl_addNode(base, "t1d", "bern")
+base <- bvl_addNode(base, "t1d", "binom")
 # Add arcs
 # 1
 s1 <- bvl_addArc(base,"metab","methyl")
@@ -81,7 +81,7 @@ s23 <- bvl_addArc(base,"metab","t1d")
 # 24
 s24 <- bvl_addArc(base,"metab","methyl")
 # Write all stan code, just in case
-lapply(paste0("s",1:24), function(x){
-  dag <- get(x)
-  write(bvl_model2Stan(dag),file = paste0("./code/stan/",x,".stan"))
-  })
+# lapply(paste0("s",1:24), function(x){
+#   dag <- get(x)
+#   write(bvl_model2Stan(dag),file = paste0("./code/stan/",x,".stan"))
+#   })
