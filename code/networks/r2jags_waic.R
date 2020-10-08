@@ -29,7 +29,7 @@ dfs <- lapply(1:nsim,function(x){
   df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
   return(df)
 })
-# DIC for each model
+# WAIC for each model
 all_waics = lapply(dfs,function(x){
   jags_data =
     list(t1d=c(x$t1d),methyl=c(x$methyl),
