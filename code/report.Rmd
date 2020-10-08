@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,dpi = 600)
-knitr::opts_knit$set(root.dir = "/Users/timvigers/Documents/GitHub/MS-Thesis")
+knitr::opts_knit$set(root.dir = "C:/Users/timbv/Documents/GitHub/MS-Thesis")
 library(tidyverse)
 library(patchwork)
 library(DiagrammeR)

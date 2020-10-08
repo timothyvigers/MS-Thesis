@@ -1,65 +1,53 @@
 library(R2jags)
-library(parallel)
+library(loo)
 # Load data
-setwd("/Users/timvigers/Documents/GitHub/MS-Thesis")
+setwd("/home/vigerst/MS-Thesis")
 load("./data/networks/pair_data.Rdata")
 load("./data/networks/cits.Rdata")
-set.seed(1017)
-# MCMC parameters
-n_adapt = 1000
-iter = 10000
+source("./code/networks/r2jags_structures.R")
+# Permutation and MCMC parameters
+cores = 24
+n = 160
+nsim = 100
 vars = c("alpha0","alpha","beta0","beta","gamma0","gamma","LogLik")
-# Unique pairs from cit package
-cits = cits[!(duplicated(cits[,c("methyl","metab")])),]
-# Parallel
-# Make cluster
-no_cores = 10
-cl <- makeCluster(no_cores,type = "FORK")
+# Structure 1: metabolite depends on T1D, methylation depends on T1D and metabolite
+## True values
+## T1D -> metab
+alpha0 <- 5 # Intercept
+alpha <- 2 # Slope
+## methyl | T1D, metab
+int <- 10 # True intercept
+beta <- 8 # T1D effect
+gamma <- 5 # Metab effect
+# Multiple simulations
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  t1d <- rbinom(n,1,prob = 0.5) # Generate T1D cases and controls - our dataset is evenly split
+  metab <- rnorm(n, mean = alpha0 + alpha*t1d, sd = 1) # Outcome
+  methyl <- rnorm(n, mean = int + beta*t1d + gamma*metab, sd = 1) # Outcome
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
 # DIC for each model
-all_dics = parApply(cl=cl,cits,1,function(x){
-  methyl = as.character(x["methyl"])
-  metab = as.character(x["metab"])
-  temp = pair_data[,c("T1Dgroup",methyl,metab)]
-  temp = temp[complete.cases(temp),]
-  temp$T1Dgroup = ifelse(temp$T1Dgroup == "T1D control",0,1)
-  N = nrow(temp)
-  jags_data = list(t1d=c(temp[,"T1Dgroup"]),methyl=c(temp[,methyl]),
-                   metab=c(temp[,metab]),
-                   N=N)
-  # R2jags
-  fit_lm1 <- jags(data = jags_data, parameters.to.save = vars, model.file = struct1_jags,
-                  n.chains = 2, n.iter = 10000, n.burnin = 1000)
-  # data for jags
- 
-  # Test all structures
-  dics = lapply(paste0("struct",1:24), function(x){
-    mod = jags.model(paste0("./code/jags/",x,".jags"),quiet=T,
-                     data = jags_data, n.adapt = n_adapt,n.chains = 2)
-    dic = dic.samples(mod,n.iter = iter,progress.bar = "none")
-    return(round(sum(dic$deviance) + sum(dic$penalty),1))
+all_waics = lapply(dfs,function(x){
+  jags_data =
+    list(t1d=c(x$t1d),methyl=c(x$methyl),
+         metab=c(x$metab),N=n)
+  # R2jags - try all structures
+  waics <- lapply(paste0("struct",1:24), function(w){
+    j <- get(paste0(w,"_jags"))
+    fit_lm <- 
+      jags.parallel(data = jags_data,n.cluster = cores,
+                            parameters.to.save = vars,model.file = j,
+                            n.chains = 2, n.iter = 10000, n.burnin = 1000)
+    loglik <- fit_lm$BUGSoutput$sims.list$LogLik
+    waic <- suppressWarnings(waic(loglik))
+    loo <- suppressWarnings(loo(loglik,cores = cores))
+    return(c(waic$estimates["waic",1],loo$estimates["looic",1]))
   })
-  return(unlist(dics))
+  waics <- as.data.frame(do.call(rbind,waics))
+  colnames(waics) <- c("waic","looic")
+  return(waics)
 })
-save(all_dics,file = "./data/networks/all_dic.Rdata")
-# Samples for all models
-all_samples = parApply(cl=cl,cits,1,function(x){
-  methyl = as.character(x["methyl"])
-  metab = as.character(x["metab"])
-  temp = pair_data[,c("T1Dgroup",methyl,metab)]
-  temp = temp[complete.cases(temp),]
-  temp$T1Dgroup = ifelse(temp$T1Dgroup == "T1D control",0,1)
-  # data for jags
-  N = nrow(temp)
-  jags_data = list(t1d=c(temp[,"T1Dgroup"]),methyl=c(temp[,methyl]),
-                   metab=c(temp[,metab]),
-                   N=N)
-  # Test all structures
-  samples = lapply(paste0("struct",1:24), function(x){
-    mod = jags.model(paste0("./code/jags/",x,".jags"),quiet=T,
-                     data = jags_data, n.adapt = n_adapt,n.chains = 2)
-    coda = coda.samples(mod,variable.names = vars,n.iter = iter,progress.bar="none")
-    return(coda)
-  })
-  return(samples)
-})
-save(all_samples,file = "./data/networks/all_samples.Rdata")
+save(all_waics,file = "./data/networks/all_waic.Rdata")
