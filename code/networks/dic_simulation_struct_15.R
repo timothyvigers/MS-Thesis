@@ -11,7 +11,7 @@ n_adapt = 1000
 iter = 10000
 vars = c("alpha0","alpha","beta0","beta","gamma0","gamma")
 
-# Structure 10: metabolite affect t1d and methylation
+# Structure 15: metabolite affect t1d and methylation
 ## True values
 ## T1D | metab
 alpha0 <- 1 # Intercept
