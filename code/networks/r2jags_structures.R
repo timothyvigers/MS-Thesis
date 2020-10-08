@@ -48,7 +48,7 @@ struct3_jags <- function(){
     t1d[i] ~ dbern(q[i])
     logit(q[i]) <- int + alpha*metab[i] + beta*methyl[i]
     # Log likelihood for the network
-    LogLik[i] <- log(dbin(t1d[i],logit(q[i]),1))
+    LogLik[i] <- log(dbin(t1d[i],q[i],1))
   }
   # Very flat priors
   int ~ dnorm(0,0.001)
@@ -90,7 +90,7 @@ struct5_jags <- function(){
     t1d[i] ~ dbern(q[i])
     logit(q[i]) <- int + beta*methyl[i] + alpha*metab[i]
     # Log likelihood for the network
-    LogLik[i] <- log(dbin(t1d[i],logit(q[i]),1))
+    LogLik[i] <- log(dbin(t1d[i],q[i],1))
   }
   # Very flat priors
   alpha ~ dnorm(0,0.001)
@@ -190,7 +190,7 @@ struct10_jags <- function(){
     t1d[i] ~ dbern(q[i])
     logit(q[i]) <- int + alpha*metab[i] + beta*methyl[i]
     # Log likelihood for the network
-    LogLik[i] <- log(dbin(t1d[i],logit(q[i]),1))
+    LogLik[i] <- log(dbin(t1d[i],q[i],1))
   }
   # Very flat priors
   int ~ dnorm(0,0.001)
@@ -210,7 +210,7 @@ struct11_jags <- function(){
     metab[i] ~ dnorm(gamma0 + gamma*methyl[i], tau)
     # Log likelihood for the network
     LogLik[i] <- log(dnorm(metab[i],gamma0 + gamma*methyl[i], tau)) + 
-      log(dbin(t1d[i],logit(q[i]),1))
+      log(dbin(t1d[i],q[i],1))
   }
   # Very flat priors
   beta0 ~ dnorm(0,0.001)
@@ -249,7 +249,7 @@ struct13_jags <- function(){
     t1d[i] ~ dbern(q[i])
     logit(q[i]) <- beta0 + beta*methyl[i]
     # Log likelihood for the network
-    LogLik[i] <- log(dbin(t1d[i],logit(q[i]),1))
+    LogLik[i] <- log(dbin(t1d[i],q[i],1))
   }
   # Very flat priors
   beta0 ~ dnorm(0,0.001)
@@ -285,8 +285,8 @@ struct15_jags <- function(){
     t1d[i] ~ dbern(q[i])
     logit(q[i]) <- alpha0 + alpha*metab[i]
     # Log likelihood for the network
-    LogLik[i] <- log(dnorm(methyl[i],alpha0 + alpha*metab[i], tau)) +
-      log(dbin(t1d[i],logit(q[i]),1))
+    LogLik[i] <- log(dnorm(methyl[i],gamma0 + gamma*metab[i], tau)) +
+      log(dbin(t1d[i],q[i],1))
   }
  # Very flat priors
   alpha0 ~ dnorm(0,0.001)
@@ -325,7 +325,7 @@ struct17_jags <- function(){
     t1d[i] ~ dbern(q[i])
     logit(q[i]) <- alpha0 + alpha*metab[i]
     # Log likelihood for the network
-    LogLik[i] <- log(dbin(t1d[i],logit(q[i]),1))
+    LogLik[i] <- log(dbin(t1d[i],q[i],1))
   }
   # Very flat priors
   alpha0 ~ dnorm(0,0.001)
@@ -389,7 +389,7 @@ struct21_jags <- function(){
     t1d[i] ~ dbern(q[i])
     logit(q[i]) <- beta0 + beta*methyl[i]
     # Log likelihood for the network
-    LogLik[i] <- log(dbin(t1d[i],logit(q[i]),1))
+    LogLik[i] <- log(dbin(t1d[i],q[i],1))
   }
   # Very flat priors
   beta0 ~ dnorm(0,0.001)
@@ -417,7 +417,7 @@ struct23_jags <- function(){
     t1d[i] ~ dbern(q[i])
     logit(q[i]) <- alpha0 + alpha*metab[i]
     # Log likelihood for the network
-    LogLik[i] <- log(dbin(t1d[i],logit(q[i]),1))
+    LogLik[i] <- log(dbin(t1d[i],q[i],1))
   }
   # Very flat priors
   alpha0 ~ dnorm(0,0.001)
