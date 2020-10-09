@@ -62,6 +62,6 @@ all_learned = lapply(dfs,function(x){
                   abs(score(model2network(correct),x)-score(learned,x)))
   return(check)
 })
-struct10_learned_sim <- as.data.frame(unlist(all_learned))
-save(struct10_learned_sim,file = "./data/networks/struct10_learned_sim.Rdata")
+struct15_learned_sim <- as.data.frame(unlist(all_learned))
+save(struct15_learned_sim,file = "./data/networks/struct15_learned_sim.Rdata")
 
