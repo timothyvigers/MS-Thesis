@@ -18,12 +18,13 @@ bnlearn_perms = apply(cits,1,function(x){
   pair$T1Dgroup[pair$T1Dgroup == "T1D case"] = 1
   pair$T1Dgroup = as.numeric(pair$T1Dgroup) + rnorm(nrow(pair),sd = 0.0001)
   true_score <- score(hc(pair),pair)
+  true_struct <- modelstring(hc(pair))
   perm_scores <- lapply(1:nperm, function(x){
     set.seed(1016+x)
     pair_perm <- pair
     pair_perm$T1Dgroup <- sample(pair_perm$T1Dgroup,replace = T)
     pair_perm[,methyl] <- sample(pair_perm[,methyl],replace = T)
-    perm_score <- score(hc(pair_perm),pair_perm)
+    perm_score <- score(model2network(true_struct),pair_perm)
     perm_score
   })
   return(list(as.data.frame(unlist(perm_scores)),true_score))
