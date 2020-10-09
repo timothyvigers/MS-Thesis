@@ -36,8 +36,6 @@ source("./code/networks/network_structures.R")
 
 ## Network structures and models
 
-### Structure
-
 ```{r eval=FALSE}
 ndf <-
   create_node_df(
@@ -86,47 +84,7 @@ $$
 \tau \sim \text{Gamma}(0.0001,0.0001)
 $$
 
-```{r eval=FALSE}
-# Plot all structures with DiagrammR
-l <- lapply(paste0("struct",1:24), function(x){
-  net <- model2network(get(x))
-  d <- as.data.frame(net$arcs)
-  d[d == "methyl"] <- 1
-  d[d == "metab"] <- 2
-  d[d == "T1Dgroup"] <- 3
-  edf <- create_edge_df(from = c(d$from),to = d$to)
-  graph <- 
-    create_graph(
-      nodes_df = ndf,
-      edges_df = edf
-    )
-  return(graph)
-})
-l[[1]] %>% render_graph(layout = "kk",as_svg = T)
-l[[2]] %>% render_graph(layout = "kk",as_svg = T)
-l[[3]] %>% render_graph(layout = "kk",as_svg = T)
-l[[4]] %>% render_graph(layout = "kk",as_svg = T)
-l[[5]] %>% render_graph(layout = "kk",as_svg = T)
-l[[6]] %>% render_graph(layout = "kk",as_svg = T)
-l[[7]] %>% render_graph(layout = "kk",as_svg = T)
-l[[8]] %>% render_graph(layout = "kk",as_svg = T)
-l[[9]] %>% render_graph(layout = "kk",as_svg = T)
-l[[10]] %>% render_graph(layout = "kk",as_svg = T)
-l[[11]] %>% render_graph(layout = "kk",as_svg = T)
-l[[12]] %>% render_graph(layout = "kk",as_svg = T)
-l[[13]] %>% render_graph(layout = "kk",as_svg = T)
-l[[14]] %>% render_graph(layout = "kk",as_svg = T)
-l[[15]] %>% render_graph(layout = "kk",as_svg = T)
-l[[16]] %>% render_graph(layout = "kk",as_svg = T)
-l[[17]] %>% render_graph(layout = "kk",as_svg = T)
-l[[18]] %>% render_graph(layout = "kk",as_svg = T)
-l[[19]] %>% render_graph(layout = "kk",as_svg = T)
-l[[20]] %>% render_graph(layout = "kk",as_svg = T)
-l[[21]] %>% render_graph(layout = "kk",as_svg = T)
-l[[22]] %>% render_graph(layout = "kk",as_svg = T)
-l[[23]] %>% render_graph(layout = "kk",as_svg = T)
-l[[24]] %>% render_graph(layout = "kk",as_svg = T)
-```
+### All Structures
 
 ```{r message=FALSE,fig.height=12,fig.width=14}
 par(mar=c(1,1,1,1))
@@ -391,7 +349,8 @@ invisible(lapply(paste0("struct",1:24), function(x){
 ```{r bnlearn data}
 load("./data/networks/struct1_learned_sim.Rdata")
 load("./data/networks/struct15_learned_sim.Rdata")
-load("./data/networks/bnlearn_perms.Rdata")
+load("./data/networks/bnlearn_score_perms.Rdata")
+load("./data/networks/bnlearn_struct_perms.Rdata")
 ```
 
 ## Simulation Results
@@ -411,7 +370,7 @@ graphviz.plot(net,main = "Structure 1",shape = "ellipse")
 
 A total of 10,000 datasets were simulated to follow this structure, and evaluated with the BIC-based hill-climbing algorithm implemented in bnlearn (in bnlearn higher scores are better). Random noise was added to T1D status (coded as 0 for control and 1 for case), to "trick" bnlearn into treating T1D as a continuous variable.
 
-Out of the 10,000 simulated datasets, bnlearn picked structure 1 `r sum(struct1_learned_sim[,1]=="Correct")` times (`r round(sum(struct1_learned_sim[,1]=="Correct")/100,3)`%) with noise distributed as $\mathcal{N}(0,0.0001)$. With the SD of the error increased to 0.001 the results were exactly the same, but the percentage of correct networks decreased to 98.29% with SD = 0.1 and 16.42% with SD = 1. These results were approximately the same for 10 different random seeds.
+Out of the 10,000 simulated datasets, bnlearn picked structure 1 `r sum(struct1_learned_sim[,1]=="Correct")` times (`r sum(struct1_learned_sim[,1]=="Correct")/100`%) with noise distributed as $\mathcal{N}(0,0.0001)$. With the SD of the error increased to 0.001 the results were exactly the same, but the percentage of correct networks decreased to 98.29% with SD = 0.1 and 16.42% with SD = 1. These results were approximately the same for 10 different random seeds.
 
 ### Structure 15
 
@@ -425,7 +384,8 @@ m <- gsub("T1Dgroup","T1D Status",m)
 net <- model2network(m)
 graphviz.plot(net,main = "Structure 15",shape = "ellipse")
 ```
-Out of the 10,000 simulated datasets, bnlearn picked structure 15 `r sum(struct15_learned_sim[,1]=="Correct")` times (`r sum(struct1_learned_sim[,1]=="Correct")/100`%) with noise distributed as $\mathcal{N}(0,0.0001)$. However, the difference in BIC between the learned structure and the correct structure was less than two `r sum(struct15_learned_sim[,1]<2)/100`% of the time.
+
+Out of the 10,000 simulated datasets, bnlearn picked structure 15 `r sum(struct15_learned_sim[,1]=="Correct")` times (`r sum(struct15_learned_sim[,1]=="Correct")/100`%) with noise distributed as $\mathcal{N}(0,0.0001)$. However, the difference in BIC between the learned structure and the correct structure was less than two `r sum(struct15_learned_sim[,1]<2)/100`% of the time.
 
 ```{r}
 hist(struct15_learned_sim[,1],xlab = "Difference in BIC",
@@ -434,25 +394,40 @@ hist(struct15_learned_sim[,1],xlab = "Difference in BIC",
 
 ## Permutation Tests
 
-For each of the CIT-selected pairs, data was permuted 1000 times to "break" the correlation between all three nodes. For each permutation, BIC was calculated for the algorithmically-chosen "best" network structure. The true BIC value for each metabolite-methylation pair was compared to the permuted values to generate a permutation-based p value. P-values represent the proportion of times that the permuted score is greater than the true value (i.e. how often it is "better").
+For each of the CIT-selected pairs, data was permuted 1000 times to "break" the correlation between all three nodes. For each permutation, BIC was calculated for the algorithmically-chosen "best" network structure. The true BIC value for each metabolite-methylation pair was compared to the distribution of permuted scores to generate a permutation-based p value. P-values represent the proportion of times that the permuted score is greater than the true value (i.e. how often it is "better").
 
 ### Permutation P Values
 
 ```{r}
-ps <- lapply(bnlearn_perms, function(x){
+ps <- lapply(bnlearn_score_perms, function(x){
   perms <- as.data.frame(x[[1]])
   true <- x[[2]]
   (sum(perms>true)+1)/(nrow(perms)+1)
 })
-hist(unlist(ps),main = "Histogram of permutation p values",xlab = "p")
+hist(unlist(ps),main = "Permutation p values",xlab = "p")
 ```
 
-### Sample Permutation Plots
+### Permutation Average Difference
+
+Generally speaking, the "true" BIC was significantly better than the permuted score:
+
+```{r}
+mean_diffs <- lapply(bnlearn_score_perms, function(x){
+  perms <- as.data.frame(x[[1]])
+  true <- x[[2]]
+  diff <- true - perms
+  mean(diff[,1])
+})
+hist(unlist(mean_diffs),xlab = "Average difference",
+     main = "Average difference between true and permuted score")
+```
+
+### Score Permutation Plots
 
 Each plot shows the distribution of BIC for the best network structure calculated for permuted data. The red line indicated the true BIC.
 
 ```{r}
-invisible(lapply(bnlearn_perms[1:10], function(x){
+invisible(lapply(bnlearn_score_perms[1:10], function(x){
   perms <- as.data.frame(x[[1]])
   true <- x[[2]]
   p <- ggplot(perms,aes(x = `unlist(perm_scores)`)) + 
@@ -461,3 +436,53 @@ invisible(lapply(bnlearn_perms[1:10], function(x){
   print(p)
 }))
 ```
+
+### Structure Permutations
+
+For the CIT-selected pairs, the learned structure from permuted data was compared to the "true" structure. Across all pairs, the permuted structure matched the true structure a maximum of two times (0.2%), and this was only true of 5 unique pairs. For 40 pairs the maximum was 1 match, and the remaining 94 had no matches.
+
+```{r}
+matching_structs <- lapply(bnlearn_struct_perms, function(x){
+  sum(x)
+})
+hist(unlist(matching_structs),breaks = 0:2,
+     main = "Number of permutations matching true structure",
+     xlab = "Matches")
+```
+
+# WAIC
+
+### Structure 1
+
+Network structure 1 was simulated as above (this time for only 100 datasets because JAGS is much slower than bnlearn), and WAIC was calculated for each network structure. In all simulations, WAIC failed to identify the correct network structure and only selected structures 4 (96%) or 18 (4%):
+
+```{r}
+load("./data/networks/all_waic.Rdata")
+struct_chosen <- lapply(all_waics, function(w){
+  which.min(w$waic)
+})
+# Plot 1
+m <- get("struct1")
+m <- gsub("methyl","Methylation",m)
+m <- gsub("metab","Metabolite",m)
+m <- gsub("T1Dgroup","T1D Status",m)
+net <- model2network(m)
+graphviz.plot(net,main = "Structure 1",shape = "ellipse")
+# Plot 4
+m <- get("struct4")
+m <- gsub("methyl","Methylation",m)
+m <- gsub("metab","Metabolite",m)
+m <- gsub("T1Dgroup","T1D Status",m)
+net <- model2network(m)
+graphviz.plot(net,main = "Structure 4",shape = "ellipse")
+# Plot 18
+m <- get("struct18")
+m <- gsub("methyl","Methylation",m)
+m <- gsub("metab","Metabolite",m)
+m <- gsub("T1Dgroup","T1D Status",m)
+net <- model2network(m)
+graphviz.plot(net,main = "Structure 18",shape = "ellipse")
+```
+
+So, WAIC appears to be correctly identifying the fact that there are three arcs, but still struggles with the direction. This is a slight improvement over DIC, but suggests that WAIC is not an ideal metric for network discovery.
+
