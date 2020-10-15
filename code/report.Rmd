@@ -7,28 +7,29 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-knitr::opts_knit$set(root.dir = "C:/Users/timbv/Documents/GitHub/MS-Thesis")
-library(tidyverse)
+knitr::opts_knit$set(root.dir = "/home/tim/Documents/GitHub/MS-Thesis")
+#library(tidyverse)
 library(patchwork)
 library(DiagrammeR)
 library(knitr)
 library(bnlearn)
-library(rjags)
+library(ggplot2)
+#library(rjags)
 ```
 
 ```{r load datasets}
-load("./data/networks/pair_data.Rdata")
-load("./data/networks/cits.Rdata")
-cits = cits[!(duplicated(cits[,c("methyl","metab")])),]
-load("./data/networks/subset_mcmc_perms.Rdata")
-subset_perms <- all_perms
-load("./data/networks/all_mcmc_perms.Rdata")
-load("./data/networks/pair_list.Rdata")
-load("./data/networks/all_mcmc_perms_methyl_scaled.Rdata")
-load("./data/networks/subset_mcmc_perms_methyl_scaled.Rdata")
-load("./data/networks/mcmc_sim_perms.Rdata")
-load("./data/networks/mcmc_sim_perms_metab_scaled.Rdata")
-load("./data/networks/mcmc_sim_perms_both_scaled.Rdata")
+# load("./data/networks/pair_data.Rdata")
+# load("./data/networks/cits.Rdata")
+# cits = cits[!(duplicated(cits[,c("methyl","metab")])),]
+# load("./data/networks/subset_mcmc_perms.Rdata")
+# subset_perms <- all_perms
+# load("./data/networks/all_mcmc_perms.Rdata")
+# load("./data/networks/pair_list.Rdata")
+# load("./data/networks/all_mcmc_perms_methyl_scaled.Rdata")
+# load("./data/networks/subset_mcmc_perms_methyl_scaled.Rdata")
+# load("./data/networks/mcmc_sim_perms.Rdata")
+# load("./data/networks/mcmc_sim_perms_metab_scaled.Rdata")
+# load("./data/networks/mcmc_sim_perms_both_scaled.Rdata")
 source("./code/networks/network_structures.R")
 ```
 

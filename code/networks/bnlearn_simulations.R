@@ -1,6 +1,6 @@
 library(bnlearn)
 set.seed(1017)
-setwd("C:/Users/timbv/Documents/GitHub/MS-Thesis")
+setwd("/home/tim/Documents/GitHub/MS-Thesis")
 ## Simulate structure 1:
 nsim = 10000
 n = 160
@@ -64,4 +64,3 @@ all_learned = lapply(dfs,function(x){
 })
 struct15_learned_sim <- as.data.frame(unlist(all_learned))
 save(struct15_learned_sim,file = "./data/networks/struct15_learned_sim.Rdata")
-
