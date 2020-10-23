@@ -1,0 +1,547 @@
+---
+title: "bnlearn Simulations"
+author: "Tim Vigers"
+date: "10/23/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,message = FALSE)
+knitr::opts_knit$set(root.dir = "/home/tim/Documents/GitHub/MS-Thesis")
+library(bnlearn)
+library(DiagrammeR)
+library(knitr)
+source("./code/networks/network_structures.R")
+set.seed(1017)
+```
+
+```{r parameters}
+nsim = 10000
+n = 160
+## True values
+## T1D -> metab
+alpha <- 2 # Slope
+## methyl | T1D, metab
+beta <- 8 # T1D effect
+gamma <- 5 # Metab effect
+```
+
+```{r check functions}
+sim_eval <- function(sims,correct,str_number){
+  checks = lapply(sims,function(x){
+    # Add noise to T1D
+    x$t1d = as.numeric(x$t1d) + rnorm(n,sd = 0.0001)
+    learned <- hc(x)
+    mod <- modelstring(learned)
+    check <- ifelse(mod == correct,1,0)
+    l <- score(learned,x)
+    c <- score(model2network(correct),x)
+    return(c(check,l,c,mod))
+  })
+  res <- as.data.frame(do.call(rbind,checks))
+  res <- cbind(str_number,res)
+  colnames(res) = c("str_number","correct","bic_learned","bic_correct",
+                    "learned_struct")
+  res[,1:4] <- lapply(res[,1:4],as.numeric)
+  res$bic_diff <- res$bic_correct - res$bic_learned
+  return(res[,c("str_number","correct","bic_learned","bic_correct","bic_diff",
+                "learned_struct")])
+}
+table_eval <- function(eval_res,correct){
+  plot(model2network(correct),main = "Correct Structure")
+  sum_t = as.data.frame(table(eval_res$learned_struct))
+  colnames(sum_t)[1] = "Structure"
+  print(kable(sum_t))
+  apply(sum_t,1,function(r){
+    plot(model2network(as.character(r["Structure"])),
+         main = paste0("n = ",r["Freq"]))
+  })
+}
+plot_eval <- function(eval_res){
+  hist(eval_res$bic_learned,xlab = "Learned BIC",main = "")
+  hist(eval_res$bic_learned,xlab = "Correct BIC",main = "")
+  hist(eval_res$bic_diff,xlab = "BIC Correct - BIC Learned",main = "")
+}
+```
+
+# Structure 1
+
+```{r}
+correct = "[t1d][metab|t1d][methyl|t1d:metab]"
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  t1d <- rbinom(n,1,prob = 0.5)
+  metab <- rnorm(n, mean = alpha*t1d) 
+  methyl <- rnorm(n, mean = beta*t1d + gamma*metab)
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_1_res <- sim_eval(dfs,correct,1)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_1_res$correct)` times (`r sum(str_1_res$correct)/nrow(str_1_res) * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_1_res,correct))
+```
+
+# Structure 2
+
+```{r}
+correct = "[t1d][methyl|t1d][metab|methyl:t1d]"
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  t1d <- rbinom(n,1,prob = 0.5)
+  methyl <- rnorm(n, mean = beta*t1d)
+  metab <- rnorm(n, mean = alpha*t1d + gamma*methyl) 
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_2_res <- sim_eval(dfs,correct,2)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_2_res$correct)` times (`r sum(str_2_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_2_res,correct))
+```
+
+```{r}
+plot_eval(str_2_res)
+```
+
+# Structure 3
+
+```{r}
+correct = "[methyl][metab|methyl][t1d|metab:methyl]"
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  methyl <- rnorm(n)
+  metab <- rnorm(n, mean = gamma*methyl)
+  t1d <- rbinom(n,1,prob = plogis(alpha*metab + beta*methyl))
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_3_res <- sim_eval(dfs,correct,3)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_3_res$correct)` times (`r sum(str_3_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_3_res,correct))
+```
+
+```{r}
+plot_eval(str_3_res)
+```
+
+# Structure 4
+
+```{r}
+correct = "[methyl][metab|methyl:t1d][t1d|methyl]"
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  methyl <- rnorm(n)
+  t1d <- rbinom(n,1,prob = plogis(beta*methyl))
+  metab <- rnorm(n, mean = gamma*methyl + alpha*t1d)
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_4_res <- sim_eval(dfs,correct,4)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_4_res$correct)` times (`r sum(str_4_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_4_res,correct))
+```
+
+```{r}
+plot_eval(str_4_res)
+```
+
+# Structure 5
+
+```{r}
+correct = "[metab][methyl|metab][t1d|metab:methyl]"
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  metab <- rnorm(n)
+  methyl <- rnorm(n, mean = gamma*metab)
+  t1d <- rbinom(n,1,prob = plogis(alpha*metab + beta*methyl))
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_5_res <- sim_eval(dfs,correct,5)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_5_res$correct)` times (`r sum(str_5_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_5_res,correct))
+```
+
+```{r}
+plot_eval(str_5_res)
+```
+
+# Structure 6
+
+```{r}
+correct = "[metab][t1d|metab][methyl|metab:t1d]"
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  metab <- rnorm(n)
+  t1d <- rbinom(n,1,prob = plogis(alpha*metab))
+  methyl <- rnorm(n, mean = gamma*metab + beta*t1d)
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_6_res <- sim_eval(dfs,correct,6)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_6_res$correct)` times (`r sum(str_6_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_6_res,correct))
+```
+
+```{r}
+plot_eval(str_6_res)
+```
+
+# Structure 7
+
+```{r}
+correct = "[t1d][metab|t1d][methyl|t1d]"
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  t1d <- rbinom(n,1,prob = 0.5)
+  methyl <- rnorm(n, mean = beta*t1d)
+  metab <- rnorm(n, mean = alpha*t1d) 
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_7_res <- sim_eval(dfs,correct,7)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_7_res$correct)` times (`r sum(str_7_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_7_res,correct))
+```
+
+```{r}
+plot_eval(str_7_res)
+```
+
+# Structure 8
+
+```{r}
+correct = "[methyl][t1d|methyl][metab|t1d]"
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  methyl <- rnorm(n)
+  t1d <- rbinom(n,1,prob = plogis(beta*methyl))
+  metab <- rnorm(n, mean = alpha*t1d) 
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_8_res <- sim_eval(dfs,correct,8)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_8_res$correct)` times (`r sum(str_8_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_8_res,correct))
+```
+
+```{r}
+plot_eval(str_8_res)
+```
+
+# Structure 9
+
+```{r}
+correct = "[metab][t1d|metab][methyl|t1d]"
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  metab <- rnorm(n)
+  t1d <- rbinom(n,1,prob = plogis(alpha*metab))
+  methyl <- rnorm(n, mean = beta*t1d) 
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_9_res <- sim_eval(dfs,correct,9)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_9_res$correct)` times (`r sum(str_9_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_9_res,correct))
+```
+
+```{r}
+plot_eval(str_9_res)
+```
+
+# Structure 10
+
+```{r}
+correct = "[metab][methyl][t1d|metab:methyl]"
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  metab <- rnorm(n)
+  methyl <- rnorm(n)
+  t1d <- rbinom(n,1,prob = plogis(alpha*metab + beta*methyl))
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_10_res <- sim_eval(dfs,correct,10)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_10_res$correct)` times (`r sum(str_10_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_10_res,correct))
+```
+
+```{r}
+plot_eval(str_10_res)
+```
+
+# Structure 11
+
+```{r}
+correct = "[methyl][metab|methyl][t1d|methyl]"
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  methyl <- rnorm(n)
+  t1d <- rbinom(n,1,prob = plogis(beta*methyl))
+  metab <- rnorm(n,mean = gamma*methyl)
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_11_res <- sim_eval(dfs,correct,11)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_11_res$correct)` times (`r sum(str_11_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_11_res,correct))
+```
+
+```{r}
+plot_eval(str_11_res)
+```
+
+# Structure 12
+
+```{r}
+correct = "[t1d][methyl|t1d][metab|methyl]"
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  t1d <- rbinom(n,1,0.5)
+  methyl <- rnorm(n,mean = beta*t1d)
+  metab <- rnorm(n,mean = gamma*methyl)
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_12_res <- sim_eval(dfs,correct,12)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_12_res$correct)` times (`r sum(str_12_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_12_res,correct))
+```
+
+```{r}
+plot_eval(str_12_res)
+```
+
+# Structure 13
+
+```{r}
+correct = "[metab][methyl|metab][t1d|methyl]"
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  metab <- rnorm(n)
+  methyl <- rnorm(n,mean = gamma*metab)
+  t1d <- rbinom(n,1,prob = plogis(beta*methyl))
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_13_res <- sim_eval(dfs,correct,13)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_13_res$correct)` times (`r sum(str_13_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_13_res,correct))
+```
+
+```{r}
+plot_eval(str_13_res)
+```
+
+# Structure 14
+
+```{r}
+correct = "[metab][t1d][methyl|metab:t1d]"
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  t1d <- rbinom(n,1,0.5)
+  metab <- rnorm(n)
+  methyl <- rnorm(n,mean = gamma*metab + beta*t1d)
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_14_res <- sim_eval(dfs,correct,14)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_14_res$correct)` times (`r sum(str_14_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_14_res,correct))
+```
+
+```{r}
+plot_eval(str_14_res)
+```
+
+# Structure 15
+
+```{r}
+correct = "[metab][methyl|metab][t1d|metab]"
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  metab <- rnorm(n)
+  t1d <- rbinom(n,1,prob = plogis(alpha*metab))
+  methyl <- rnorm(n,mean = gamma*metab)
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_15_res <- sim_eval(dfs,correct,15)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_15_res$correct)` times (`r sum(str_15_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_15_res,correct))
+```
+
+```{r}
+plot_eval(str_15_res)
+```
+
+# Structure 16
+
+```{r}
+correct = "[t1d][metab|t1d][methyl|metab]"
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  t1d <- rbinom(n,1,0.5)
+  metab <- rnorm(n,mean = alpha*t1d)
+  methyl <- rnorm(n,mean = gamma*metab)
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_16_res <- sim_eval(dfs,correct,16)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_16_res$correct)` times (`r sum(str_16_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_16_res,correct))
+```
+
+```{r}
+plot_eval(str_16_res)
+```
+
+# Structure 17
+
+```{r}
+correct = "[methyl][metab|methyl][t1d|metab]"
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  methyl <- rnorm(n)
+  metab <- rnorm(n,mean = gamma*methyl)
+  t1d <- rbinom(n,1,prob = plogis(alpha*metab))
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_17_res <- sim_eval(dfs,correct,17)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_17_res$correct)` times (`r sum(str_17_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_17_res,correct))
+```
+
+```{r}
+plot_eval(str_17_res)
+```
+
+# Structure 18
+
+```{r}
+correct = "[methyl][t1d][metab|methyl:t1d]"
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  t1d <- rbinom(n,1,0.5)
+  methyl <- rnorm(n)
+  metab <- rnorm(n,mean = gamma*methyl + alpha*t1d)
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_18_res <- sim_eval(dfs,correct,18)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_18_res$correct)` times (`r sum(str_18_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_18_res,correct))
+```
+
+```{r}
+plot_eval(str_18_res)
+```
