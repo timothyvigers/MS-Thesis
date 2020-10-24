@@ -68,6 +68,7 @@ plot_eval <- function(eval_res){
 
 ```{r}
 correct = "[t1d][metab|t1d][methyl|t1d:metab]"
+correct = modelstring(model2network(correct))
 # Simulate
 dfs <- lapply(1:nsim,function(x){
   set.seed(1016 + x)
@@ -87,10 +88,15 @@ Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_1_r
 invisible(table_eval(str_1_res,correct))
 ```
 
+```{r}
+plot_eval(str_1_res)
+```
+
 # Structure 2
 
 ```{r}
 correct = "[t1d][methyl|t1d][metab|methyl:t1d]"
+correct = modelstring(model2network(correct))
 # Simulate
 dfs <- lapply(1:nsim,function(x){
   set.seed(1016 + x)
@@ -118,11 +124,12 @@ plot_eval(str_2_res)
 
 ```{r}
 correct = "[methyl][metab|methyl][t1d|metab:methyl]"
+correct = modelstring(model2network(correct))
 # Simulate
 dfs <- lapply(1:nsim,function(x){
   set.seed(1016 + x)
   # Simulate data
-  methyl <- rnorm(n)
+  methyl <- rnorm(n,5)
   metab <- rnorm(n, mean = gamma*methyl)
   t1d <- rbinom(n,1,prob = plogis(alpha*metab + beta*methyl))
   df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
@@ -145,11 +152,12 @@ plot_eval(str_3_res)
 
 ```{r}
 correct = "[methyl][metab|methyl:t1d][t1d|methyl]"
+correct = modelstring(model2network(correct))
 # Simulate
 dfs <- lapply(1:nsim,function(x){
   set.seed(1016 + x)
   # Simulate data
-  methyl <- rnorm(n)
+  methyl <- rnorm(n,5)
   t1d <- rbinom(n,1,prob = plogis(beta*methyl))
   metab <- rnorm(n, mean = gamma*methyl + alpha*t1d)
   df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
@@ -172,11 +180,12 @@ plot_eval(str_4_res)
 
 ```{r}
 correct = "[metab][methyl|metab][t1d|metab:methyl]"
+correct = modelstring(model2network(correct))
 # Simulate
 dfs <- lapply(1:nsim,function(x){
   set.seed(1016 + x)
   # Simulate data
-  metab <- rnorm(n)
+  metab <- rnorm(n,5)
   methyl <- rnorm(n, mean = gamma*metab)
   t1d <- rbinom(n,1,prob = plogis(alpha*metab + beta*methyl))
   df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
@@ -199,11 +208,12 @@ plot_eval(str_5_res)
 
 ```{r}
 correct = "[metab][t1d|metab][methyl|metab:t1d]"
+correct = modelstring(model2network(correct))
 # Simulate
 dfs <- lapply(1:nsim,function(x){
   set.seed(1016 + x)
   # Simulate data
-  metab <- rnorm(n)
+  metab <- rnorm(n,5)
   t1d <- rbinom(n,1,prob = plogis(alpha*metab))
   methyl <- rnorm(n, mean = gamma*metab + beta*t1d)
   df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
@@ -226,6 +236,7 @@ plot_eval(str_6_res)
 
 ```{r}
 correct = "[t1d][metab|t1d][methyl|t1d]"
+correct = modelstring(model2network(correct))
 # Simulate
 dfs <- lapply(1:nsim,function(x){
   set.seed(1016 + x)
@@ -253,11 +264,12 @@ plot_eval(str_7_res)
 
 ```{r}
 correct = "[methyl][t1d|methyl][metab|t1d]"
+correct = modelstring(model2network(correct))
 # Simulate
 dfs <- lapply(1:nsim,function(x){
   set.seed(1016 + x)
   # Simulate data
-  methyl <- rnorm(n)
+  methyl <- rnorm(n,5)
   t1d <- rbinom(n,1,prob = plogis(beta*methyl))
   metab <- rnorm(n, mean = alpha*t1d) 
   df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
@@ -280,11 +292,12 @@ plot_eval(str_8_res)
 
 ```{r}
 correct = "[metab][t1d|metab][methyl|t1d]"
+correct = modelstring(model2network(correct))
 # Simulate
 dfs <- lapply(1:nsim,function(x){
   set.seed(1016 + x)
   # Simulate data
-  metab <- rnorm(n)
+  metab <- rnorm(n,5)
   t1d <- rbinom(n,1,prob = plogis(alpha*metab))
   methyl <- rnorm(n, mean = beta*t1d) 
   df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
@@ -307,12 +320,13 @@ plot_eval(str_9_res)
 
 ```{r}
 correct = "[metab][methyl][t1d|metab:methyl]"
+correct = modelstring(model2network(correct))
 # Simulate
 dfs <- lapply(1:nsim,function(x){
   set.seed(1016 + x)
   # Simulate data
-  metab <- rnorm(n)
-  methyl <- rnorm(n)
+  metab <- rnorm(n,5)
+  methyl <- rnorm(n,5)
   t1d <- rbinom(n,1,prob = plogis(alpha*metab + beta*methyl))
   df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
   return(df)
@@ -334,11 +348,12 @@ plot_eval(str_10_res)
 
 ```{r}
 correct = "[methyl][metab|methyl][t1d|methyl]"
+correct = modelstring(model2network(correct))
 # Simulate
 dfs <- lapply(1:nsim,function(x){
   set.seed(1016 + x)
   # Simulate data
-  methyl <- rnorm(n)
+  methyl <- rnorm(n,5)
   t1d <- rbinom(n,1,prob = plogis(beta*methyl))
   metab <- rnorm(n,mean = gamma*methyl)
   df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
@@ -361,6 +376,7 @@ plot_eval(str_11_res)
 
 ```{r}
 correct = "[t1d][methyl|t1d][metab|methyl]"
+correct = modelstring(model2network(correct))
 # Simulate
 dfs <- lapply(1:nsim,function(x){
   set.seed(1016 + x)
@@ -388,11 +404,12 @@ plot_eval(str_12_res)
 
 ```{r}
 correct = "[metab][methyl|metab][t1d|methyl]"
+correct = modelstring(model2network(correct))
 # Simulate
 dfs <- lapply(1:nsim,function(x){
   set.seed(1016 + x)
   # Simulate data
-  metab <- rnorm(n)
+  metab <- rnorm(n,5)
   methyl <- rnorm(n,mean = gamma*metab)
   t1d <- rbinom(n,1,prob = plogis(beta*methyl))
   df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
@@ -415,12 +432,13 @@ plot_eval(str_13_res)
 
 ```{r}
 correct = "[metab][t1d][methyl|metab:t1d]"
+correct = modelstring(model2network(correct))
 # Simulate
 dfs <- lapply(1:nsim,function(x){
   set.seed(1016 + x)
   # Simulate data
   t1d <- rbinom(n,1,0.5)
-  metab <- rnorm(n)
+  metab <- rnorm(n,5)
   methyl <- rnorm(n,mean = gamma*metab + beta*t1d)
   df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
   return(df)
@@ -442,11 +460,12 @@ plot_eval(str_14_res)
 
 ```{r}
 correct = "[metab][methyl|metab][t1d|metab]"
+correct = modelstring(model2network(correct))
 # Simulate
 dfs <- lapply(1:nsim,function(x){
   set.seed(1016 + x)
   # Simulate data
-  metab <- rnorm(n)
+  metab <- rnorm(n,5)
   t1d <- rbinom(n,1,prob = plogis(alpha*metab))
   methyl <- rnorm(n,mean = gamma*metab)
   df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
@@ -469,6 +488,7 @@ plot_eval(str_15_res)
 
 ```{r}
 correct = "[t1d][metab|t1d][methyl|metab]"
+correct = modelstring(model2network(correct))
 # Simulate
 dfs <- lapply(1:nsim,function(x){
   set.seed(1016 + x)
@@ -496,11 +516,12 @@ plot_eval(str_16_res)
 
 ```{r}
 correct = "[methyl][metab|methyl][t1d|metab]"
+correct = modelstring(model2network(correct))
 # Simulate
 dfs <- lapply(1:nsim,function(x){
   set.seed(1016 + x)
   # Simulate data
-  methyl <- rnorm(n)
+  methyl <- rnorm(n,5)
   metab <- rnorm(n,mean = gamma*methyl)
   t1d <- rbinom(n,1,prob = plogis(alpha*metab))
   df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
@@ -523,12 +544,13 @@ plot_eval(str_17_res)
 
 ```{r}
 correct = "[methyl][t1d][metab|methyl:t1d]"
+correct = modelstring(model2network(correct))
 # Simulate
 dfs <- lapply(1:nsim,function(x){
   set.seed(1016 + x)
   # Simulate data
   t1d <- rbinom(n,1,0.5)
-  methyl <- rnorm(n)
+  methyl <- rnorm(n,5)
   metab <- rnorm(n,mean = gamma*methyl + alpha*t1d)
   df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
   return(df)
@@ -544,4 +566,200 @@ invisible(table_eval(str_18_res,correct))
 
 ```{r}
 plot_eval(str_18_res)
+```
+
+# Structure 19
+
+```{r}
+correct = "[methyl|t1d][t1d][metab]"
+correct = modelstring(model2network(correct))
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  t1d <- rbinom(n,1,0.5)
+  methyl <- rnorm(n,mean = beta*t1d)
+  metab <- rnorm(n,5)
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_19_res <- sim_eval(dfs,correct,19)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_19_res$correct)` times (`r sum(str_19_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_19_res,correct))
+```
+
+```{r}
+plot_eval(str_19_res)
+```
+
+# Structure 20
+
+```{r}
+correct = "[methyl][t1d][metab|t1d]"
+correct = modelstring(model2network(correct))
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  t1d <- rbinom(n,1,0.5)
+  metab <- rnorm(n,mean = alpha*t1d)
+  methyl <- rnorm(n,5)
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_20_res <- sim_eval(dfs,correct,20)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_20_res$correct)` times (`r sum(str_20_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_20_res,correct))
+```
+
+```{r}
+plot_eval(str_20_res)
+```
+
+# Structure 21
+
+```{r}
+correct = "[methyl][t1d|methyl][metab]"
+correct = modelstring(model2network(correct))
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  methyl <- rnorm(n,5)
+  t1d <- rbinom(n,1,prob = plogis(beta*methyl))
+  metab <- rnorm(n,5)
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_21_res <- sim_eval(dfs,correct,21)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_21_res$correct)` times (`r sum(str_21_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_21_res,correct))
+```
+
+```{r}
+plot_eval(str_21_res)
+```
+
+# Structure 22
+
+```{r}
+correct = "[methyl][t1d][metab|methyl]"
+correct = modelstring(model2network(correct))
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  methyl <- rnorm(n,5)
+  t1d <- rbinom(n,1,0.5)
+  metab <- rnorm(n,mean = gamma*methyl)
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_22_res <- sim_eval(dfs,correct,22)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_22_res$correct)` times (`r sum(str_22_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_22_res,correct))
+```
+
+```{r}
+plot_eval(str_22_res)
+```
+
+# Structure 23
+
+```{r}
+correct = "[metab][methyl][t1d|metab]"
+correct = modelstring(model2network(correct))
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  metab <- rnorm(n,5)
+  t1d <- rbinom(n,1,prob = plogis(alpha*metab))
+  methyl <- rnorm(n,5)
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_23_res <- sim_eval(dfs,correct,23)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_23_res$correct)` times (`r sum(str_23_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_23_res,correct))
+```
+
+```{r}
+plot_eval(str_23_res)
+```
+
+# Structure 24
+
+```{r}
+correct = "[metab][methyl|metab][t1d]"
+correct = modelstring(model2network(correct))
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  metab <- rnorm(n,5)
+  t1d <- rbinom(n,1,0.5)
+  methyl <- rnorm(n,mean = gamma*metab)
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+str_24_res <- sim_eval(dfs,correct,24)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(str_24_res$correct)` times (`r sum(str_24_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(str_24_res,correct))
+```
+
+```{r}
+plot_eval(str_24_res)
+```
+
+# Continuous Data
+
+```{r}
+correct = "[metab][methyl|metab][t1d|metab:methyl]"
+correct = modelstring(model2network(correct))
+# Simulate
+dfs <- lapply(1:nsim,function(x){
+  set.seed(1016 + x)
+  # Simulate data
+  metab <- rnorm(n,5)
+  methyl <- rnorm(n, mean = gamma*metab)
+  t1d <- rnorm(n,mean = alpha*metab + beta*methyl)
+  df <- data.frame(t1d = t1d,metab = metab,methyl = methyl)
+  return(df)
+})
+cont_res <- sim_eval(dfs,correct,25)
+```
+
+Out of `r nsim` simulations, bnlearn picked the correct structure `r sum(cont_res$correct)` times (`r sum(cont_res$correct)/nsim * 100`%).
+
+```{r,results='asis'}
+invisible(table_eval(cont_res,correct))
+```
+
+```{r}
+plot_eval(cont_res)
 ```
