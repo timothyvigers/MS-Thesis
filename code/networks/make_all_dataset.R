@@ -35,9 +35,6 @@ df = merge(df,lipid,by = "samplekey",all.x = T)
 df = merge(df,oxylipin,by = "samplekey",all.x = T)
 df = merge(df,vitd,by = "samplekey",all.x = T)
 df = df[!duplicated(df$samplekey),]
-# Scale
-vars = min(grep("cg",colnames(df))):ncol(df)
-df[,vars] = lapply(df[,vars], scale)
 # Save
-all_data_methyl_scaled = df
-save(all_data_methyl_scaled,file = "~/MS-Thesis/data/networks/all_data_methyl_scaled.Rdata")
+all_data = df
+save(all_data,file = "~/MS-Thesis/data/networks/all_data.Rdata")
