@@ -12,8 +12,9 @@ library(arsenal)
 library(skimr)
 library(knitr)
 library(tidyverse)
+library(GEOquery)
 ```
 
 ```{r}
-
+load("./data/networks/cits.RData")
 ```
