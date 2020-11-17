@@ -4,6 +4,8 @@ setwd("/home/vigerst/MS-Thesis")
 load("./data/networks/all_data_methyl_scaled.Rdata")
 load("./data/networks/cits.Rdata")
 set.seed(1017)
+# Mediation model lists
+out_list = unique(paste0("factor(T1Dgroup)~",cits$methyl,"+",cits$metab))
 # Cluster
 cl = makeCluster(12,type = "FORK")
 cits_mediation = parLapply(cl,out_list, function(t){
