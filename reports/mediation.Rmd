@@ -1,0 +1,64 @@
+---
+title: "MS Thesis Work"
+author: "Tim Vigers"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_knit$set(root.dir = "C:/Users/tim/Documents/GitHub/MS-Thesis")
+library(flextable)
+library(tidyverse)
+set.seed(1017)
+```
+
+# CIT Results
+
+Of the metabolite - methylation pairs significant by CIT, the there was a relatively even split in terms of which was the mediator:
+
+```{r}
+# Import cit results
+load("./data/networks/cits.Rdata")
+# Annotate
+gctof_anno = read.csv("./data/metabolomics/gctof.featureAnno.csv") %>% 
+  select(BinBase.name,feature_name) %>% rename(name = BinBase.name)
+hilic_anno = read.csv("./data/metabolomics/hilic.featureAnno.csv") %>%
+  select(Metabolite.name,feature_name) %>% rename(name = Metabolite.name)
+lipid_anno = read.csv("./data/metabolomics/lipid.featureAnno.csv") %>%
+  select(Metabolite.name,feature_name) %>% rename(name = Metabolite.name)
+vitd_anno = read.csv("./data/metabolomics/vitD.featureAnno.csv") %>%
+  select(originalName,boxcoxDat_name) %>% 
+  rename(name = originalName,feature_name = boxcoxDat_name)
+oxylipin_anno = 
+  read.csv("./data/metabolomics/oxylipin.featureAnno.csv") %>%
+  select(full.name,cleanedDat_name) %>% 
+  rename(name = full.name,feature_name = cleanedDat_name)
+oxylipin_anno$feature_name = paste0("bc_",oxylipin_anno$feature_name)
+
+anno = bind_rows(gctof_anno,hilic_anno,lipid_anno,vitd_anno,oxylipin_anno)
+
+cits$metab = anno$name[match(cits$metab,anno$feature_name)]
+# Repeats
+repeats = cits[,c("methyl","metab")]
+repeats = repeats[duplicated(repeats),]
+# Convert arrow
+cits$Mediator = factor(cits$direction,levels = c("<",">"),
+                       labels = c("Methylation","Metabolite"))
+# Print
+table(cits$Mediator) %>% as.data.frame(.) %>% rename(Mediator = Var1) %>%
+  flextable()
+```
+
+Of the above `r nrow(cits)` pairs, `r nrow(repeats)` were significant with both the metabolite and methylation probe as a mediator:
+
+```{r}
+repeats %>% rename(Methylation = methyl,Metabolite = metab) %>%
+  flextable() %>% set_table_properties(.,layout = "autofit",width = 0.75)
+```
+
+# Less conservative mediation analysis
+
+```{r}
+
+```
