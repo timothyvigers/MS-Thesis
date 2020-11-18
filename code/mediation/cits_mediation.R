@@ -1,14 +1,13 @@
-library(parallel)
+library(mediation)
 # Load data
-setwd("/home/vigerst/MS-Thesis")
+setwd("C:/Users/tim/Documents/GitHub/MS-Thesis")
 load("./data/networks/all_data_methyl_scaled.Rdata")
 load("./data/networks/cits.Rdata")
 set.seed(1017)
 # Mediation model lists
 out_list = unique(paste0("factor(T1Dgroup)~",cits$methyl,"+",cits$metab))
-# Cluster
-cl = makeCluster(12,type = "FORK")
-cits_mediation = parLapply(cl,out_list, function(t){
+# Iterate through all
+cits_mediation = lapply(out_list, function(t){
   split = strsplit(t,"\\~|\\+")
   y = glm(as.formula(t),data = all_data_methyl_scaled,family = "binomial")
   # methyl mediator
@@ -20,6 +19,5 @@ cits_mediation = parLapply(cl,out_list, function(t){
   m = lm(m2_form,data = all_data_methyl_scaled)
   med2 = mediate(m,y,mediator = split[[1]][3],treat = split[[1]][2])
   # Results - what to report here?
-})
-stopCluster(cl) 
+}) 
 save(cits_mediation,file = "./data/mediation/cits_mediation.Rdata")
