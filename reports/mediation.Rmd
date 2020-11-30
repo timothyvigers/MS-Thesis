@@ -7,10 +7,11 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-knitr::opts_knit$set(root.dir = "C:/Users/tim/Documents/GitHub/MS-Thesis")
+knitr::opts_knit$set(root.dir = "/Users/timvigers/GitHub/MS-Thesis")
 library(mediation)
 library(parallel)
 library(flextable)
+library(diagram)
 library(tidyverse)
 set.seed(1017)
 ```
@@ -63,4 +64,24 @@ repeats %>% rename(Methylation = methyl,Metabolite = metabolite) %>%
 
 ```{r}
 load("./data/mediation/cits_mediation.Rdata")
+# Plot
+data <- c(0, "'a'", 0,
+          0, 0, 0, 
+          "'b'", "'c'", 0)
+M<- matrix (nrow=3, ncol=3, byrow = TRUE, data=data)
+plot<- plotmat (M, pos=c(1,2), 
+                name= c( "M","X", "T1D Status"), 
+                box.type = "rect", box.size = 0.12, box.prop=0.5,  curve=0)
+```
+
+Total effect = c + ab, or the effect of X on Y without controlling for M.
+
+c = the direct effect of X on Y after controlling for M 
+
+Amount of mediation = ab = total effect - c
+
+## Volcano plot of ACME
+
+```{r}
+
 ```
