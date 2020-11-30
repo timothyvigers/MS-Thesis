@@ -1,17 +1,16 @@
 library(mediation)
 library(parallel)
+set.seed(1017)
 # Load data
 setwd("/Users/timvigers/GitHub/MS-Thesis")
 load("./data/networks/all_data_methyl_scaled.Rdata")
-load("./data/networks/cits.Rdata")
-set.seed(1017)
+load("./data/networks/pair_list.Rdata")
 # Mediation model lists
-out_list = unique(paste0("factor(T1Dgroup)~",cits$methyl,"+",cits$metab))
-out_list = out_list[1:2]
+out_list = unique(paste0("factor(T1Dgroup)~",pairs$methyl,"+",pairs$metab))
 # Cluster
 cl = makeCluster(8,type = "FORK")
 # Iterate through all
-cits_mediation = parLapply(cl,out_list, function(t){
+mediation = parLapply(cl,out_list, function(t){
   split = strsplit(t,"\\~|\\+")
   y_mod = glm(as.formula(t),data = all_data_methyl_scaled,family = "binomial")
   # methyl mediator
@@ -31,14 +30,14 @@ cits_mediation = parLapply(cl,out_list, function(t){
   # Results
   r = rbind(r1,r2)
 }) 
-cits_mediation = do.call(rbind,cits_mediation)
-rownames(cits_mediation) = 1:nrow(cits_mediation)
-colnames(cits_mediation) = c("X","M","Total Effect","Total Effect p",
+mediation = do.call(rbind,mediation)
+rownames(mediation) = 1:nrow(mediation)
+colnames(mediation) = c("X","M","Total Effect","Total Effect p",
                              "Average ACME","Average ACME p",
                              "Average ADE","Average ADE p",
                              "Average Prop. Med.","Average Prop. Med. p")
 # Sensitivity analysis for all
-cits_mediation_sensitivity = parLapply(cl,out_list, function(t){
+mediation_sensitivity = parLapply(cl,out_list, function(t){
   split = strsplit(t,"\\~|\\+")
   y = glm(as.formula(t),data = all_data_methyl_scaled,family = binomial("probit"))
   # methyl mediator
@@ -54,6 +53,6 @@ cits_mediation_sensitivity = parLapply(cl,out_list, function(t){
   # Results
   list(sens1,sens2)
 }) 
-save(cits_mediation,file = "./data/mediation/cits_mediation.Rdata")
-save(cits_mediation_sensitivity,file = "./data/mediation/cits_mediation_sensitivity.Rdata")
+save(mediation,file = "./data/mediation/mediation.Rdata")
+save(mediation_sensitivity,file = "./data/mediation/mediation_sensitivity.Rdata")
 stopCluster(cl)
