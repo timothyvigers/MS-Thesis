@@ -2,7 +2,7 @@ library(mediation)
 library(parallel)
 set.seed(1017)
 # Load data
-setwd("/Users/timvigers/GitHub/MS-Thesis")
+setwd("/home/vigerst/MS-Thesis")
 load("./data/networks/all_data_methyl_scaled.Rdata")
 load("./data/networks/pair_list.Rdata")
 # Mediation model lists
