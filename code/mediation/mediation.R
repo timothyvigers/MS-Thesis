@@ -11,7 +11,7 @@ out_list = unique(paste0("factor(T1Dgroup)~",pairs$methyl,"+",pairs$metab))
 cl = makeCluster(8,type = "FORK")
 # Iterate through all
 mediation = parLapply(cl,out_list, function(t){
-  split = strsplit(t,"\\~|\\+")
+  try({split = strsplit(t,"\\~|\\+")
   y_mod = glm(as.formula(t),data = all_data_methyl_scaled,family = "binomial")
   # methyl mediator
   m = split[[1]][2]
@@ -28,17 +28,17 @@ mediation = parLapply(cl,out_list, function(t){
   med2 = mediate(m_mod,y_mod,mediator = m,treat = x)
   r2 = c(x,m,med2$tau.coef,med2$tau.p,med2$d.avg,med2$d.avg.p,med2$z.avg,med2$z.avg.p,med2$n.avg,med2$n.avg.p)
   # Results
-  r = rbind(r1,r2)
+  r = rbind(r1,r2)})
 }) 
 mediation = do.call(rbind,mediation)
 rownames(mediation) = 1:nrow(mediation)
 colnames(mediation) = c("X","M","Total Effect","Total Effect p",
-                             "Average ACME","Average ACME p",
-                             "Average ADE","Average ADE p",
-                             "Average Prop. Med.","Average Prop. Med. p")
+                        "Average ACME","Average ACME p",
+                        "Average ADE","Average ADE p",
+                        "Average Prop. Med.","Average Prop. Med. p")
 # Sensitivity analysis for all
 mediation_sensitivity = parLapply(cl,out_list, function(t){
-  split = strsplit(t,"\\~|\\+")
+  try({split = strsplit(t,"\\~|\\+")
   y = glm(as.formula(t),data = all_data_methyl_scaled,family = binomial("probit"))
   # methyl mediator
   m1_form = as.formula(paste0(split[[1]][2],"~",split[[1]][3]))
@@ -51,7 +51,7 @@ mediation_sensitivity = parLapply(cl,out_list, function(t){
   med2 = mediate(m,y,mediator = split[[1]][3],treat = split[[1]][2])
   sens2 = medsens(med2)
   # Results
-  list(sens1,sens2)
+  list(sens1,sens2)})
 }) 
 save(mediation,file = "./data/mediation/mediation.Rdata")
 save(mediation_sensitivity,file = "./data/mediation/mediation_sensitivity.Rdata")
