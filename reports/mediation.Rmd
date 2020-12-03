@@ -13,6 +13,7 @@ library(parallel)
 library(flextable)
 library(diagram)
 library(tidyverse)
+library(EnhancedVolcano)
 set.seed(1017)
 ```
 
@@ -63,7 +64,10 @@ repeats %>% rename(Methylation = methyl,Metabolite = metabolite) %>%
 # Less conservative mediation analysis
 
 ```{r}
+load("./data/mediation/cits_mediation_sensitivity.Rdata")
 load("./data/mediation/cits_mediation.Rdata")
+cits_mediation = as.data.frame(cits_mediation)
+cits_mediation[,3:ncol(cits_mediation)] = lapply(cits_mediation[,3:ncol(cits_mediation)],as.numeric)
 # Plot
 data <- c(0, "'a'", 0,
           0, 0, 0, 
@@ -80,8 +84,42 @@ c = the direct effect of X on Y after controlling for M
 
 Amount of mediation = ab = total effect - c
 
-## Volcano plot of ACME
+## Volcano plots of ACME
 
 ```{r}
-
+methyl_med = as.data.frame(cits_mediation[grep("cg.*",cits_mediation[,"M"]),])
+metab_med = as.data.frame(cits_mediation[grep("cg.*",cits_mediation[,"X"]),])
 ```
+
+### Methylation as "M"
+
+The following p values are not adjusted for multiple comparisons.
+
+```{r}
+ggplot(methyl_med,aes(x = `Average ACME`, y = -log10(`Average ACME p`))) +
+  geom_point() + theme_bw()
+```
+
+### Metabolite as "M"
+
+```{r}
+ggplot(metab_med,aes(x = `Average ACME`, y = -log10(`Average ACME p`))) +
+  geom_point() + theme_bw()
+```
+
+### Everything
+
+```{r}
+ggplot(cits_mediation,aes(x = `Average ACME`, y = -log10(`Average ACME p`))) +
+  geom_point() + theme_bw()
+```
+
+# A sensitivity analysis example
+
+```{r}
+s = cits_mediation_sensitivity[[1]][[1]]
+plot(s,sens.par = "rho")
+plot(s,sens.par = "R2")
+summary(s)
+```
+
