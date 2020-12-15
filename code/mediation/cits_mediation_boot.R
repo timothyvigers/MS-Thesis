@@ -2,14 +2,14 @@ library(mediation)
 library(parallel)
 set.seed(1017)
 # Load data
-setwd("/home/vigerst/MS-Thesis")
+setwd("/Users/timvigers/GitHub/MS-Thesis")
 load("./data/networks/all_data.Rdata")
 load("./data/networks/cits.Rdata")
 # Mediation model list and parameters
 out_list = unique(paste0("T1Dgroup~",cits$methyl,"+",cits$metab))
 sims = 10000
 # Cluster
-cl = makeCluster(24,type = "FORK")
+cl = makeCluster(8,type = "FORK")
 # Iterate through all
 cits_mediation = parLapply(cl,out_list, function(t){
   try({
