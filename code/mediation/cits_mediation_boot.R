@@ -6,22 +6,28 @@ setwd("/Users/timvigers/GitHub/MS-Thesis")
 load("./data/networks/all_data.Rdata")
 load("./data/networks/cits.Rdata")
 all_data$T1Dgroup = factor(all_data$T1Dgroup)
-# Mediation model lists
+# Mediation model list
 out_list = unique(paste0("T1Dgroup~",cits$methyl,"+",cits$metab))
 # Cluster
 cl = makeCluster(4,type = "FORK")
 # Iterate through all
 cits_mediation = parLapply(cl,out_list, function(t){
   try({
-    split = strsplit(t,"\\~|\\+")
-    y_form = as.formula(paste0(t,"+clinage+SEX+dr34"))
-    y_mod = glm(y_form,data = all_data,family = binomial("logit"))
     # methyl mediator
-    m = split[[1]][2]
-    x = split[[1]][3]
-    m1_form = as.formula(paste0(m,"~",x,"+clinage+SEX+dr34"))
-    m_mod = lm(m1_form,data = all_data)
-    med1 = mediate(m_mod,y_mod,mediator = m,treat = x,boot = T)
+    split = strsplit(t,"\\~|\\+")
+    df = all_data[complete.cases(all_data[,c(split[[1]][2],split[[1]][3])]),]
+    t1d = c(df$T1Dgroup) - 1
+    m = c(df[,split[[1]][2]])
+    x = c(df[,split[[1]][3]])
+    clinage = c(df$clinage)
+    SEX = c(df$SEX)
+    dr34 = c(df$dr34)
+    # Y
+    y_mod = glm(t1d ~ m+x+clinage+SEX+dr34,family = binomial("logit"))
+    # M
+    m_mod = lm(m ~ x+clinage+SEX+dr34)
+    # Mediate
+    med1 = mediate(m_mod,y_mod,mediator = "m",treat = "x",boot = T)
     r1 = c(x,m,med1$tau.coef,med1$tau.p,med1$d.avg,med1$d.avg.p,med1$z.avg,med1$z.avg.p,med1$n.avg,med1$n.avg.p)
     # metabolite mediator
     m = split[[1]][3]
