@@ -36,5 +36,5 @@ df = merge(df,oxylipin,by = "samplekey",all.x = T)
 df = merge(df,vitd,by = "samplekey",all.x = T)
 df = df[!duplicated(df$samplekey),]
 # Save
-all_data = df
+all_data = data.frame(df)
 save(all_data,file = "~/MS-Thesis/data/networks/all_data.Rdata")
