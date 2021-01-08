@@ -1,12 +1,12 @@
 ---
-title: "MS Thesis Work"
+title: "MS Thesis Mediation"
 author: "Tim Vigers"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE,warning = FALSE)
 knitr::opts_knit$set(root.dir = "/Users/timvigers/GitHub/MS-Thesis")
 library(mediation)
 library(parallel)
@@ -17,57 +17,13 @@ library(EnhancedVolcano)
 set.seed(1017)
 ```
 
-# CIT Results
-
-Of the metabolite - methylation pairs significant by CIT, the there was a relatively even split in terms of which was the mediator:
-
 ```{r}
-# Import cit results
-load("./data/networks/cits.Rdata")
-# Annotate
-gctof_anno = read.csv("./data/metabolomics/gctof.featureAnno.csv") %>% 
-  select(BinBase.name,feature_name) %>% rename(name = BinBase.name)
-hilic_anno = read.csv("./data/metabolomics/hilic.featureAnno.csv") %>%
-  select(Metabolite.name,feature_name) %>% rename(name = Metabolite.name)
-lipid_anno = read.csv("./data/metabolomics/lipid.featureAnno.csv") %>%
-  select(Metabolite.name,feature_name) %>% rename(name = Metabolite.name)
-vitd_anno = read.csv("./data/metabolomics/vitD.featureAnno.csv") %>%
-  select(originalName,boxcoxDat_name) %>% 
-  rename(name = originalName,feature_name = boxcoxDat_name)
-oxylipin_anno = 
-  read.csv("./data/metabolomics/oxylipin.featureAnno.csv") %>%
-  select(full.name,cleanedDat_name) %>% 
-  rename(name = full.name,feature_name = cleanedDat_name)
-oxylipin_anno$feature_name = paste0("bc_",oxylipin_anno$feature_name)
-
-anno = bind_rows(gctof_anno,hilic_anno,lipid_anno,vitd_anno,oxylipin_anno)
-
-cits$metabolite = anno$name[match(cits$metab,anno$feature_name)]
-# Repeats
-repeats = cits[,c("methyl","metabolite")]
-repeats = repeats[duplicated(repeats),]
-# Convert arrow
-cits$Mediator = factor(cits$direction,levels = c("<",">"),
-                       labels = c("Methylation","Metabolite"))
-# Print
-table(cits$Mediator) %>% as.data.frame(.) %>% rename(Mediator = Var1) %>%
-  flextable()
-```
-
-Of the above `r nrow(cits)` pairs, `r nrow(repeats)` were significant with both the metabolite and methylation probe as a mediator:
-
-```{r}
-repeats %>% rename(Methylation = methyl,Metabolite = metabolite) %>%
-  flextable() %>% set_table_properties(.,layout = "autofit",width = 0.75)
-```
-
-# Less conservative mediation analysis
-
-```{r}
-load("./data/mediation/cits_mediation_sensitivity.Rdata")
-load("./data/mediation/cits_mediation.Rdata")
-cits_mediation = as.data.frame(cits_mediation)
-cits_mediation[,3:ncol(cits_mediation)] = lapply(cits_mediation[,3:ncol(cits_mediation)],as.numeric)
+load("./data/mediation/mediation_quasi.Rdata")
+load("./data/networks/pair_list.Rdata")
+load("./data/networks/all_data.Rdata")
+mediation_quasi = as.data.frame(mediation_quasi)
+mediation_quasi[,3:ncol(mediation_quasi)] = 
+  lapply(mediation_quasi[,3:ncol(mediation_quasi)],as.numeric)
 # Plot
 data <- c(0, "'a'", 0,
           0, 0, 0, 
@@ -84,14 +40,14 @@ c = the direct effect of X on Y after controlling for M
 
 Amount of mediation = ab = total effect - c
 
-## Volcano plots of ACME
+# Volcano plots of ACME
 
 ```{r}
-methyl_med = as.data.frame(cits_mediation[grep("cg.*",cits_mediation[,"M"]),])
-metab_med = as.data.frame(cits_mediation[grep("cg.*",cits_mediation[,"X"]),])
+methyl_med = mediation_quasi[grep("cg.*",mediation_quasi[,"M"]),]
+metab_med = mediation_quasi[grep("cg.*",mediation_quasi[,"X"]),]
 ```
 
-### Methylation as "M"
+## Methylation as "M"
 
 The following p values are not adjusted for multiple comparisons.
 
@@ -100,26 +56,104 @@ ggplot(methyl_med,aes(x = `Average ACME`, y = -log10(`Average ACME p`))) +
   geom_point() + theme_bw()
 ```
 
-### Metabolite as "M"
+## Metabolite as "M"
 
 ```{r}
 ggplot(metab_med,aes(x = `Average ACME`, y = -log10(`Average ACME p`))) +
   geom_point() + theme_bw()
 ```
 
-### Everything
+## Everything
 
 ```{r}
-ggplot(cits_mediation,aes(x = `Average ACME`, y = -log10(`Average ACME p`))) +
+ggplot(mediation_quasi,aes(x = `Average ACME`, y = -log10(`Average ACME p`))) +
   geom_point() + theme_bw()
 ```
 
-# A sensitivity analysis example
+# P value histograms
+
+## Total Effect
 
 ```{r}
-s = cits_mediation_sensitivity[[1]][[1]]
-plot(s,sens.par = "rho")
-plot(s,sens.par = "R2")
-summary(s)
+hist(mediation_quasi$`Total Effect p`)
 ```
 
+## Average ACME
+
+```{r}
+hist(mediation_quasi$`Average ACME p`)
+```
+
+## Average ADE
+
+```{r}
+hist(mediation_quasi$`Average ADE p`)
+```
+
+## Average Proportion Mediated
+
+```{r}
+hist(methyl_med$`Average Prop. Med. p`)
+```
+
+# Increased MCMC draws
+
+```{r include=FALSE,cache=TRUE}
+set.seed(1017)
+# Get those with problematic pvalues and re-run mediation analysis with higher 
+# number of sims
+t = mediation_quasi[which(mediation_quasi$`Total Effect p` == 0.004),]
+# Mediation model list and parameters
+sims = 10000
+out_list = unique(paste0("T1Dgroup~",pairs$methyl[pairs$methyl %in% t$X],"+",pairs$metab[pairs$metab %in% t$X]))
+out_list = out_list[1:50]
+# Cluster
+cl = makeCluster(8,type = "FORK")
+# Iterate through all
+mediation = parLapply(cl,out_list, function(t){
+  try({
+    # methyl mediator
+    split = strsplit(t,"\\~|\\+")
+    df = all_data[complete.cases(all_data[,c(split[[1]][2],split[[1]][3])]),]
+    t1d = c(df$T1Dgroup) - 1
+    m = c(df[,split[[1]][2]])
+    x = c(df[,split[[1]][3]])
+    clinage = c(df$clinage)
+    SEX = c(df$SEX)
+    dr34 = c(df$dr34)
+    # Y
+    y_mod = glm(t1d ~ m+x+clinage+SEX+dr34,family = binomial("logit"))
+    # M
+    m_mod = lm(m ~ x+clinage+SEX+dr34)
+    # Mediate
+    med1 = mediate(m_mod,y_mod,mediator = "m",treat = "x",sims = sims)
+    r1 = c(split[[1]][3],split[[1]][2],med1$tau.coef,med1$tau.p,med1$d.avg,med1$d.avg.p,
+           med1$z.avg,med1$z.avg.p,med1$n.avg,med1$n.avg.p)
+    # metabolite mediator
+    m = c(df[,split[[1]][3]])
+    x = c(df[,split[[1]][2]])
+    y_mod = glm(t1d ~ m+x+clinage+SEX+dr34,family = binomial("logit"))
+    m_mod = lm(m ~ x+clinage+SEX+dr34)
+    med2 = mediate(m_mod,y_mod,mediator = "m",treat = "x",sims = sims)
+    r2 = c(split[[1]][2],split[[1]][3],med2$tau.coef,med2$tau.p,med2$d.avg,med2$d.avg.p,
+           med2$z.avg,med2$z.avg.p,med2$n.avg,med2$n.avg.p)
+    # Results
+    r = rbind(r1,r2)
+  })
+}) 
+stopCluster(cl)
+# Format
+mediation = do.call(rbind,mediation)
+rownames(mediation) = 1:nrow(mediation)
+colnames(mediation) = c("X","M","Total Effect","Total Effect p",
+                             "Average ACME","Average ACME p",
+                             "Average ADE","Average ADE p",
+                             "Average Prop. Med.","Average Prop. Med. p")
+# Numeric
+mediation = as.data.frame(mediation)
+mediation[,3:ncol(mediation)] = 
+  lapply(mediation[,3:ncol(mediation)],as.numeric)
+# Volcano plot
+ggplot(mediation,aes(x = `Average ACME`, y = -log10(`Average ACME p`))) +
+  geom_point() + theme_bw()
+```
