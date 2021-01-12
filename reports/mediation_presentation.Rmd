@@ -1,0 +1,56 @@
+---
+title: "The Mediation R Package"
+author: "Tim Vigers"
+date: "1/12/2021"
+output: beamer_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Notation
+
+Decompose a statistical model into two parts:
+
+$Y_i\sim f(\theta_i,\alpha)$ and $\theta_i=g(X_i,\beta)$. 
+
+For a normal linear regression: 
+
+$Y_i\sim N(\mu_i,\sigma^2)$, $\mu_i=X_i\beta$, and $\alpha=Var(Y_i)=\sigma^2$.
+
+## Quasi-Bayesian Approximation (King et al., 2000)
+
+1. Get point estimates and covariance from the appropriate model. "Stack" the point estimates in a vector $\hat{\gamma}=vec(\hat{\beta},\hat{\alpha})$ and call the covariance matrix $\hat{V}(\hat{\gamma})$.
+
+2. The CLT (assuming a large enough sample size and bounded variance) allows us to draw from a multivariate normal distribution assuming:
+
+$$
+\hat{\gamma}\sim N(\hat{\gamma},\hat{V}(\hat{\gamma}))
+$$
+
+## Quasi-Bayesian Approximation (King et al., 2000)
+
+3. Draw one instance of the vector from the multivariate normal distribution:
+
+$$
+\tilde{\gamma}=vec(\tilde{\beta},\tilde{\alpha})
+$$
+
+Repeat step 3 $M=1000$ times (by default, but can be increased). 
+
+4. Calculate CIs by sorting the draws from lowest to highest and taking the 25th and 976th values (if $M=1000$).
+
+## The Bootstrap Approach
+
+
+
+## Questions
+
+1. Should I be using robust standard errors? This uses White's heteroskedasticity-consistent estimator for the covariance matrix (from the sandwich package). Default is to not use it.
+
+## References
+
+1. 	King G, Tomz M, Wittenberg J. Making the Most of Statistical Analyses: Improving Interpretation and Presentation. Am J Polit Sci. 2000;44(2):347. doi:10.2307/2669316
+
+2. 	Tingley D, Yamamoto T, Hirose K, Keele L, Imai K. mediation: R Package for Causal Mediation Analysis. J Stat Softw. 2014;59(1):1-38. doi:10.18637/jss.v059.i05
