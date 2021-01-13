@@ -7,13 +7,12 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,warning = FALSE)
-knitr::opts_knit$set(root.dir = "/Users/timvigers/GitHub/MS-Thesis")
+knitr::opts_knit$set(root.dir = "C:/Users/Tim Vigers/Documents/GitHub/MS-Thesis")
 library(mediation)
 library(parallel)
 library(flextable)
 library(diagram)
 library(tidyverse)
-library(EnhancedVolcano)
 set.seed(1017)
 ```
 
@@ -31,7 +30,8 @@ data <- c(0, "'a'", 0,
 M<- matrix (nrow=3, ncol=3, byrow = TRUE, data=data)
 plot<- plotmat (M, pos=c(1,2), 
                 name= c( "M","X", "T1D Status"), 
-                box.type = "rect", box.size = 0.12, box.prop=0.5,  curve=0)
+                box.type = "rect", box.size = 0.12, box.prop=0.5,  
+                curve=0)
 ```
 
 Total effect = c + ab, or the effect of X on Y without controlling for M.
@@ -96,64 +96,3 @@ hist(mediation_quasi$`Average ADE p`)
 hist(methyl_med$`Average Prop. Med. p`)
 ```
 
-# Increased MCMC draws
-
-```{r include=FALSE,cache=TRUE}
-set.seed(1017)
-# Get those with problematic pvalues and re-run mediation analysis with higher 
-# number of sims
-t = mediation_quasi[which(mediation_quasi$`Total Effect p` == 0.004),]
-# Mediation model list and parameters
-sims = 10000
-out_list = unique(paste0("T1Dgroup~",pairs$methyl[pairs$methyl %in% t$X],"+",pairs$metab[pairs$metab %in% t$X]))
-out_list = out_list[1:50]
-# Cluster
-cl = makeCluster(8,type = "FORK")
-# Iterate through all
-mediation = parLapply(cl,out_list, function(t){
-  try({
-    # methyl mediator
-    split = strsplit(t,"\\~|\\+")
-    df = all_data[complete.cases(all_data[,c(split[[1]][2],split[[1]][3])]),]
-    t1d = c(df$T1Dgroup) - 1
-    m = c(df[,split[[1]][2]])
-    x = c(df[,split[[1]][3]])
-    clinage = c(df$clinage)
-    SEX = c(df$SEX)
-    dr34 = c(df$dr34)
-    # Y
-    y_mod = glm(t1d ~ m+x+clinage+SEX+dr34,family = binomial("logit"))
-    # M
-    m_mod = lm(m ~ x+clinage+SEX+dr34)
-    # Mediate
-    med1 = mediate(m_mod,y_mod,mediator = "m",treat = "x",sims = sims)
-    r1 = c(split[[1]][3],split[[1]][2],med1$tau.coef,med1$tau.p,med1$d.avg,med1$d.avg.p,
-           med1$z.avg,med1$z.avg.p,med1$n.avg,med1$n.avg.p)
-    # metabolite mediator
-    m = c(df[,split[[1]][3]])
-    x = c(df[,split[[1]][2]])
-    y_mod = glm(t1d ~ m+x+clinage+SEX+dr34,family = binomial("logit"))
-    m_mod = lm(m ~ x+clinage+SEX+dr34)
-    med2 = mediate(m_mod,y_mod,mediator = "m",treat = "x",sims = sims)
-    r2 = c(split[[1]][2],split[[1]][3],med2$tau.coef,med2$tau.p,med2$d.avg,med2$d.avg.p,
-           med2$z.avg,med2$z.avg.p,med2$n.avg,med2$n.avg.p)
-    # Results
-    r = rbind(r1,r2)
-  })
-}) 
-stopCluster(cl)
-# Format
-mediation = do.call(rbind,mediation)
-rownames(mediation) = 1:nrow(mediation)
-colnames(mediation) = c("X","M","Total Effect","Total Effect p",
-                             "Average ACME","Average ACME p",
-                             "Average ADE","Average ADE p",
-                             "Average Prop. Med.","Average Prop. Med. p")
-# Numeric
-mediation = as.data.frame(mediation)
-mediation[,3:ncol(mediation)] = 
-  lapply(mediation[,3:ncol(mediation)],as.numeric)
-# Volcano plot
-ggplot(mediation,aes(x = `Average ACME`, y = -log10(`Average ACME p`))) +
-  geom_point() + theme_bw()
-```
