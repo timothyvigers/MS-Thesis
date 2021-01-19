@@ -3,6 +3,10 @@ pheno = pheno[pheno$Visit_Type == "SV" | pheno$Visit_Type == "PSV",]
 # Code from candidate selection
 # Methylation
 load("/home/biostats_share/Norris/data/methylation/Mmatrix.platformAdj.regressOut.Rdata")
+# Significant methyl probes
+load("/home/vigerst/MS-Thesis/data/networks/pair_list.Rdata")
+M.adj = M.adj[which(rownames(M.adj) %in% pairs$methyl),]
+# Transpose
 names = colnames(M.adj)
 methyl = as.data.frame(t(M.adj))
 rownames(methyl) = names
