@@ -1,122 +1,123 @@
+# library(parallel)
+# library(nlme)
+# setwd("/home/tim/.local/share/Cryptomator/mnt/Vault/School/Statistical Genomics/Final Project")
+# load("./data/final_data.RData")
+# rm(probes)
+# load("./data/probesFromPipeline.Rdata")
+# set.seed(1017)
+# # Covariates
+# Sex = factor(df$SEX)
+# Visit = factor(df$Visit,levels = c("CWB","Late Infancy","Childhood"))
+# CD8T	= df$CD8T
+# CD4T = df$CD4T
+# NK = df$NK
+# Bcell	= df$Bcell
+# Mono = df$Mono
+# Gran = df$Gran # drop to make independent
+# ID = df$ID
+# Platform = factor(df$Data)
+# # Diet variables - breast-feeding duration, age at introduction to milk, eggs, 
+# # meat, vegetables, fruit, gluten, and cereals.
+# # Age at introduction should be categorized (0=<4 months, 1= 4-5 months, and 2= ≥6 months)
+# labs = c("<4 months","4-5 months","6+ months")
+# bfdur = df$bfdur
+# dairy = cut(df$frstdairy,c(0,4,6,Inf),right = F,labels = labs)
+# egg = cut(df$frstegg,c(0,median(df$frstegg,na.rm = T),Inf),
+#           labels = c("0-11 months","> 11 months"))
+# meat = cut(df$frstmeat,c(0,4,6,Inf),right = F,labels = labs)
+# veg = cut(df$frstveg,c(0,4,6,Inf),right = F,labels = labs)
+# fruit = cut(df$frstfruit,c(0,4,6,Inf),right = F,labels = labs)
+# gluten = cut(df$frstwheat,c(0,4,6,Inf),right = F,labels = labs)
+# cereal = factor(df$id_cerealn,labels = labs)
+# # Remove unnecessary columns
+# df = df[,probesFromPipeline]
+# # RI only models for all probes
+# cores = 6
+# # Breastfeeding duration
+# # cl = makeCluster(cores,type = "FORK")
+# # bfdur_mods = parLapply(cl,df, function(m){
+# #   mod = try(lme(m ~ Visit*bfdur + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform,
+# #                 random=~1|ID,na.action = na.omit))
+# #   ifelse(class(mod) == "try-error",NA,return(summary(mod)$tTable))
+# # })
+# # stopCluster(cl)
+# # save(bfdur_mods,file = "./data/ewas/bfdur_mods.RData")
+# # rm(bfdur_mods)
+# # Dairy
+# # cl = makeCluster(cores,type = "FORK")
+# # dairy_mods = parLapply(cl,df, function(m){
+# #   mod = try(lme(m ~ Visit*dairy + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform,
+# #                 random=~1|ID,na.action = na.omit))
+# #   ifelse(class(mod) == "try-error",NA,return(summary(mod)$tTable))
+# # })
+# # stopCluster(cl)
+# # save(dairy_mods,file = "./data/ewas/dairy_mods.RData")
+# # rm(dairy_mods)
+# # Egg
+# # cl = makeCluster(cores,type = "FORK")
+# # egg_mods = parLapply(cl,df, function(m){
+# #   mod = try(lme(m ~ Visit*egg + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform,
+# #                 random=~1|ID,na.action = na.omit))
+# #   ifelse(class(mod) == "try-error",NA,return(summary(mod)$tTable))
+# # })
+# # stopCluster(cl)
+# # save(egg_mods,file = "./data/ewas/egg_mods.RData")
+# # rm(egg_mods)
+# # Meat
+# # cl = makeCluster(cores,type = "FORK")
+# # meat_mods = parLapply(cl,df, function(m){
+# #   mod = try(lme(m ~ Visit*meat + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform, 
+# #                 random=~1|ID,na.action = na.omit))
+# #   ifelse(class(mod) == "try-error",NA,return(summary(mod)$tTable))
+# # })
+# # stopCluster(cl)
+# # save(meat_mods,file = "./data/ewas/meat_mods.RData")
+# # rm(meat_mods)
+# # Veg
+# # cl = makeCluster(cores,type = "FORK")
+# # veg_mods = parLapply(cl,df, function(m){
+# #   mod = try(lme(m ~ Visit*veg + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform, 
+# #                 random=~1|ID,na.action = na.omit))
+# #   ifelse(class(mod) == "try-error",NA,return(summary(mod)$tTable))
+# # })
+# # stopCluster(cl)
+# # save(veg_mods,file = "./data/ewas/veg_mods.RData")
+# # rm(veg_mods)
+# # Fruit
+# # cl = makeCluster(cores,type = "FORK")
+# # fruit_mods = parLapply(cl,df, function(m){
+# #   mod = try(lme(m ~ Visit*fruit + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform, 
+# #                 random=~1|ID,na.action = na.omit))
+# #   ifelse(class(mod) == "try-error",NA,return(summary(mod)$tTable))
+# # })
+# # stopCluster(cl)
+# # save(fruit_mods,file = "./data/ewas/fruit_mods.RData")
+# # rm(fruit_mods)
+# # Gluten
+# # cl = makeCluster(cores,type = "FORK")
+# # gluten_mods = parLapply(cl,df, function(m){
+# #   mod = try(lme(m ~ Visit*gluten + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform, 
+# #                 random=~1|ID,na.action = na.omit))
+# #   ifelse(class(mod) == "try-error",NA,return(summary(mod)$tTable))
+# # })
+# # stopCluster(cl)
+# # save(gluten_mods,file = "./data/ewas/gluten_mods.RData")
+# # rm(gluten_mods)
+# # Cereal
+# # cl = makeCluster(cores,type = "FORK")
+# # cereal_mods = parLapply(cl,df, function(m){
+# #   mod = try(lme(m ~ Visit*cereal + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform, 
+# #                 random=~1|ID,na.action = na.omit))
+# #   ifelse(class(mod) == "try-error",NA,return(summary(mod)$tTable))
+# # })
+# # stopCluster(cl)
+# # save(cereal_mods,file = "./data/ewas/cereal_mods.RData")
+# # rm(cereal_mods)
+# # Simple models
+# rm(list=ls())
 library(parallel)
 library(nlme)
 setwd("/home/tim/.local/share/Cryptomator/mnt/Vault/School/Statistical Genomics/Final Project")
-load("./data/final_data.RData")
-rm(probes)
-load("./data/probesFromPipeline.Rdata")
-set.seed(1017)
-# Covariates
-Sex = factor(df$SEX)
-Visit = factor(df$Visit,levels = c("CWB","Late Infancy","Childhood"))
-CD8T	= df$CD8T
-CD4T = df$CD4T
-NK = df$NK
-Bcell	= df$Bcell
-Mono = df$Mono
-Gran = df$Gran # drop to make independent
-ID = df$ID
-Platform = factor(df$Data)
-# Diet variables - breast-feeding duration, age at introduction to milk, eggs, 
-# meat, vegetables, fruit, gluten, and cereals.
-# Age at introduction should be categorized (0=<4 months, 1= 4-5 months, and 2= ≥6 months)
-labs = c("<4 months","4-5 months","6+ months")
-bfdur = df$bfdur
-dairy = cut(df$frstdairy,c(0,4,6,Inf),right = F,labels = labs)
-egg = cut(df$frstegg,c(0,median(df$frstegg,na.rm = T),Inf),
-          labels = c("0-11 months","> 11 months"))
-meat = cut(df$frstmeat,c(0,4,6,Inf),right = F,labels = labs)
-veg = cut(df$frstveg,c(0,4,6,Inf),right = F,labels = labs)
-fruit = cut(df$frstfruit,c(0,4,6,Inf),right = F,labels = labs)
-gluten = cut(df$frstwheat,c(0,4,6,Inf),right = F,labels = labs)
-cereal = factor(df$id_cerealn,labels = labs)
-# Remove unnecessary columns
-df = df[,probesFromPipeline]
-# RI only models for all probes
-cores = 6
-# Breastfeeding duration
-# cl = makeCluster(cores,type = "FORK")
-# bfdur_mods = parLapply(cl,df, function(m){
-#   mod = try(lme(m ~ Visit*bfdur + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform,
-#                 random=~1|ID,na.action = na.omit))
-#   ifelse(class(mod) == "try-error",NA,return(summary(mod)$tTable))
-# })
-# stopCluster(cl)
-# save(bfdur_mods,file = "./data/ewas/bfdur_mods.RData")
-# rm(bfdur_mods)
-# Dairy
-# cl = makeCluster(cores,type = "FORK")
-# dairy_mods = parLapply(cl,df, function(m){
-#   mod = try(lme(m ~ Visit*dairy + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform,
-#                 random=~1|ID,na.action = na.omit))
-#   ifelse(class(mod) == "try-error",NA,return(summary(mod)$tTable))
-# })
-# stopCluster(cl)
-# save(dairy_mods,file = "./data/ewas/dairy_mods.RData")
-# rm(dairy_mods)
-# Egg
-cl = makeCluster(cores,type = "FORK")
-egg_mods = parLapply(cl,df, function(m){
-  mod = try(lme(m ~ Visit*egg + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform,
-                random=~1|ID,na.action = na.omit))
-  ifelse(class(mod) == "try-error",NA,return(summary(mod)$tTable))
-})
-stopCluster(cl)
-save(egg_mods,file = "./data/ewas/egg_mods.RData")
-rm(egg_mods)
-# Meat
-# cl = makeCluster(cores,type = "FORK")
-# meat_mods = parLapply(cl,df, function(m){
-#   mod = try(lme(m ~ Visit*meat + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform, 
-#                 random=~1|ID,na.action = na.omit))
-#   ifelse(class(mod) == "try-error",NA,return(summary(mod)$tTable))
-# })
-# stopCluster(cl)
-# save(meat_mods,file = "./data/ewas/meat_mods.RData")
-# rm(meat_mods)
-# Veg
-# cl = makeCluster(cores,type = "FORK")
-# veg_mods = parLapply(cl,df, function(m){
-#   mod = try(lme(m ~ Visit*veg + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform, 
-#                 random=~1|ID,na.action = na.omit))
-#   ifelse(class(mod) == "try-error",NA,return(summary(mod)$tTable))
-# })
-# stopCluster(cl)
-# save(veg_mods,file = "./data/ewas/veg_mods.RData")
-# rm(veg_mods)
-# Fruit
-# cl = makeCluster(cores,type = "FORK")
-# fruit_mods = parLapply(cl,df, function(m){
-#   mod = try(lme(m ~ Visit*fruit + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform, 
-#                 random=~1|ID,na.action = na.omit))
-#   ifelse(class(mod) == "try-error",NA,return(summary(mod)$tTable))
-# })
-# stopCluster(cl)
-# save(fruit_mods,file = "./data/ewas/fruit_mods.RData")
-# rm(fruit_mods)
-# Gluten
-# cl = makeCluster(cores,type = "FORK")
-# gluten_mods = parLapply(cl,df, function(m){
-#   mod = try(lme(m ~ Visit*gluten + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform, 
-#                 random=~1|ID,na.action = na.omit))
-#   ifelse(class(mod) == "try-error",NA,return(summary(mod)$tTable))
-# })
-# stopCluster(cl)
-# save(gluten_mods,file = "./data/ewas/gluten_mods.RData")
-# rm(gluten_mods)
-# Cereal
-# cl = makeCluster(cores,type = "FORK")
-# cereal_mods = parLapply(cl,df, function(m){
-#   mod = try(lme(m ~ Visit*cereal + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform, 
-#                 random=~1|ID,na.action = na.omit))
-#   ifelse(class(mod) == "try-error",NA,return(summary(mod)$tTable))
-# })
-# stopCluster(cl)
-# save(cereal_mods,file = "./data/ewas/cereal_mods.RData")
-# rm(cereal_mods)
-# Simple models
-rm(list=ls())
-library(parallel)
-library(nlme)
 load("./data/final_data.RData")
 rm(probes)
 load("./data/probesFromPipeline.Rdata")
@@ -146,7 +147,7 @@ fruit = cut(late_infancy$frstfruit,c(0,4,6,Inf),right = F,labels = labs)
 gluten = cut(late_infancy$frstwheat,c(0,4,6,Inf),right = F,labels = labs)
 cereal = factor(late_infancy$id_cerealn,labels = labs)
 # Cluster variables
-cores = 6
+cores = 4
 # Remove unnecessary columns
 late_infancy = late_infancy[,probesFromPipeline]
 # Breastfeeding duration
@@ -225,6 +226,7 @@ rm(cereal_infancy_mods)
 rm(list=ls())
 library(parallel)
 library(nlme)
+setwd("/home/tim/.local/share/Cryptomator/mnt/Vault/School/Statistical Genomics/Final Project")
 load("./data/final_data.RData")
 rm(probes)
 load("./data/probesFromPipeline.Rdata")
@@ -253,7 +255,7 @@ fruit = cut(childhood$frstfruit,c(0,4,6,Inf),right = F,labels = labs)
 gluten = cut(childhood$frstwheat,c(0,4,6,Inf),right = F,labels = labs)
 cereal = factor(childhood$id_cerealn,labels = labs)
 # Cluster variables
-cores = 6
+cores = 4
 # Remove unnecessary columns
 childhood = childhood[,probesFromPipeline]
 # Breastfeeding duration
