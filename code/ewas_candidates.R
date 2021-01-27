@@ -13,7 +13,7 @@ get_candidates = function(mods,cutoff = 0.1){
   t = as.data.frame(do.call(rbind,t))
   t$p_adj = p.adjust(as.numeric(t$`Pr(>F)`),"fdr")
   t = t[t$p_adj < cutoff,]
-  return(t$probe[order(t$p_adj)])
+  return(unique(t$probe[order(t$p_adj)]))
 }
 # Infancy - FDR < 0.05
 # BF duration
@@ -96,10 +96,69 @@ length(veg_candidates) = n
 length(fruit_candidates) = n
 length(gluten_candidates) = n
 length(cereal_candidates) = n
-late_childhood_candidates = 
+childhood_candidates = 
   bind_cols(bfdur_candidates,dairy_candidates,egg_candidates,meat_candidates,
             veg_candidates,fruit_candidates,gluten_candidates,cereal_candidates)
-colnames(late_childhood_candidates) = c("bfdur","dairy","egg","meat","veg",
+colnames(childhood_candidates) = c("bfdur","dairy","egg","meat","veg",
                                       "fruit","gluten","cereal")
-write.csv(late_childhood_candidates,"late_childhood_candidates.csv",row.names = F,
+write.csv(childhood_candidates,"childhood_candidates.csv",row.names = F,
           na = "")
+# # Mixed models
+# load("./bfdur_mods.RData")
+# # Function
+# get_candidates = function(mods,cutoff = 0.1){
+#   mods = mods[!is.na(mods)]
+#   t = lapply(1:length(mods), function(x){
+#     m = mods[[x]]
+#     r = as.data.frame(m[grep("Visit.*:",rownames(m)),])
+#     r["probe"] = names(mods)[x]
+#     return(r[which.min(r$`p-value`),])
+#   })
+#   t = as.data.frame(do.call(rbind,t))
+#   t$p_adj = p.adjust(as.numeric(t$`p-value`),"fdr")
+#   t = t[t$p_adj < cutoff,]
+#   return(unique(t$probe[order(t$p_adj)]))
+# }
+# # BF duration
+# load("./bfdur_mods.RData")
+# bfdur_candidates = get_candidates(bfdur_mods,0.1)
+# # Dairy
+# load("./dairy_mods.RData")
+# dairy_candidates = get_candidates(dairy_mods,0.1)
+# # Egg
+# load("./egg_mods.RData")
+# egg_candidates = get_candidates(egg_mods,0.05)
+# # Meat
+# load("./meat_mods.RData")
+# meat_candidates = get_candidates(meat_mods,0.05)
+# # Veg
+# load("./veg_mods.RData")
+# veg_candidates = get_candidates(veg_mods,0.05)
+# # Fruit
+# load("./fruit_mods.RData")
+# fruit_candidates = get_candidates(fruit_mods,0.05)
+# # Gluten
+# load("./gluten_mods.RData")
+# gluten_candidates = get_candidates(gluten_mods,0.05)
+# # Cereal
+# load("./cereal_mods.RData")
+# cereal_candidates = get_candidates(cereal_mods,0.05)
+# # Candidate table
+# n = max(length(bfdur_candidates),length(dairy_candidates),length(egg_candidates),
+#         length(meat_candidates),length(veg_candidates),length(fruit_candidates),
+#         length(gluten_candidates),length(cereal_candidates))
+# length(bfdur_candidates) = n
+# length(dairy_candidates) = n
+# length(egg_candidates) = n
+# length(meat_candidates) = n
+# length(veg_candidates) = n
+# length(fruit_candidates) = n
+# length(gluten_candidates) = n
+# length(cereal_candidates) = n
+# longitudinalcandidates = 
+#   bind_cols(bfdur_candidates,dairy_candidates,egg_candidates,meat_candidates,
+#             veg_candidates,fruit_candidates,gluten_candidates,cereal_candidates)
+# colnames(longitudinalcandidates) = c("bfdur","dairy","egg","meat","veg",
+#                                    "fruit","gluten","cereal")
+# write.csv(longitudinalcandidates,"longitudinalcandidates.csv",row.names = F,
+#           na = "")
