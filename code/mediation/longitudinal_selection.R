@@ -32,6 +32,7 @@ lipid <- read.csv("/home/biostats_share/Norris/data/metabolomics/lipid.bc.csv")
 rownames(lipid) = lipid$samplekey
 lipid$samplekey = NULL
 oxylipin <- read.csv("/home/biostats_share/Norris/data/metabolomics/oxylipin.bc.csv")
+oxylipin = oxylipin[!duplicated(oxylipin$samplekey),]
 rownames(oxylipin) = oxylipin$samplekey
 oxylipin$samplekey = NULL
 vitd <- read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
@@ -59,10 +60,10 @@ run_mods <- function(methyl,metab,no_cores = 20) {
       meta_mod = lm(meta[psv_metab_match] ~ ia[match(psv_samples,pheno$samplekey)])
       # Check association between metabolite and methylation
       mm_mod = lm(meth[psv_methyl_match] ~ meta[psv_metab_match])
-      if(summary(meta_mod)$coefficients[2,4] > 0.5 | 
-         summary(meth_mod)$coefficients[2,4] > 0.5) {
+      if(summary(meta_mod)$coefficients[2,4] > 0.05 | 
+         summary(meth_mod)$coefficients[2,4] > 0.05) {
         return(NA)
-      } else if(summary(mod)$coefficients[2,4] < 0.4) {
+      } else if(summary(mm_mod)$coefficients[2,4] < 0.01) {
         return(paste(c,m))
       } else {
           return(NA)
@@ -81,10 +82,10 @@ run_mods <- function(methyl,metab,no_cores = 20) {
       meta_mod = lm(meta[sv_metab_match] ~ ia[match(sv_samples,pheno$samplekey)])
       # Check association between metabolite and methylation
       mm_mod = lm(meth[sv_methyl_match] ~ meta[sv_metab_match])
-      if(summary(meta_mod)$coefficients[2,4] > 0.5 | 
-         summary(meth_mod)$coefficients[2,4] > 0.5) {
+      if(summary(meta_mod)$coefficients[2,4] > 0.05 | 
+         summary(meth_mod)$coefficients[2,4] > 0.05) {
         return(NA)
-      } else if(summary(mod)$coefficients[2,4] < 0.4) {
+      } else if(summary(mm_mod)$coefficients[2,4] < 0.01) {
         return(paste(c,m))
       } else {
         return(NA)
@@ -97,17 +98,17 @@ run_mods <- function(methyl,metab,no_cores = 20) {
   return(intersect(psv_candidates,sv_candidates))
 }
 # gctof
-gctof_candidates = run_mods(methyl = methyl[,1:20],metab = gctof)
+gctof_candidates = run_mods(methyl = methyl,metab = gctof)
 save(gctof_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/gctof_candidates.RData")
 # hilic
-hilic_candidates = run_mods(methyl = methyl[,1:20],metab = hilic)
+hilic_candidates = run_mods(methyl = methyl,metab = hilic)
 save(hilic_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/hilic_candidates.RData")
 # lipid
-lipid_candidates = run_mods(methyl = methyl[,1:20],metab = lipid)
+lipid_candidates = run_mods(methyl = methyl,metab = lipid)
 save(lipid_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/lipid_candidates.RData")
 # oxylipin
-oxylipin_candidates = run_mods(methyl = methyl[,1:20],metab = oxylipin)
+oxylipin_candidates = run_mods(methyl = methyl,metab = oxylipin)
 save(oxylipin_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/oxylipin_candidates.RData")
 # vitd
-vitd_candidates = run_mods(methyl = methyl[,1:20],metab = vitd)
+vitd_candidates = run_mods(methyl = methyl,metab = vitd)
 save(vitd_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/vitd_candidates.RData")
