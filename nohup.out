@@ -1,6 +1,0 @@
-code/mediation/longitudinal_selection.R: line 3: syntax error near unexpected token `('
-code/mediation/longitudinal_selection.R: line 3: `pheno <- read.csv("/home/biostats_share/Norris/data/phenotype/ivyomicssample_noIdentifyingInfo.csv",'
-
-real	0m0.005s
-user	0m0.002s
-sys	0m0.004s
