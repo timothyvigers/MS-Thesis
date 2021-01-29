@@ -96,7 +96,7 @@ run_mods = function(methyl,metab,no_cores = 20) {
   return(intersect(psv_candidates,sv_candidates))
 }
 # gctof
-gctof_candidates = run_mods(methyl = methyl[1:1000],metab = gctof)
+gctof_candidates = run_mods(methyl = methyl[1:5000],metab = gctof)
 save(gctof_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/gctof_candidates.RData")
 # hilic
 # hilic_candidates = run_mods(methyl = methyl,metab = hilic)
