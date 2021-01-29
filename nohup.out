@@ -13,3 +13,8 @@ Loading required package: parallel
 real	2m14.231s
 user	25m27.560s
 sys	2m3.145s
+Loading required package: parallel
+
+real	7m7.128s
+user	119m43.085s
+sys	3m31.857s
