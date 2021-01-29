@@ -1,1 +1,10 @@
 Loading required package: parallel
+Loading required package: parallel
+Error in serialize(data, node$con, xdr = FALSE) : 
+  error writing to connection
+Calls: run_mods ... postNode -> sendData -> sendData.SOCK0node -> serialize
+Execution halted
+
+real	3m2.821s
+user	16m16.222s
+sys	4m9.384s
