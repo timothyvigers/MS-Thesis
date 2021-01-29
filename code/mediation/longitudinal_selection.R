@@ -96,17 +96,17 @@ run_mods = function(methyl,metab,no_cores = 20) {
   return(intersect(psv_candidates,sv_candidates))
 }
 # gctof
-gctof_candidates = run_mods(methyl = methyl[1:5000],metab = gctof)
+gctof_candidates = run_mods(methyl = methyl,metab = gctof)
 save(gctof_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/gctof_candidates.RData")
 # hilic
-# hilic_candidates = run_mods(methyl = methyl,metab = hilic)
-# save(hilic_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/hilic_candidates.RData")
-# # lipid
-# lipid_candidates = run_mods(methyl = methyl,metab = lipid)
-# save(lipid_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/lipid_candidates.RData")
-# # oxylipin
-# oxylipin_candidates = run_mods(methyl = methyl,metab = oxylipin)
-# save(oxylipin_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/oxylipin_candidates.RData")
-# # vitd
-# vitd_candidates = run_mods(methyl = methyl,metab = vitd)
-# save(vitd_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/vitd_candidates.RData")
+hilic_candidates = run_mods(methyl = methyl,metab = hilic)
+save(hilic_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/hilic_candidates.RData")
+# lipid
+lipid_candidates = run_mods(methyl = methyl,metab = lipid)
+save(lipid_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/lipid_candidates.RData")
+# oxylipin
+oxylipin_candidates = run_mods(methyl = methyl,metab = oxylipin)
+save(oxylipin_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/oxylipin_candidates.RData")
+# vitd
+vitd_candidates = run_mods(methyl = methyl,metab = vitd)
+save(vitd_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/vitd_candidates.RData")
