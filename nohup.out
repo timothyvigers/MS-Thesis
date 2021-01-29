@@ -8,3 +8,8 @@ Execution halted
 real	3m2.821s
 user	16m16.222s
 sys	4m9.384s
+Loading required package: parallel
+
+real	2m14.231s
+user	25m27.560s
+sys	2m3.145s
