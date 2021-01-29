@@ -58,7 +58,7 @@ run_mods = function(methyl,metab,no_cores = 20) {
       meta_mod = lm(meta[psv_metab_match] ~ ia[match(psv_samples,pheno$samplekey)])
       # Check association between metabolite and methylation
       mm_mod = lm(meth[psv_methyl_match] ~ meta[psv_metab_match])
-      if(summary(meta_mod)$coefficients[2,4] > 0.05 | 
+      if(summary(meta_mod)$coefficients[2,4] > 0.05 & 
          summary(meth_mod)$coefficients[2,4] > 0.05) {
         return(NA)
       } else if(summary(mm_mod)$coefficients[2,4] < 0.01) {
@@ -80,7 +80,7 @@ run_mods = function(methyl,metab,no_cores = 20) {
       meta_mod = lm(meta[sv_metab_match] ~ ia[match(sv_samples,pheno$samplekey)])
       # Check association between metabolite and methylation
       mm_mod = lm(meth[sv_methyl_match] ~ meta[sv_metab_match])
-      if(summary(meta_mod)$coefficients[2,4] > 0.05 | 
+      if(summary(meta_mod)$coefficients[2,4] > 0.05 & 
          summary(meth_mod)$coefficients[2,4] > 0.05) {
         return(NA)
       } else if(summary(mm_mod)$coefficients[2,4] < 0.01) {
