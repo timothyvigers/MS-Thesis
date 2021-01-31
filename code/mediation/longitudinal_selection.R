@@ -16,7 +16,7 @@ key_epic$platform = "EPIC"
 key = rbind(key_450k,key_epic)
 # Make final methylation dataset
 methyl_samplekey = key$samplekey[match(rownames(methyl),key$array)]
-rm(c("key","key_450k","key_epic"))
+rm("key","key_450k","key_epic")
 # PSV and SV samples
 psv_samples = pheno$samplekey[which(pheno$Visit_Type == "PSV")]
 sv_samples = pheno$samplekey[which(pheno$Visit_Type == "SV")]
