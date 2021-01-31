@@ -16,26 +16,10 @@ key_epic$platform = "EPIC"
 key = rbind(key_450k,key_epic)
 # Make final methylation dataset
 methyl_samplekey = key$samplekey[match(rownames(methyl),key$array)]
+rm(c("key","key_450k","key_epic"))
 # PSV and SV samples
 psv_samples = pheno$samplekey[which(pheno$Visit_Type == "PSV")]
 sv_samples = pheno$samplekey[which(pheno$Visit_Type == "SV")]
-# Metabolites
-gctof = read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.bc.csv")
-rownames(gctof) = gctof$samplekey
-gctof$samplekey = NULL
-hilic = read.csv("/home/biostats_share/Norris/data/metabolomics/hilic.bc.csv")
-rownames(hilic) = hilic$samplekey
-hilic$samplekey = NULL
-lipid = read.csv("/home/biostats_share/Norris/data/metabolomics/lipid.bc.csv")
-rownames(lipid) = lipid$samplekey
-lipid$samplekey = NULL
-oxylipin = read.csv("/home/biostats_share/Norris/data/metabolomics/oxylipin.bc.csv")
-oxylipin = oxylipin[!duplicated(oxylipin$samplekey),]
-rownames(oxylipin) = oxylipin$samplekey
-oxylipin$samplekey = NULL
-vitd = read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
-rownames(vitd) = vitd$samplekey
-vitd$samplekey = NULL
 # Model function
 run_mods = function(methyl,metab,no_cores = 20) {
   require(parallel)
@@ -96,17 +80,37 @@ run_mods = function(methyl,metab,no_cores = 20) {
   return(intersect(psv_candidates,sv_candidates))
 }
 # gctof
-gctof_candidates = run_mods(methyl = methyl,metab = gctof)
-save(gctof_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/gctof_candidates.RData")
+# gctof = read.csv("/home/biostats_share/Norris/data/metabolomics/gctof.bc.csv")
+# rownames(gctof) = gctof$samplekey
+# gctof$samplekey = NULL
+# gctof_candidates = run_mods(methyl = methyl,metab = gctof)
+# save(gctof_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/gctof_candidates.RData")
+# rm("gctof")
 # hilic
+hilic = read.csv("/home/biostats_share/Norris/data/metabolomics/hilic.bc.csv")
+rownames(hilic) = hilic$samplekey
+hilic$samplekey = NULL
 hilic_candidates = run_mods(methyl = methyl,metab = hilic)
 save(hilic_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/hilic_candidates.RData")
+rm("hilic")
 # lipid
+lipid = read.csv("/home/biostats_share/Norris/data/metabolomics/lipid.bc.csv")
+rownames(lipid) = lipid$samplekey
+lipid$samplekey = NULL
 lipid_candidates = run_mods(methyl = methyl,metab = lipid)
 save(lipid_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/lipid_candidates.RData")
+rm("lipid")
 # oxylipin
+oxylipin = read.csv("/home/biostats_share/Norris/data/metabolomics/oxylipin.bc.csv")
+oxylipin = oxylipin[!duplicated(oxylipin$samplekey),]
+rownames(oxylipin) = oxylipin$samplekey
+oxylipin$samplekey = NULL
 oxylipin_candidates = run_mods(methyl = methyl,metab = oxylipin)
 save(oxylipin_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/oxylipin_candidates.RData")
+rm("oxylipin")
 # vitd
+vitd = read.csv("/home/biostats_share/Norris/data/metabolomics/vitD.bc.csv")
+rownames(vitd) = vitd$samplekey
+vitd$samplekey = NULL
 vitd_candidates = run_mods(methyl = methyl,metab = vitd)
 save(vitd_candidates,file = "/home/vigerst/MS-Thesis/data/mediation/vitd_candidates.RData")
