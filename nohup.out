@@ -1,0 +1,7 @@
+Error in rm(c("key", "key_450k", "key_epic")) : 
+  ... must contain names or character strings
+Execution halted
+
+real	0m38.119s
+user	0m36.055s
+sys	0m9.595s
