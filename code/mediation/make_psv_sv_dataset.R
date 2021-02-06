@@ -38,8 +38,12 @@ df = merge(df,lipid,by = "samplekey")
 df = merge(df,oxylipin,by = "samplekey")
 df = merge(df,vitd,by = "samplekey")
 # Pre-SV and SV only
-df = df[df$Visit_Type %in% c("PSV","SV"),]
 df = df[!duplicated(df$samplekey),]
 rownames(df) = df$samplekey
+psv = df[df$Visit_Type == "PSV",]
+sv = df[df$Visit_Type == "SV",]
+ids = intersect(psv$ID,sv$ID)
+psv = psv[ids,]
+sv = sv[ids,]
 # Save
-save(df,file = "./psv_sv_dataset.Rdata")
+save(psv,sv,file = "./psv_sv_dataset.Rdata")
