@@ -22,6 +22,7 @@ methyl_psv_candidates = lapply(probesFromPipeline, function(p){
 })
 methyl_psv_candidates = do.call(rbind,methyl_psv_candidates)
 save(methyl_psv_candidates,file = "./methyl_psv_candidates.Rdata")
+rm("methyl_psv_candidates")
 # Methylation at SV, metabolite at PSV
 metab_psv_candidates = lapply(probesFromPipeline, function(p){
   candidates = lapply(metab_candidates, function(m){
