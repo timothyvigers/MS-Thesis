@@ -91,7 +91,7 @@ $$
 
 # Results
 
-```{r cache=TRUE,message=FALSE}
+```{r message=FALSE}
 # Import mediation results
 load("./data/mediation/longitudinal_mediation_mods_100k.Rdata")
 res = lapply(mediation_mods, function(m){
@@ -100,14 +100,14 @@ res = lapply(mediation_mods, function(m){
 })
 names(res) = methyl_psv_candidates[,1]
 res = res[!is.na(res)]
-# Get annotation
+# Get probe annotation
 load("./data/raw_data/annotation.450k.Rdata")
 anno = as.data.frame(anno)
 anno = anno[names(res),c("chr","pos","Relation_to_Island","UCSC_RefGene_Name",
                          "Enhancer","Regulatory_Feature_Group")]
 ```
 
-Of the 19 candidate pairs, `r length(res)` had an average proportion mediated > 5% (statistically significant at the 0.05 level):
+Of the 19 candidate pairs, `r length(res)` had an average proportion mediated > 5% (statistically significant a nominal 0.05 level):
 
 ```{r}
 kable(anno)
@@ -115,12 +115,108 @@ kable(anno)
 
 ## cg00232387
 
+![](/Users/timvigers/GitHub/MS-Thesis/images/cg00232387.png)
+
 ```{r}
 res["cg00232387"]
 ```
 
-## cg00232387
+## cg03052301
+
+![](/Users/timvigers/GitHub/MS-Thesis/images/cg03052301.png)
 
 ```{r}
+res["cg03052301"]
+genedesc <- getBM(attributes=c('external_gene_name','entrezgene_description',
+                               'phenotype_description'),filters = 'external_gene_name', 
+                  mart =ensembl,values = anno["cg03052301","UCSC_RefGene_Name"])
+kable(genedesc)
+```
 
+## cg03162492
+
+![](/Users/timvigers/GitHub/MS-Thesis/images/cg03162492.png)
+
+```{r}
+res["cg03162492"]
+```
+
+## cg04442638
+
+![](/Users/timvigers/GitHub/MS-Thesis/images/cg04442638.png)
+
+```{r}
+res["cg04442638"]
+```
+
+## cg05861255
+
+![](/Users/timvigers/GitHub/MS-Thesis/images/cg05861255.png)
+
+```{r}
+res["cg05861255"]
+```
+
+## cg13536060
+
+![](/Users/timvigers/GitHub/MS-Thesis/images/cg13536060.png)
+
+```{r}
+res["cg13536060"]
+```
+
+## cg14571710
+
+![](/Users/timvigers/GitHub/MS-Thesis/images/cg14571710.png)
+
+```{r}
+res["cg14571710"]
+```
+
+## cg15342139
+
+![](/Users/timvigers/GitHub/MS-Thesis/images/cg15342139.png)
+
+```{r}
+res["cg15342139"]
+```
+
+## cg16922753
+
+![](/Users/timvigers/GitHub/MS-Thesis/images/cg16922753.png)
+
+```{r}
+res["cg16922753"]
+```
+
+## cg17202839
+
+![](/Users/timvigers/GitHub/MS-Thesis/images/cg17202839.png)
+
+```{r}
+res["cg17202839"]
+```
+
+## cg19680388
+
+![](/Users/timvigers/GitHub/MS-Thesis/images/cg19680388.png)
+
+```{r}
+res["cg19680388"]
+```
+
+## cg22598669
+
+![](/Users/timvigers/GitHub/MS-Thesis/images/cg22598669.png)
+
+```{r}
+res["cg22598669"]
+```
+
+## cg23149053
+
+![](/Users/timvigers/GitHub/MS-Thesis/images/cg23149053.png)
+
+```{r}
+res["cg23149053"]
 ```
