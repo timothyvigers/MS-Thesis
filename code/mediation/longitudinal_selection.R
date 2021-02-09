@@ -9,7 +9,7 @@ metab_candidates = unique(metab_candidates[!is.na(metab_candidates)])
 n_cores = 8
 cl = makeCluster(n_cores,type = "FORK")
 # Methylation at PSV, metabolite at SV
-methyl_psv_candidates = parLapply(cl,probesFromPipeline[1:8], function(p){
+methyl_psv_candidates = parLapply(cl,probesFromPipeline, function(p){
   candidates = lapply(metab_candidates, function(m){
     ia = factor(psv$IAgroup2)
     meth = psv[,p]
@@ -31,7 +31,7 @@ rm("methyl_psv_candidates")
 # Restart cluster
 cl = makeCluster(n_cores,type = "FORK")
 # Methylation at SV, metabolite at PSV
-metab_psv_candidates = parLapply(cl,probesFromPipeline[1:8], function(p){
+metab_psv_candidates = parLapply(cl,probesFromPipeline, function(p){
   candidates = lapply(metab_candidates, function(m){
     ia = factor(psv$IAgroup2)
     meth = sv[,p]
