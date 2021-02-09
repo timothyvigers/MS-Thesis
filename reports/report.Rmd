@@ -12,438 +12,115 @@ library(patchwork)
 library(DiagrammeR)
 library(knitr)
 library(ggplot2)
+library(mediation)
+```
+
+
+```{r}
+load("./data/mediation/methyl_psv_candidates.Rdata")
+lipid_anno = read.csv("./data/raw_data/lipid.featureAnno.csv")
 ```
 
 # Pair Selection
 
-```{r eval=FALSE}
+```{r fig.height=8,fig.width=8}
 grViz("
   graph{
-  node [shape = box] Metabolite; Methylation; IA
-  Metabolite -- {Methylation IA}
-  {rank = same;Methylation -- IA}
+  node [shape = box,fontname = Helvetica]
+  a[label= 'Metabolite at SV']
+  b[label= 'Methylation at PSV']
+  c[label= 'IA']
+  a -- b [label = 'p < 0.001',fontsize = 9]
+  a -- c [label = 'p< 0.05',fontsize = 9]
+  {rank = same;b -- c [label = 'p< 0.05',fontsize = 9]}
   }
 ")
 ```
 
-### Models
+Using this mediation structure, there were `r nrow(methyl_psv_candidates)` pairs selected. The only metabolite selected was `r unique(methyl_psv_candidates[,2])`:
+
+```{r}
+kable(lipid_anno[lipid_anno$feature_name=="lipid_582",])
+```
+
+```{r fig.height=8,fig.width=8}
+grViz("
+  graph{
+  node [shape = box,fontname = Helvetica]
+  a[label= 'Methylation at SV']
+  b[label= 'Metabolite at PSV']
+  c[label= 'IA']
+  a -- b [label = 'p < 0.001',fontsize = 9]
+  a -- c [label = 'p< 0.05',fontsize = 9]
+  {rank = same;b -- c [label = 'p< 0.05',fontsize = 9]}
+  }
+")
+```
+
+No pairs were selected using this mediation structure.
+
+# Mediation Analysis
+
+## Models
+
+Terms:
 
 $$
-\text{T1D | Metabolite} \sim \text{Bern}(\text{logit}(\alpha_0 + \alpha_1*\text{Metabolite}))\\
-\text{Methylation | Metabolite, T1D} \sim \text{N}(\delta+\gamma*\text{Metabolite}+\beta*\text{T1D},\sigma^2)\\
+Y = \text{IA Status}\\
+M = \text{Metabolite at SV}\\
+T = \text{Methylation at PSV}\\
+X_2 = \text{Age at PSV}\\
+X_3 = \text{Sex}\\
+X_4 = \text{DR3/4 Status}\\
+\text{i indexes subject}\\
 $$
 
-### Priors
+### Mediator Model
 
 $$
-\alpha_0 \sim \text{N}(0,100)\\
-\alpha_1 \sim \text{N}(0,100)\\
-\delta \sim \text{N}(0,100)\\
-\gamma \sim \text{N}(0,100)\\
-\beta \sim \text{N}(0,100)\\
-\sigma^2 = \frac{1}{\tau}\\
-\tau \sim \text{Gamma}(0.0001,0.0001)
+M_i = \beta_0 + \beta_1 T_i+\beta_2 X_{i2}+\beta_3 X_{i3}+\beta_4 X_{i4}+\epsilon_i\\
+\text{With } \epsilon_i\text{ i.i.d. } N(0,\sigma^2)
 $$
 
-### All Structures
+### Outcome Model
 
-```{r message=FALSE,fig.height=12,fig.width=14}
-par(mar=c(1,1,1,1))
-par(mfrow=c(6,4),lty="solid")
-invisible(lapply(paste0("struct",1:24), function(x){
-  m <- get(x)
-  m <- gsub("methyl","Methylation",m)
-  m <- gsub("metab","Metabolite",m)
-  m <- gsub("T1Dgroup","T1D Status",m)
-  net <- model2network(m)
-  graphviz.plot(net,main = sub("struct","Structure ",x),
-                shape = "ellipse")
-}))
-```
+$$
+\text{Let }p=\text{the probability a given subject is an IA case}=P(Y = 1)\\
+ln(\frac{p}{1-p}) = \alpha_0 +\alpha_1 T_i+\alpha_2 M_i+\alpha_3 X_{i2}+\alpha_4 X_{i3}+\alpha_5 X_{i4}
+$$
 
-<!-- ## Model comparisons -->
+# Results
 
-<!-- ### DIC distribution by network structure -->
-
-<!-- #### Cit-selected pairs - Unscaled -->
-
-<!-- First, I looked at the distribution of DIC for all 139 methylation - metabolite pairs selected using the cit package. It appears that structures 14, 19, and 24 tend to be the best, all of which have one or two arrows pointing towards the methylation node. Interestingly, although structure 19 tended to have lower DIC when looking at all the pairs together, it was never selected as the best structure. -->
-
-<!-- ```{r} -->
-<!-- all_dics <- sapply(all_perms,"[",1) -->
-<!-- all_dics <- t(do.call(rbind,all_dics)) -->
-<!-- # Count best structures -->
-<!-- kable(table(unlist(lapply(as.data.frame(all_dics), function(x){ -->
-<!--   which.min(x) -->
-<!-- }))),caption = "Number of Pairs Where Structure Is Best") -->
-<!-- best <- lapply(as.data.frame(all_dics),function(x){ -->
-<!--   min <- min(x) -->
-<!--   best <- which(x-min <=2) -->
-<!--   return(best) -->
-<!-- }) -->
-<!-- kable(table(unlist(best)),caption = "Number of Pairs Where Structure Is Best or Within 2 DIC") -->
-<!-- # Format DIC data -->
-<!-- t = as.data.frame(t(all_dics)) -->
-<!-- colnames(t) = paste0("struct",1:24) -->
-<!-- # Melt for plotting -->
-<!-- t <- t %>% pivot_longer(struct1:struct24) -->
-<!-- t$name = as.numeric(gsub("struct","",t$name)) -->
-<!-- # Plot -->
-<!-- ggplot(t[t$value<2000,],aes(x=factor(name),y=value)) + -->
-<!--   geom_boxplot() + -->
-<!--   xlab("Structure number") + ylab("DIC") + -->
-<!--   theme_bw() + -->
-<!--   ylim(-200,1200) -->
-<!-- ``` -->
-
-<!-- #### Cit-selected pairs - scaled methylation -->
-
-<!-- Because the structures with arrows pointing towards methylation tended to have lower DIC, I repeated these tests with a scaled methylation variable. The idea was that perhaps methylation was "outweighing" the metabolites because only the metabolites were scaled. Scaling the methylation variables appears to reduce the variability in DIC, and results in structures 10, 21, and 23 being consistently the "best." -->
-
-<!-- ```{r} -->
-<!-- all_dics <- sapply(all_perms_methyl_scaled,"[",1) -->
-<!-- all_dics <- t(do.call(rbind,all_dics)) -->
-<!-- # Count best structures -->
-<!-- kable(table(unlist(lapply(as.data.frame(all_dics), function(x){ -->
-<!--   which.min(x) -->
-<!-- }))),caption = "Number of Pairs Where Structure Is Best") -->
-<!-- best <- lapply(as.data.frame(all_dics),function(x){ -->
-<!--   min <- min(x) -->
-<!--   best <- which(x-min <=2) -->
-<!--   return(best) -->
-<!-- }) -->
-<!-- kable(table(unlist(best)),caption = "Number of Pairs Where Structure Is Best or Within 2 DIC") -->
-<!-- # Format DIC data -->
-<!-- t = as.data.frame(t(all_dics)) -->
-<!-- colnames(t) = paste0("struct",1:24) -->
-<!-- # Melt for plotting -->
-<!-- t <- t %>% pivot_longer(struct1:struct24) -->
-<!-- t$name = as.numeric(gsub("struct","",t$name)) -->
-<!-- # Plot -->
-<!-- ggplot(t[t$value<2000,],aes(x=factor(name),y=value)) + -->
-<!--   geom_boxplot() + -->
-<!--   xlab("Structure number") + ylab("DIC") + -->
-<!--   theme_bw() + -->
-<!--   ylim(-200,1200) -->
-<!-- ``` -->
-
-<!-- #### Non-cit pairs -->
-
-<!-- Next, I selected metabolite - methylation pairs that were not associated with each other or with T1D status (p >= 0.5). I checked which structures were most often selected when there is no relationship between the three variables. The results look pretty similar to what we see with the selected pairs, which is somewhat concerning. -->
-
-<!-- ```{r warning=FALSE} -->
-<!-- # Get correct DICs (first permutation is with our data) -->
-<!-- t <- sapply(subset_perms,"[",1) -->
-<!-- t <- do.call(rbind,t) -->
-<!-- t = as.data.frame(t) -->
-<!-- colnames(t) = paste0("struct",1:24) -->
-<!-- # Count best structures -->
-<!-- best <- apply(t,1,function(x){ -->
-<!--   min <- min(x) -->
-<!--   best <- which(x-min <=2) -->
-<!--   return(best) -->
-<!-- }) -->
-<!-- kable(table(unlist(lapply(as.data.frame(t(t)), function(x){ -->
-<!--   which.min(x) -->
-<!-- }))),caption = "Number of Pairs Where Structure Is Best") -->
-<!-- kable(table(unlist(best)),caption = "Number of Pairs Where Structure Is Best or Within 2 DIC") -->
-<!-- # Melt for plotting -->
-<!-- t <- t %>% pivot_longer(struct1:struct24) -->
-<!-- t$name = as.numeric(gsub("struct","",t$name)) -->
-<!-- # Plot -->
-<!-- ggplot(t,aes(x=factor(name),y=value)) + -->
-<!--   geom_boxplot() + -->
-<!--   xlab("Structure number") + ylab("DIC") + -->
-<!--   theme_bw() + -->
-<!--   ylim(-200,1200) -->
-<!-- ``` -->
-
-<!-- #### Non-cit pairs - scaled methylation -->
-
-<!-- Scaling methylation in the unrelated pairs has a similar effect to scaling the selected pairs. -->
-
-<!-- ```{r warning=FALSE} -->
-<!-- # Get correct DICs (first permutation is with our data) -->
-<!-- t <- sapply(subset_mcmc_perms_methyl_scaled,"[",1) -->
-<!-- t <- do.call(rbind,t) -->
-<!-- t = as.data.frame(t) -->
-<!-- colnames(t) = paste0("struct",1:24) -->
-<!-- # Count best structures -->
-<!-- best <- apply(t,1,function(x){ -->
-<!--   min <- min(x) -->
-<!--   best <- which(x-min <=2) -->
-<!--   return(best) -->
-<!-- }) -->
-<!-- kable(table(unlist(lapply(as.data.frame(t(t)), function(x){ -->
-<!--   which.min(x) -->
-<!-- }))),caption = "Number of Pairs Where Structure Is Best") -->
-<!-- kable(table(unlist(best)),caption = "Number of Pairs Where Structure Is Best or Within 2 DIC") -->
-<!-- # Melt for plotting -->
-<!-- t <- t %>% pivot_longer(struct1:struct24) -->
-<!-- t$name = as.numeric(gsub("struct","",t$name)) -->
-<!-- # Plot -->
-<!-- ggplot(t,aes(x=factor(name),y=value)) + -->
-<!--   geom_boxplot() + -->
-<!--   xlab("Structure number") + ylab("DIC") + -->
-<!--   theme_bw() + -->
-<!--   ylim(-200,1200) -->
-<!-- ``` -->
-
-<!-- ### DIC simulations -->
-
-<!-- Data were simulated for a single triad with nodes relating to each other according to network structure 1.  -->
-
-<!-- #### "Correct" DIC for simulated struture 1 -->
-
-<!-- JAGS code was applied to the simulated data, and DIC results are below. Interestingly, we would fail to pick the correct network structure based on DIC, although it's possible we would select a similar 3 arc structure. However, the 2 arc structure 18 is significantly better than 4, and also has two arrows pointing towards the metabolite node. -->
-
-<!-- ```{r warning=FALSE} -->
-<!-- # Get correct DICs (first permutation is with our data) -->
-<!-- t = as.data.frame(rbind(mcmc_sim_perms[[1]])) -->
-<!-- colnames(t) = paste0("struct",1:24) -->
-<!-- # Melt for plotting -->
-<!-- t <- t %>% pivot_longer(struct1:struct24) -->
-<!-- t$name = as.numeric(gsub("struct","",t$name)) -->
-<!-- # Plot -->
-<!-- ggplot(t,aes(x=factor(name),y=value)) + -->
-<!--   geom_boxplot() + -->
-<!--   xlab("Structure number") + ylab("DIC") + -->
-<!--   theme_bw() -->
-<!-- ``` -->
-
-<!-- #### "Incorrect" permutations with simulated data for structure 1 -->
-
-<!-- The same permutation approach was applied to simulated data. For each permutation, the metabolite and methylation columns were sampled randomly without replacement, and DIC calculated using the permuted data. DIC appears to favor structures 10, 21, and 23 whene there is no real relationship between the three variables, which is interesting considering that we occasionally see these structures picked in our real data. -->
-
-<!-- ```{r warning=FALSE} -->
-<!-- # Get correct DICs (first permutation is with our data) -->
-<!-- t <- do.call(rbind,mcmc_sim_perms) -->
-<!-- t = as.data.frame(t) -->
-<!-- t = t[-c(1),] -->
-<!-- colnames(t) = paste0("struct",1:24) -->
-<!-- # Melt for plotting -->
-<!-- t <- t %>% pivot_longer(struct1:struct24) -->
-<!-- t$name = as.numeric(gsub("struct","",t$name)) -->
-<!-- # Plot -->
-<!-- ggplot(t,aes(x=factor(name),y=value)) + -->
-<!--   geom_boxplot() + -->
-<!--   xlab("Structure number") + ylab("DIC") + -->
-<!--   theme_bw() -->
-<!-- ``` -->
-
-<!-- #### "Correct" DIC for simulated struture 1, metabolite data scaled -->
-
-<!-- Because some of the permutation testing suggests that scaling the data can affect DIC, the same simulations were run with the metabolomic data scaled to n(0,1), like our real data. There are some slight changes to DIC, but the overall pattern remains essentially the same (and we would still pick the wrong structure bases on DIC). -->
-
-<!-- ```{r,warning=FALSE} -->
-<!-- # Get correct DICs (first permutation is with our data) -->
-<!-- t = as.data.frame(rbind(mcmc_sim_perms_metab_scaled[[1]])) -->
-<!-- colnames(t) = paste0("struct",1:24) -->
-<!-- # Melt for plotting -->
-<!-- t <- t %>% pivot_longer(struct1:struct24) -->
-<!-- t$name = as.numeric(gsub("struct","",t$name)) -->
-<!-- # Plot -->
-<!-- ggplot(t,aes(x=factor(name),y=value)) + -->
-<!--   geom_boxplot() + -->
-<!--   xlab("Structure number") + ylab("DIC") + -->
-<!--   theme_bw() -->
-<!-- ``` -->
-
-<!-- #### "Incorrect" permutations with simulated data for structure 1, metabolite data scaled -->
-
-<!-- ```{r warning=FALSE} -->
-<!-- # Get correct DICs (first permutation is with our data) -->
-<!-- t <- do.call(rbind,mcmc_sim_perms_metab_scaled) -->
-<!-- t = as.data.frame(t) -->
-<!-- t = t[-c(1),] -->
-<!-- colnames(t) = paste0("struct",1:24) -->
-<!-- # Melt for plotting -->
-<!-- t <- t %>% pivot_longer(struct1:struct24) -->
-<!-- t$name = as.numeric(gsub("struct","",t$name)) -->
-<!-- # Plot -->
-<!-- ggplot(t,aes(x=factor(name),y=value)) + -->
-<!--   geom_boxplot() + -->
-<!--   xlab("Structure number") + ylab("DIC") + -->
-<!--   theme_bw() -->
-<!-- ``` -->
-
-<!-- #### "Correct" DIC for simulated struture 1, metabolite and methylation data scaled -->
-
-<!-- I also simulated with both metabolite and methylation scaled, to see if that made a difference. Interestingly, the network we would select this way is close to correct, with two arrows pointing towards the methylation node. However, DIC is still not selecting the correct three arc network. -->
-
-<!-- ```{r warning=FALSE} -->
-<!-- # Get correct DICs (first permutation is with our data) -->
-<!-- t = as.data.frame(rbind(mcmc_sim_perms_both_scaled[[1]])) -->
-<!-- colnames(t) = paste0("struct",1:24) -->
-<!-- # Melt for plotting -->
-<!-- t <- t %>% pivot_longer(struct1:struct24) -->
-<!-- t$name = as.numeric(gsub("struct","",t$name)) -->
-<!-- # Plot -->
-<!-- ggplot(t,aes(x=factor(name),y=value)) + -->
-<!--   geom_boxplot() + -->
-<!--   xlab("Structure number") + ylab("DIC") + -->
-<!--   theme_bw() -->
-<!-- ``` -->
-
-<!-- #### "Incorrect" permutations with simulated data for structure 1, metabolite and methylation data scaled -->
-
-<!-- With both variables scaled, we see the same pattern in the "incorrect" permutation tests. -->
-
-<!-- ```{r warning=FALSE} -->
-<!-- # Get correct DICs (first permutation is with our data) -->
-<!-- t <- do.call(rbind,mcmc_sim_perms_both_scaled) -->
-<!-- t = as.data.frame(t) -->
-<!-- t = t[-c(1),] -->
-<!-- colnames(t) = paste0("struct",1:24) -->
-<!-- # Melt for plotting -->
-<!-- t <- t %>% pivot_longer(struct1:struct24) -->
-<!-- t$name = as.numeric(gsub("struct","",t$name)) -->
-<!-- # Plot -->
-<!-- ggplot(t,aes(x=factor(name),y=value)) + -->
-<!--   geom_boxplot() + -->
-<!--   xlab("Structure number") + ylab("DIC") + -->
-<!--   theme_bw() -->
-<!-- ``` -->
-
-# How to Trick bnlearn
-
-```{r bnlearn data}
-load("./data/networks/struct1_learned_sim.Rdata")
-load("./data/networks/struct15_learned_sim.Rdata")
-load("./data/networks/bnlearn_score_perms.Rdata")
-load("./data/networks/bnlearn_struct_perms.Rdata")
-```
-
-## Simulation Results
-
-### Structure 1
-
-Structure one is a three arc network with T1D status affecting both omics nodes, and metabolite affecting methylation:
-
-```{r s1 plot}
-m <- get("struct1")
-m <- gsub("methyl","Methylation",m)
-m <- gsub("metab","Metabolite",m)
-m <- gsub("T1Dgroup","T1D Status",m)
-net <- model2network(m)
-graphviz.plot(net,main = "Structure 1",shape = "ellipse")
-```
-
-A total of 10,000 datasets were simulated to follow this structure, and evaluated with the BIC-based hill-climbing algorithm implemented in bnlearn (in bnlearn higher scores are better). Random noise was added to T1D status (coded as 0 for control and 1 for case), to "trick" bnlearn into treating T1D as a continuous variable.
-
-Out of the 10,000 simulated datasets, bnlearn picked structure 1 `r sum(struct1_learned_sim[,1]=="Correct")` times (`r sum(struct1_learned_sim[,1]=="Correct")/100`%) with noise distributed as $\mathcal{N}(0,0.0001)$. With the SD of the error increased to 0.001 the results were exactly the same, but the percentage of correct networks decreased to 98.29% with SD = 0.1 and 16.42% with SD = 1. These results were approximately the same for 10 different random seeds.
-
-### Structure 15
-
-Structure 15 is a two arc network with metabolite affecting the two other nodes:
-
-```{r s15 plot}
-m <- get("struct15")
-m <- gsub("methyl","Methylation",m)
-m <- gsub("metab","Metabolite",m)
-m <- gsub("T1Dgroup","T1D Status",m)
-net <- model2network(m)
-graphviz.plot(net,main = "Structure 15",shape = "ellipse")
-```
-
-Out of the 10,000 simulated datasets, bnlearn picked structure 15 `r sum(struct15_learned_sim[,1]=="Correct")` times (`r sum(struct15_learned_sim[,1]=="Correct")/100`%) with noise distributed as $\mathcal{N}(0,0.0001)$. However, the difference in BIC between the learned structure and the correct structure was less than two `r sum(struct15_learned_sim[,1]<2)/100`% of the time.
-
-```{r}
-hist(struct15_learned_sim[,1],xlab = "Difference in BIC",
-     main = "Learned vs. Correct Structure")
-```
-
-## Permutation Tests
-
-For each of the CIT-selected pairs, data was permuted 1000 times to "break" the correlation between all three nodes. For each permutation, BIC was calculated for the algorithmically-chosen "best" network structure. The true BIC value for each metabolite-methylation pair was compared to the distribution of permuted scores to generate a permutation-based p value. P-values represent the proportion of times that the permuted score is greater than the true value (i.e. how often it is "better").
-
-### Permutation P Values
-
-```{r}
-ps <- lapply(bnlearn_score_perms, function(x){
-  perms <- as.data.frame(x[[1]])
-  true <- x[[2]]
-  (sum(perms>true)+1)/(nrow(perms)+1)
+```{r cache=TRUE,message=FALSE}
+# Import mediation results
+load("./data/mediation/longitudinal_mediation_mods_100k.Rdata")
+res = lapply(mediation_mods, function(m){
+  s = summary(m)
+  if(s$n.avg > 0.05 & s$n.avg.p < 0.05){return(s)}else{return(NA)}
 })
-hist(unlist(ps),main = "Permutation p values",xlab = "p")
+names(res) = methyl_psv_candidates[,1]
+res = res[!is.na(res)]
+# Get annotation
+load("./data/raw_data/annotation.450k.Rdata")
+anno = as.data.frame(anno)
+anno = anno[names(res),c("chr","pos","Relation_to_Island","UCSC_RefGene_Name",
+                         "Enhancer","Regulatory_Feature_Group")]
 ```
 
-### Permutation Average Difference
-
-Generally speaking, the "true" BIC was significantly better than the permuted score:
+Of the 19 candidate pairs, `r length(res)` had an average proportion mediated > 5% (statistically significant at the 0.05 level):
 
 ```{r}
-mean_diffs <- lapply(bnlearn_score_perms, function(x){
-  perms <- as.data.frame(x[[1]])
-  true <- x[[2]]
-  diff <- true - perms
-  mean(diff[,1])
-})
-hist(unlist(mean_diffs),xlab = "Average difference",
-     main = "Average difference between true and permuted score")
+kable(anno)
 ```
 
-### Score Permutation Plots
-
-Each plot shows the distribution of BIC for the best network structure calculated for permuted data. The red line indicated the true BIC.
+## cg00232387
 
 ```{r}
-invisible(lapply(bnlearn_score_perms[1:10], function(x){
-  perms <- as.data.frame(x[[1]])
-  true <- x[[2]]
-  p <- ggplot(perms,aes(x = `unlist(perm_scores)`)) + 
-    geom_histogram(binwidth = 1) + theme_bw() + xlab("BIC") + 
-    geom_vline(aes(xintercept=true),color="red")
-  print(p)
-}))
+res["cg00232387"]
 ```
 
-### Structure Permutations
-
-For the CIT-selected pairs, the learned structure from permuted data was compared to the "true" structure. Across all pairs, the permuted structure matched the true structure a maximum of two times (0.2%), and this was only true of 5 unique pairs. For 40 pairs the maximum was 1 match, and the remaining 94 had no matches.
+## cg00232387
 
 ```{r}
-matching_structs <- lapply(bnlearn_struct_perms, function(x){
-  sum(x)
-})
-hist(unlist(matching_structs),breaks = 0:2,
-     main = "Number of permutations matching true structure",
-     xlab = "Matches")
+
 ```
-
-# WAIC
-
-### Structure 1
-
-Network structure 1 was simulated as above (this time for only 100 datasets because JAGS is much slower than bnlearn), and WAIC was calculated for each network structure. In all simulations, WAIC failed to identify the correct network structure and only selected structures 4 (96%) or 18 (4%):
-
-```{r}
-load("./data/networks/all_waic.Rdata")
-struct_chosen <- lapply(all_waics, function(w){
-  which.min(w$waic)
-})
-# Plot 1
-m <- get("struct1")
-m <- gsub("methyl","Methylation",m)
-m <- gsub("metab","Metabolite",m)
-m <- gsub("T1Dgroup","T1D Status",m)
-net <- model2network(m)
-graphviz.plot(net,main = "Structure 1",shape = "ellipse")
-# Plot 4
-m <- get("struct4")
-m <- gsub("methyl","Methylation",m)
-m <- gsub("metab","Metabolite",m)
-m <- gsub("T1Dgroup","T1D Status",m)
-net <- model2network(m)
-graphviz.plot(net,main = "Structure 4",shape = "ellipse")
-# Plot 18
-m <- get("struct18")
-m <- gsub("methyl","Methylation",m)
-m <- gsub("metab","Metabolite",m)
-m <- gsub("T1Dgroup","T1D Status",m)
-net <- model2network(m)
-graphviz.plot(net,main = "Structure 18",shape = "ellipse")
-```
-
-So, WAIC appears to be correctly identifying the fact that there are three arcs, but still struggles with the direction. This is a slight improvement over DIC, but suggests that WAIC is not an ideal metric for network discovery.
-
