@@ -13,7 +13,7 @@ methyl_psv_candidates = lapply(probesFromPipeline, function(p){
     a = summary(lm(meta ~ meth))$coefficients[2,4]
     b = summary(glm(ia ~ meta,family = binomial("logit")))$coefficients[2,4]
     c = summary(glm(ia ~ meth,family = binomial("logit")))$coefficients[2,4]
-    if(a < 0.001 & b < 0.05 & c < 0.05){
+    if(a < 0.05 & b < 0.05 & c < 0.05){
       return(c(p,m))
     } else {return(c(NA,NA))}
   })
@@ -21,7 +21,7 @@ methyl_psv_candidates = lapply(probesFromPipeline, function(p){
   candidates[complete.cases(candidates),]
 })
 methyl_psv_candidates = do.call(rbind,methyl_psv_candidates)
-save(methyl_psv_candidates,file = "./methyl_psv_candidates.Rdata")
+save(methyl_psv_candidates,file = "./methyl_psv_candidates_p_0.05.Rdata")
 rm("methyl_psv_candidates")
 # Methylation at SV, metabolite at PSV
 metab_psv_candidates = lapply(probesFromPipeline, function(p){
@@ -32,7 +32,7 @@ metab_psv_candidates = lapply(probesFromPipeline, function(p){
     a = summary(lm(meta ~ meth))$coefficients[2,4]
     b = summary(glm(ia ~ meta,family = binomial("logit")))$coefficients[2,4]
     c = summary(glm(ia ~ meth,family = binomial("logit")))$coefficients[2,4]
-    if(a < 0.001 & b < 0.05 & c < 0.05){
+    if(a < 0.05 & b < 0.05 & c < 0.05){
       return(c(p,m))
     } else {return(c(NA,NA))}
   })
@@ -40,4 +40,4 @@ metab_psv_candidates = lapply(probesFromPipeline, function(p){
   candidates[complete.cases(candidates),]
 })
 metab_psv_candidates = do.call(rbind,metab_psv_candidates)
-save(metab_psv_candidates,file = "./metab_psv_candidates.Rdata")
+save(metab_psv_candidates,file = "./metab_psv_candidates_p_0.05.Rdata")
