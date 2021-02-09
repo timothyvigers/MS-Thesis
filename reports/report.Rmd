@@ -11,17 +11,19 @@ knitr::opts_knit$set(root.dir = "/Users/timvigers/GitHub/MS-Thesis")
 library(patchwork)
 library(DiagrammeR)
 library(knitr)
-library(ggplot2)
+library(tidyverse)
 library(mediation)
 ```
 
 
 ```{r}
-load("./data/mediation/methyl_psv_candidates.Rdata")
+load("./data/mediation/methyl_psv_candidates_p_001.Rdata")
 lipid_anno = read.csv("./data/raw_data/lipid.featureAnno.csv")
 ```
 
 # Pair Selection
+
+To look for candidate metabolite-methylation pairs, I ran three linear models and selected based on the p value cutoffs below (e.g. metabolite and methylation associated at p < 0.001, and both associated with IA status at p < 0.05).
 
 ```{r fig.height=8,fig.width=8}
 grViz("
@@ -86,7 +88,31 @@ $$
 
 $$
 \text{Let }p=\text{the probability a given subject is an IA case}=P(Y = 1)\\
-ln(\frac{p}{1-p}) = \alpha_0 +\alpha_1 T_i+\alpha_2 M_i+\alpha_3 X_{i2}+\alpha_4 X_{i3}+\alpha_5 X_{i4}
+ln(\frac{p}{1-p}) = \theta_0 +\theta_1 T_i+\theta_2 M_i+\theta_3 X_{i2}+\theta_4 X_{i3}+\theta_5 X_{i4}
+$$
+
+## Mediation
+
+```{r fig.height=8,fig.width=8}
+grViz("
+  graph{
+  node [shape = box,fontname = Helvetica]
+  a[label= 'Metabolite at SV']
+  b[label= 'Methylation at PSV']
+  c[label= 'IA']
+  a -- b [label = 'a',fontsize = 9]
+  a -- c [label = 'b',fontsize = 9]
+  {rank = same;b -- c [label = 'c',fontsize = 9]}
+  }
+")
+```
+
+Given, the observed outcome $Y_i(T_i, M_i(T_i))$, where $M_i(T_i)$ represents the observed value of the mediator:
+
+$$
+\text{CME: }\delta_i(t)\equiv Y_i(t, M_i(1)) − Y_i(t, M_i(0))\\
+\text{DE: } \gamma_i(t)\equiv Y_i(1, M_i(t)) − Y_i(0, M_i(t))\\
+\text{TE: } \tau_i\equiv \delta_i(t)+\gamma_i(1−t)
 $$
 
 # Results
@@ -110,23 +136,7 @@ anno = anno[names(res),c("chr","pos","Relation_to_Island","UCSC_RefGene_Name",
 Of the 19 candidate pairs, `r length(res)` had an average proportion mediated > 5% (statistically significant a nominal 0.05 level):
 
 ```{r}
-kable(anno)
-```
-
-## cg00232387
-
-![](/Users/timvigers/GitHub/MS-Thesis/images/cg00232387.png)
-
-```{r}
-res["cg00232387"]
-```
-
-## cg03052301
-
-![](/Users/timvigers/GitHub/MS-Thesis/images/cg03052301.png)
-
-```{r}
-res["cg03052301"]
+kable(anno %>% arrange(as.numeric(sub("chr","",chr)),pos))
 ```
 
 ## cg03162492
@@ -135,30 +145,6 @@ res["cg03052301"]
 
 ```{r}
 res["cg03162492"]
-```
-
-## cg04442638
-
-![](/Users/timvigers/GitHub/MS-Thesis/images/cg04442638.png)
-
-```{r}
-res["cg04442638"]
-```
-
-## cg05861255
-
-![](/Users/timvigers/GitHub/MS-Thesis/images/cg05861255.png)
-
-```{r}
-res["cg05861255"]
-```
-
-## cg13536060
-
-![](/Users/timvigers/GitHub/MS-Thesis/images/cg13536060.png)
-
-```{r}
-res["cg13536060"]
 ```
 
 ## cg14571710
@@ -185,12 +171,12 @@ res["cg15342139"]
 res["cg16922753"]
 ```
 
-## cg17202839
+## cg03052301
 
-![](/Users/timvigers/GitHub/MS-Thesis/images/cg17202839.png)
+![](/Users/timvigers/GitHub/MS-Thesis/images/cg03052301.png)
 
 ```{r}
-res["cg17202839"]
+res["cg03052301"]
 ```
 
 ## cg19680388
@@ -201,12 +187,12 @@ res["cg17202839"]
 res["cg19680388"]
 ```
 
-## cg22598669
+## cg05861255
 
-![](/Users/timvigers/GitHub/MS-Thesis/images/cg22598669.png)
+![](/Users/timvigers/GitHub/MS-Thesis/images/cg05861255.png)
 
 ```{r}
-res["cg22598669"]
+res["cg05861255"]
 ```
 
 ## cg23149053
@@ -216,3 +202,51 @@ res["cg22598669"]
 ```{r}
 res["cg23149053"]
 ```
+
+## cg17202839
+
+![](/Users/timvigers/GitHub/MS-Thesis/images/cg17202839.png)
+
+```{r}
+res["cg17202839"]
+```
+
+## cg04442638
+
+![](/Users/timvigers/GitHub/MS-Thesis/images/cg04442638.png)
+
+```{r}
+res["cg04442638"]
+```
+
+## cg00232387
+
+![](/Users/timvigers/GitHub/MS-Thesis/images/cg00232387.png)
+
+```{r}
+res["cg00232387"]
+```
+
+## cg22598669
+
+![](/Users/timvigers/GitHub/MS-Thesis/images/cg22598669.png)
+
+```{r}
+res["cg22598669"]
+```
+
+## cg13536060
+
+![](/Users/timvigers/GitHub/MS-Thesis/images/cg13536060.png)
+
+```{r}
+res["cg13536060"]
+```
+
+# Future Directions
+
+1. Perform a sensitivity analysis with manual mediation code 
+  - Per VanderWeele, "the case–control study design needs to be explicitly taken into account for the mediator regression" (pg. 28)
+    - IA is a rare outcome, so the case-control design oversamples the outcome.
+  - Do we know the incidence of IA status in the general population?
+2. What else?
