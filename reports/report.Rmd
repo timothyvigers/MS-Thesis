@@ -1,5 +1,5 @@
 ---
-title: "MS Thesis Work"
+title: "MS Thesis: Mediation"
 author: "Tim Vigers"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output: html_document
@@ -7,63 +7,23 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-knitr::opts_knit$set(root.dir = "/home/tim/Documents/GitHub/MS-Thesis")
-#library(tidyverse)
+knitr::opts_knit$set(root.dir = "/Users/timvigers/GitHub/MS-Thesis")
 library(patchwork)
 library(DiagrammeR)
 library(knitr)
-library(bnlearn)
 library(ggplot2)
-#library(rjags)
 ```
 
-```{r load datasets}
-# load("./data/networks/pair_data.Rdata")
-# load("./data/networks/cits.Rdata")
-# cits = cits[!(duplicated(cits[,c("methyl","metab")])),]
-# load("./data/networks/subset_mcmc_perms.Rdata")
-# subset_perms <- all_perms
-# load("./data/networks/all_mcmc_perms.Rdata")
-# load("./data/networks/pair_list.Rdata")
-# load("./data/networks/all_mcmc_perms_methyl_scaled.Rdata")
-# load("./data/networks/subset_mcmc_perms_methyl_scaled.Rdata")
-# load("./data/networks/mcmc_sim_perms.Rdata")
-# load("./data/networks/mcmc_sim_perms_metab_scaled.Rdata")
-# load("./data/networks/mcmc_sim_perms_both_scaled.Rdata")
-source("./code/networks/network_structures.R")
-```
-
-# Bayesian networks with JAGS
-
-## Network structures and models
+# Pair Selection
 
 ```{r eval=FALSE}
-ndf <-
-  create_node_df(
-    n = 3,
-    label = c("Methylation","Metabolite","T1D Status"),
-    shape = c("oval", "oval","oval"),
-    fixedsize=F
-  )
-edf1 <-
-  create_edge_df(
-    from = c(2,1),
-    to   = c(3,3),
-    label = c("p < 0.05","p < 0.05")
-  )
-edf2 <-
-  create_edge_df(
-    from = 2,
-    to   = 1,
-    label = c("p < 0.001"),
-    dir = "none"
-  )
-graph <-
-  create_graph(
-    nodes_df = ndf,
-    edges_df = combine_edfs(edf1,edf2)
-  )
-graph %>% render_graph(layout = "kk",as_svg = T)
+grViz("
+  graph{
+  node [shape = box] Metabolite; Methylation; IA
+  Metabolite -- {Methylation IA}
+  {rank = same;Methylation -- IA}
+  }
+")
 ```
 
 ### Models
