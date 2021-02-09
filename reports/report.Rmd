@@ -127,10 +127,6 @@ res["cg00232387"]
 
 ```{r}
 res["cg03052301"]
-genedesc <- getBM(attributes=c('external_gene_name','entrezgene_description',
-                               'phenotype_description'),filters = 'external_gene_name', 
-                  mart =ensembl,values = anno["cg03052301","UCSC_RefGene_Name"])
-kable(genedesc)
 ```
 
 ## cg03162492
