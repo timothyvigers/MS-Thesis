@@ -1,5 +1,5 @@
 library(parallel)
-setwd("/home/vigerst/MS-Thesis/data/raw_data")
+setwd("/Users/timvigers/GitHub/MS-Thesis/data/raw_data")
 load("./psv_sv_dataset.Rdata")
 load("./probesFromPipeline.Rdata")
 metab_candidates = read.csv("./liz_candidates.csv",stringsAsFactors = F,na.strings = "")
