@@ -19,7 +19,7 @@ mediation_mods = parApply(cl,methyl_psv_candidates,1,function(r){
   # Mediation models
   m = lm(metab~methyl+clinage+SEX+dr34)
   c = glm(ia ~ methyl+metab+clinage+SEX+dr34,family = binomial("logit"))
-  med = mediate(m,c,treat="methyl",mediator="metab",boot = T,sims = 100000,long = F)
+  med = mediate(m,c,treat="methyl",mediator="metab",boot = T,sims = 100000)
 }) 
 stopCluster(cl)
 # Save
