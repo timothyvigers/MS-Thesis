@@ -1,17 +1,14 @@
 library(parallel)
-setwd("/Users/timvigers/GitHub/MS-Thesis/data/raw_data")
+setwd("/home/vigerst/MS-Thesis/data/raw_data")
 load("./psv_sv_dataset.Rdata")
 load("./probesFromPipeline.Rdata")
-metab_candidates = read.csv("./liz_candidates.csv",stringsAsFactors = F,na.strings = "")
-metab_candidates = unlist(metab_candidates)
-metab_candidates = unique(metab_candidates[!is.na(metab_candidates)])
+ia = factor(psv$IAgroup2)
 # Parallel
-n_cores = 8
+n_cores = 16
 cl = makeCluster(n_cores,type = "FORK")
 # Methylation at PSV, metabolite at SV
 methyl_psv_candidates = parLapply(cl,probesFromPipeline, function(p){
-  candidates = lapply(metab_candidates, function(m){
-    ia = factor(psv$IAgroup2)
+  candidates = lapply(metabolites, function(m){
     meth = psv[,p]
     meta = sv[,m]
     a = summary(lm(meta ~ meth))$coefficients[2,4]
@@ -32,7 +29,7 @@ rm("methyl_psv_candidates")
 cl = makeCluster(n_cores,type = "FORK")
 # Methylation at SV, metabolite at PSV
 metab_psv_candidates = parLapply(cl,probesFromPipeline, function(p){
-  candidates = lapply(metab_candidates, function(m){
+  candidates = lapply(metabolites, function(m){
     ia = factor(psv$IAgroup2)
     meth = sv[,p]
     meta = psv[,m]
