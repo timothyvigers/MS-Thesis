@@ -1,4 +1,4 @@
-setwd("C:/Users/Tim Vigers/Documents/GitHub/MS-Thesis/data/raw_data")
+setwd("/home/vigerst/MS-Thesis/data/raw_data")
 # Data import
 # Phenotype
 pheno = read.csv("./ivyomicssample_noIdentifyingInfo.csv",stringsAsFactors = F,na.strings = "")
@@ -19,17 +19,15 @@ key = rbind(key_450k,key_epic)
 methyl$samplekey = key$samplekey[match(rownames(methyl),key$array)]
 rm("key","key_450k","key_epic")
 # Metabolites
-metab_candidates = read.csv("./liz_candidates.csv",stringsAsFactors = F,na.strings = "")
-# gctof
 gctof = read.csv("./gctof.bc.csv")
-gctof = gctof[,c("samplekey",unique(metab_candidates$gctof))]
 hilic = read.csv("./hilic.bc.csv")
-hilic = hilic[,c("samplekey","hilic_12")]
 lipid = read.csv("./lipid.bc.csv")
-lipid = lipid[,c("samplekey",unique(metab_candidates$lipid))]
 oxylipin = read.csv("./oxylipin.bc.csv")
 oxylipin = oxylipin[!duplicated(oxylipin$samplekey),]
 vitd = read.csv("./vitD.bc.csv")
+metabolites = c(colnames(gctof),colnames(hilic),colnames(lipid),
+                colnames(oxylipin),colnames(vitd))
+metabolites = metabolites[metabolites != "samplekey"]
 # Make big dataframe
 df = merge(pheno,methyl,by = "samplekey")
 df = merge(df,gctof,by = "samplekey")
@@ -46,4 +44,4 @@ ids = intersect(psv$ID,sv$ID)
 psv = psv[ids,]
 sv = sv[ids,]
 # Save
-save(psv,sv,file = "./psv_sv_dataset.Rdata")
+save(psv,sv,metabolites,file = "./psv_sv_dataset.Rdata")
