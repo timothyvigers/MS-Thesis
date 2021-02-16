@@ -13,16 +13,16 @@ dr34 = factor(psv$dr34,labels = c("No","Yes"))
 age = sv$clinage - psv$clinage
 # Cluster
 cl = makeCluster(8,type = "SOCK")
-clusterExport(cl,list("methyl_psv_candidates","psv","sv",
-                      "ia","SEX","dr34","age","mediate"))
+clusterExport(cl,varlist = list("methyl_psv_candidates","psv","sv",
+                      "ia","SEX","dr34","age","mediate"),envir=environment())
 # Iterate through all
-mediation_mods = parApply(cl,methyl_psv_candidates,1,function(r){
+mediation_mods = parApply(cl,methyl_psv_candidates[1:8,],1,function(r){
   methyl = psv[,r[1]]
   metab = sv[,r[2]]
   # Mediation models
   m = lm(metab~methyl+age+SEX+dr34)
   c = glm(ia ~ methyl+metab+age+SEX+dr34,family = binomial("logit"))
-  med = mediate(m,c,treat="methyl",mediator="metab",boot = T,sims = 100000)
+  med = mediate(m,c,treat="methyl",mediator="metab",boot = T,sims = 1000)
 }) 
 stopCluster(cl)
 # Save
