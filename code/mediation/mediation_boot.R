@@ -14,7 +14,7 @@ age = sv$clinage - psv$clinage
 # Cluster
 cl = makeCluster(8,type = "SOCK")
 clusterExport(cl,varlist = list("methyl_psv_candidates","psv","sv",
-                      "ia","SEX","dr34","age","mediate"),envir=environment())
+                      "ia","SEX","dr34","age","mediate"))
 # Iterate through all
 mediation_mods = parApply(cl,methyl_psv_candidates[1:8,],1,function(r){
   methyl = psv[,r[1]]
@@ -23,7 +23,7 @@ mediation_mods = parApply(cl,methyl_psv_candidates[1:8,],1,function(r){
   m = lm(metab~methyl+age+SEX+dr34)
   c = glm(ia ~ methyl+metab+age+SEX+dr34,family = binomial("logit"))
   med = mediate(m,c,treat="methyl",mediator="metab",boot = T,sims = 1000)
-}) 
+})
 stopCluster(cl)
 # Save
 save(mediation_mods,file = "./data/mediation/longitudinal_mediation_p_05_100k_sims.Rdata")
