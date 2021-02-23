@@ -27,10 +27,10 @@ boot_med = function(data,i){
   return(c(de,ie,pmed))
 }
 # Model function
-med_mods_tim = function(age,out_name,n_cores = 8,n_sims = 10000,long = F){
+med_mods_manual = function(age,out_name,n_cores = 8,n_sims = 10000,ci.type = "bca"){
   # Iterate through all
   mediation_results = list()
-  for(row in 1:3){
+  for(row in 1:nrow(methyl_psv_candidates)){
     r = methyl_psv_candidates[row,]
     methyl = psv[,r[1]]
     metab = sv[,r[2]]*1000 # Metabolite estimates are difficult to interpret on current scale
@@ -47,22 +47,28 @@ med_mods_tim = function(age,out_name,n_cores = 8,n_sims = 10000,long = F){
     # Run bootstrap
     res = boot(data = df,statistic = boot_med,R = n_sims,ncpus = n_cores)
     # Confidence intervals
-    de_ci = boot.ci(res,type = "perc",index = 1)
-    de_ci = de_ci$percent[c(4,5)]
-    ie_ci = boot.ci(res,type = "perc",index = 2)
-    ie_ci = ie_ci$percent[c(4,5)]
-    pmed_ci = boot.ci(res,type = "perc",index = 3)
-    pmed_ci = pmed_ci$percent[c(4,5)]
+    de_ci = boot.ci(res,type = ci.type,index = 1)
+    de_ci = de_ci[[4]][c(4,5)]
+    ie_ci = boot.ci(res,type = ci.type,index = 2)
+    ie_ci = ie_ci[[4]][c(4,5)]
+    pmed_ci = boot.ci(res,type = ci.type,index = 3)
+    pmed_ci = pmed_ci[[4]][c(4,5)]
     # Return
     ret = c(res$t0[1],de_ci,res$t0[2],ie_ci,res$t0[3],pmed_ci)
+    ret = c(r[1],r[2],round(ret,3))
     mediation_results[[row]] = ret
     }
-  # Save
+  # Format and save
+  mediation_results = do.call(rbind,mediation_results)
+  colnames(mediation_results) = c("Probe","Metabolite",
+                                  "DE","DE Lower","DE Upper",
+                                  "IE","IE Lower","IE Upper",
+                                  "PM","PM Lower","PM Upper")
   save(mediation_results,file = paste0("./data/mediation/",out_name,"_manual.Rdata"))
 }
 # Age at PSV
-med_mods(age = psv$clinage,out_name = "long_med_p_05_psv_age")
+med_mods_manual(age = psv$clinage,out_name = "long_med_p_05_psv_age")
 # Time from PSV to SV
-med_mods(age = sv$clinage - psv$clinage,out_name = "long_med_p_05_delta_age")
+med_mods_manual(age = sv$clinage - psv$clinage,out_name = "long_med_p_05_delta_age")
 # Time from PSV to SV
-med_mods(age = psv$clinage - psv$clinage,out_name = "long_med_p_05_no_age")
+med_mods_manual(age = psv$clinage - psv$clinage,out_name = "long_med_p_05_no_age")
