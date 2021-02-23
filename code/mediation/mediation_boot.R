@@ -10,7 +10,7 @@ ia = factor(psv$IAgroup2)
 SEX = factor(psv$SEX)
 dr34 = factor(psv$dr34,labels = c("No","Yes"))
 # Model function
-med_mods = function(age,out_name,n_cores = 8,n_sims = 10000){
+med_mods = function(age,out_name,n_cores = 8,n_sims = 10000,long = F){
   # Cluster
   cl = makeCluster(n_cores,type = "FORK")
   # Iterate through all
@@ -20,7 +20,7 @@ med_mods = function(age,out_name,n_cores = 8,n_sims = 10000){
     # Mediation models
     m = lm(metab~methyl+age+SEX+dr34)
     c = glm(ia ~ methyl+metab+age+SEX+dr34,family = binomial("logit"))
-    med = mediate(m,c,treat="methyl",mediator="metab",boot = T,sims = n_sims)
+    med = mediate(m,c,treat="methyl",mediator="metab",boot = T,sims = n_sims,long = long)
   })
   stopCluster(cl)
   # Save
