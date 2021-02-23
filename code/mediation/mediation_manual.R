@@ -22,12 +22,13 @@ med_mods_tim = function(age,out_name,n_cores = 8,n_sims = 10000,long = F){
     m = lm(metab[controls]~methyl[controls]+age[controls]+SEX[controls]+dr34[controls])
     c = glm(ia ~ methyl*metab+age+SEX+dr34,family = binomial("logit"))
     # Calculate direct and indirect effect (starting on VandwerWeele pg. 27)
-    theta_1 = summary(c)$coefficients[2,1]
-    theta_2 = summary(c)$coefficients[3,1]
-    
-    med = mediate(m,c,treat="methyl",mediator="metab",boot = T,sims = n_sims,long = long)
+    de = summary(c)$coefficients[2,1]
+    ie = summary(m)$coefficients[2,1] * summary(c)$coefficients[3,1]
+    # Bootstrap
+    boot_med = function(df){
+      
+    }
   })
-  stopCluster(cl)
   # Save
   save(mediation_mods,file = paste0("./data/mediation/",out_name,"_",n_sims / 1000,"k_sims.Rdata"))
 }
