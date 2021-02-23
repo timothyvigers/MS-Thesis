@@ -55,7 +55,7 @@ med_mods_manual = function(age,out_name,n_cores = 8,n_sims = 10000,ci.type = "bc
     pmed_ci = pmed_ci[[4]][c(4,5)]
     # Return
     ret = c(res$t0[1],de_ci,res$t0[2],ie_ci,res$t0[3],pmed_ci)
-    ret = c(r[1],r[2],round(ret,3))
+    ret = c(r[1],r[2],round(ret,5))
     mediation_results[[row]] = ret
     }
   # Format and save
