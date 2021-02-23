@@ -175,114 +175,12 @@ Of the `r nrow(methyl_psv_candidates)` candidate pairs, `r length(res)` had an a
 kable(anno %>% arrange(as.numeric(sub("chr","",chr)),pos))
 ```
 
-## cg03162492
+# Networks Approaches
 
-![](/Users/timvigers/GitHub/MS-Thesis/images/cg03162492.png)
-
-```{r}
-res["cg03162492"]
-```
-
-## cg14571710
-
-![](/Users/timvigers/GitHub/MS-Thesis/images/cg14571710.png)
-
-```{r}
-res["cg14571710"]
-```
-
-## cg15342139
-
-![](/Users/timvigers/GitHub/MS-Thesis/images/cg15342139.png)
-
-```{r}
-res["cg15342139"]
-```
-
-## cg16922753
-
-![](/Users/timvigers/GitHub/MS-Thesis/images/cg16922753.png)
-
-```{r}
-res["cg16922753"]
-```
-
-## cg03052301
-
-![](/Users/timvigers/GitHub/MS-Thesis/images/cg03052301.png)
-
-```{r}
-res["cg03052301"]
-```
-
-## cg19680388
-
-![](/Users/timvigers/GitHub/MS-Thesis/images/cg19680388.png)
-
-```{r}
-res["cg19680388"]
-```
-
-## cg05861255
-
-![](/Users/timvigers/GitHub/MS-Thesis/images/cg05861255.png)
-
-```{r}
-res["cg05861255"]
-```
-
-## cg23149053
-
-![](/Users/timvigers/GitHub/MS-Thesis/images/cg23149053.png)
-
-```{r}
-res["cg23149053"]
-```
-
-## cg17202839
-
-![](/Users/timvigers/GitHub/MS-Thesis/images/cg17202839.png)
-
-```{r}
-res["cg17202839"]
-```
-
-## cg04442638
-
-![](/Users/timvigers/GitHub/MS-Thesis/images/cg04442638.png)
-
-```{r}
-res["cg04442638"]
-```
-
-## cg00232387
-
-![](/Users/timvigers/GitHub/MS-Thesis/images/cg00232387.png)
-
-```{r}
-res["cg00232387"]
-```
-
-## cg22598669
-
-![](/Users/timvigers/GitHub/MS-Thesis/images/cg22598669.png)
-
-```{r}
-res["cg22598669"]
-```
-
-## cg13536060
-
-![](/Users/timvigers/GitHub/MS-Thesis/images/cg13536060.png)
-
-```{r}
-res["cg13536060"]
-```
-
-# Future Directions
+# Future Directions and Questions
 
 1. Perform a sensitivity analysis with manual mediation code 
-- Per VanderWeele, "the case–control study design needs to be explicitly taken into account for the mediator regression" (pg. 28)
-- IA is a rare outcome, so the case-control design oversamples the outcome.
-- Do we know the incidence of IA status in the general population?
+  - Per VanderWeele, "the case–control study design needs to be explicitly taken into account for the mediator regression" (pg. 28)
+  - IA is a rare outcome, so the case-control design oversamples the outcome.
+  - Do we know the incidence of IA status in the general population?
 2. What else?
