@@ -9,17 +9,22 @@ load("./data/raw_data/psv_sv_dataset.Rdata")
 ia = factor(psv$IAgroup2)
 SEX = factor(psv$SEX)
 dr34 = factor(psv$dr34,labels = c("No","Yes"))
+controls = which(psv$IAgroup2 == "control")
 # Model function
-med_mods = function(age,out_name,n_cores = 8,n_sims = 10000,long = F){
-  # Cluster
-  cl = makeCluster(n_cores,type = "FORK")
+med_mods_tim = function(age,out_name,n_cores = 8,n_sims = 10000,long = F){
   # Iterate through all
-  mediation_mods = parApply(cl,methyl_psv_candidates,1,function(r){
+  mediation_results = apply(methyl_psv_candidates,1,function(r){
     methyl = psv[,r[1]]
     metab = sv[,r[2]]
     # Mediation models
-    m = lm(metab~methyl+age+SEX+dr34)
-    c = glm(ia ~ methyl+metab+age+SEX+dr34,family = binomial("logit"))
+    # Because we have a case-control design, the mediator model should be fit to 
+    # only the controls to account for oversampling a rare outcome (VanderWeele pg. 28)
+    m = lm(metab[controls]~methyl[controls]+age[controls]+SEX[controls]+dr34[controls])
+    c = glm(ia ~ methyl*metab+age+SEX+dr34,family = binomial("logit"))
+    # Calculate direct and indirect effect (starting on VandwerWeele pg. 27)
+    theta_1 = summary(c)$coefficients[2,1]
+    theta_2 = summary(c)$coefficients[3,1]
+    
     med = mediate(m,c,treat="methyl",mediator="metab",boot = T,sims = n_sims,long = long)
   })
   stopCluster(cl)
