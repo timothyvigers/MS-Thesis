@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-knitr::opts_knit$set(root.dir = "/Users/timvigers/GitHub/MS-Thesis")
+knitr::opts_knit$set(root.dir = "/Users/timvigers/Documents/School/MS Thesis")
 library(patchwork)
 library(DiagrammeR)
 library(knitr)
@@ -17,7 +17,7 @@ library(mediation)
 
 
 ```{r}
-load("./data/mediation/methyl_psv_candidates_p_001.Rdata")
+load("./data/mediation/methyl_psv_candidates_p_05.Rdata")
 lipid_anno = read.csv("./data/raw_data/lipid.featureAnno.csv")
 ```
 
@@ -117,14 +117,21 @@ $$
 
 # Results
 
-```{r message=FALSE}
+## Adjusting for age at PSV
+
+```{r message=FALSE,cache=TRUE}
 # Import mediation results
-load("./data/mediation/longitudinal_mediation_mods_100k.Rdata")
-res = lapply(mediation_mods, function(m){
-  s = summary(m)
-  if(s$n.avg > 0.05 & s$n.avg.p < 0.05){return(s)}else{return(NA)}
+load("./data/mediation/long_med_p_05_psv_age_10k_sims.Rdata")
+names(mediation_mods) = methyl_psv_candidates[,1]
+res = lapply(names(mediation_mods), function(n){
+  s = summary(mediation_mods[[n]])
+  if((!is.na(s$n.avg) & s$n.avg > 0.2) & (!is.na(s$n.avg.p) & s$n.avg.p < 0.05)){
+    return(s)
+  } else {
+    return(NA)
+  }
 })
-names(res) = methyl_psv_candidates[,1]
+names(res) = names(mediation_mods)
 res = res[!is.na(res)]
 # Get probe annotation
 load("./data/raw_data/annotation.450k.Rdata")
@@ -133,7 +140,36 @@ anno = anno[names(res),c("chr","pos","Relation_to_Island","UCSC_RefGene_Name",
                          "Enhancer","Regulatory_Feature_Group")]
 ```
 
-Of the 19 candidate pairs, `r length(res)` had an average proportion mediated > 5% (statistically significant a nominal 0.05 level):
+Of the `r nrow(methyl_psv_candidates)` candidate pairs, `r length(res)` had an average proportion mediated > 20% (statistically significant a nominal 0.05 level):
+
+```{r}
+kable(anno %>% arrange(as.numeric(sub("chr","",chr)),pos))
+```
+
+## Adjusting for Change in Age from PSV to SV
+
+```{r message=FALSE,cache=TRUE}
+# Import mediation results
+load("./data/mediation/long_med_p_05_delta_age_10k_sims.Rdata")
+names(mediation_mods) = methyl_psv_candidates[,1]
+res = lapply(names(mediation_mods), function(n){
+  s = summary(mediation_mods[[n]])
+  if((!is.na(s$n.avg) & s$n.avg > 0.05) & (!is.na(s$n.avg.p) & s$n.avg.p < 0.05)){
+    return(s)
+  } else {
+    return(NA)
+  }
+})
+names(res) = names(mediation_mods)
+res = res[!is.na(res)]
+# Get probe annotation
+load("./data/raw_data/annotation.450k.Rdata")
+anno = as.data.frame(anno)
+anno = anno[names(res),c("chr","pos","Relation_to_Island","UCSC_RefGene_Name",
+                         "Enhancer","Regulatory_Feature_Group")]
+```
+
+Of the `r nrow(methyl_psv_candidates)` candidate pairs, `r length(res)` had an average proportion mediated > 5% (statistically significant a nominal 0.05 level):
 
 ```{r}
 kable(anno %>% arrange(as.numeric(sub("chr","",chr)),pos))
@@ -246,7 +282,7 @@ res["cg13536060"]
 # Future Directions
 
 1. Perform a sensitivity analysis with manual mediation code 
-  - Per VanderWeele, "the case–control study design needs to be explicitly taken into account for the mediator regression" (pg. 28)
-    - IA is a rare outcome, so the case-control design oversamples the outcome.
-  - Do we know the incidence of IA status in the general population?
+- Per VanderWeele, "the case–control study design needs to be explicitly taken into account for the mediator regression" (pg. 28)
+- IA is a rare outcome, so the case-control design oversamples the outcome.
+- Do we know the incidence of IA status in the general population?
 2. What else?
