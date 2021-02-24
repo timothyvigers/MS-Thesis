@@ -28,7 +28,7 @@ boot_med = function(data,i){
   return(c(de,ie,pmed))
 }
 # Model function
-med_mods_manual = function(age,out_name,n_cores = 16,n_sims = 10000,ci.type = "bca"){
+med_mods_manual = function(age,out_name,n_cores = 16,n_sims = 10000,ci.type = "perc"){
   # Iterate through all
   mediation_results = list()
   for(row in 1:nrow(methyl_psv_candidates)){
