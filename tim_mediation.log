@@ -1,8 +1,7 @@
-Error in bca.ci(boot.out, conf, index[1L], L = L, t = t.o, t0 = t0.o,  : 
-  estimated adjustment 'a' is NA
-Calls: med_mods_manual -> boot.ci -> bca.ci
+Error in summary(c)$coefficients[7, 4] : subscript out of bounds
+Calls: med_mods_manual
 Execution halted
 
-real	0m11.011s
-user	0m10.856s
-sys	0m4.009s
+real	0m28.489s
+user	0m43.730s
+sys	0m34.587s
