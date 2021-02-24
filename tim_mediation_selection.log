@@ -1,4 +1,1 @@
-
-real	310m47.600s
-user	2225m50.744s
-sys	8m26.292s
+slurmstepd: error: *** JOB 175 ON localhost CANCELLED AT 2021-02-15T18:19:52 ***
