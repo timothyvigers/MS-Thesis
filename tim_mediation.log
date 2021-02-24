@@ -1,7 +1,0 @@
-Error in summary(c)$coefficients[7, 4] : subscript out of bounds
-Calls: med_mods_manual
-Execution halted
-
-real	0m28.489s
-user	0m43.730s
-sys	0m34.587s
