@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE,message = FALSE)
 knitr::opts_knit$set(root.dir = "/Users/timvigers/Documents/School/MS Thesis")
 library(patchwork)
 library(DiagrammeR)
@@ -23,7 +23,7 @@ lipid_anno = read.csv("./data/raw_data/lipid.featureAnno.csv")
 
 # Pair Selection
 
-To look for candidate metabolite-methylation pairs, I ran three linear models and selected based on the p value cutoffs below (e.g. metabolite and methylation associated at p < 0.001, and both associated with IA status at p < 0.05).
+To look for candidate metabolite-methylation pairs, I ran three linear models and selected based on the p value cutoffs below (e.g. metabolite and methylation associated at p < 0.05, and both associated with IA status at p < 0.05).
 
 ```{r fig.height=8,fig.width=8}
 grViz("
@@ -32,7 +32,7 @@ grViz("
   a[label= 'Metabolite at SV']
   b[label= 'Methylation at PSV']
   c[label= 'IA']
-  a -- b [label = 'p < 0.001',fontsize = 9]
+  a -- b [label = 'p < 0.05',fontsize = 9]
   a -- c [label = 'p< 0.05',fontsize = 9]
   {rank = same;b -- c [label = 'p< 0.05',fontsize = 9]}
   }
@@ -52,7 +52,7 @@ grViz("
   a[label= 'Methylation at SV']
   b[label= 'Metabolite at PSV']
   c[label= 'IA']
-  a -- b [label = 'p < 0.001',fontsize = 9]
+  a -- b [label = 'p < 0.05',fontsize = 9]
   a -- c [label = 'p< 0.05',fontsize = 9]
   {rank = same;b -- c [label = 'p< 0.05',fontsize = 9]}
   }
@@ -166,6 +166,7 @@ kable(delta_age_package_res)
 ```{r}
 # Import mediation results
 load("./data/mediation/long_med_p_05_psv_age_manual.Rdata")
+psv_age = mediation_results
 # Get significant results
 psv_age = 
   psv_age[!(psv_age[,"PM Lower"] < 0 & psv_age[,"PM Upper"] > 0),]
@@ -182,13 +183,14 @@ Of the `r nrow(methyl_psv_candidates)` candidate pairs, `r length(psv_age[psv_ag
 kable(anno %>% arrange(as.numeric(sub("chr","",chr)),pos))
 ```
 
-Of these, `r sum(psv_age[psv_age[,"PM"]>0.2,"Probe"] %in% psv_age_package_res[psv_age_package_res[,"PM"]>0.2,"Probe"])`.
+Of these, `r sum(psv_age[psv_age[,"PM"]>0.2,"Probe"] %in% psv_age_package_res[psv_age_package_res[,"PM"]>0.2,"Probe"])` were also significant according to the mediation package.
 
 ## Adjusting for Change in Age from PSV to SV
 
 ```{r}
 # Import mediation results
 load("./data/mediation/long_med_p_05_delta_age_manual.Rdata")
+delta_age = mediation_results
 # Get significant results
 delta_age = 
   delta_age[!(delta_age[,"PM Lower"] < 0 & delta_age[,"PM Upper"] > 0),]
