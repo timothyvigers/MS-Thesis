@@ -17,7 +17,7 @@ boot_med = function(data,i){
   # Mediation models
   # Because we have a case-control design, the mediator model should be fit to 
   # only the controls to account for oversampling a rare outcome (VanderWeele pg. 28)
-  m = lm(metab~methyl+age+SEX+dr34,data = d[d$ia=="control",])
+  m = lm(metab~methyl+age+SEX+dr34,data = d)
   # Refit without interaction term
   c = glm(ia ~ methyl+metab+age+SEX+dr34,data = d,family = binomial("logit"))
   # Calculate direct and indirect effect (starting on VandwerWeele pg. 27)
