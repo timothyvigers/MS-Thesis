@@ -2,6 +2,7 @@ library(boot)
 set.seed(1017)
 # Load data
 setwd("/home/vigerst/MS-Thesis/")
+# setwd("/Users/timvigers/Documents/School/MS Thesis")
 load("./data/mediation/methyl_psv_candidates_p_05.Rdata")
 load("./data/raw_data/psv_sv_dataset.Rdata")
 # Outcome and adjustment variables
@@ -70,5 +71,3 @@ med_mods_manual = function(age,out_name,n_cores = 16,n_sims = 1000,ci.type = "bc
 med_mods_manual(age = psv$clinage,out_name = "long_med_p_05_psv_age")
 # Time from PSV to SV
 med_mods_manual(age = sv$clinage - psv$clinage,out_name = "long_med_p_05_delta_age")
-# Time from PSV to SV
-med_mods_manual(age = psv$clinage - psv$clinage,out_name = "long_med_p_05_no_age")
