@@ -1,7 +1,7 @@
 library(boot)
 set.seed(1017)
 # Load data
-setwd("/Users/timvigers/Documents/School/MS Thesis/")
+setwd("/home/vigerst/MS-Thesis/")
 load("./data/mediation/methyl_psv_candidates_p_05.Rdata")
 load("./data/raw_data/psv_sv_dataset.Rdata")
 # Outcome and adjustment variables
@@ -27,10 +27,10 @@ boot_med = function(data,i){
   return(c(de,ie,pmed))
 }
 # Model function
-med_mods_manual = function(age,out_name,n_cores = 8,n_sims = 10000,ci.type = "bca"){
+med_mods_manual = function(age,out_name,n_cores = 8,n_sims = 100,ci.type = "bca"){
   # Iterate through all
   mediation_results = list()
-  for(row in 1:nrow(methyl_psv_candidates)){
+  for(row in 1:4){
     r = methyl_psv_candidates[row,]
     methyl = psv[,r[1]]
     metab = sv[,r[2]]*1000 # Metabolite estimates are difficult to interpret on current scale
