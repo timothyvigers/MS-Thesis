@@ -161,17 +161,69 @@ kable(delta_age_package_res)
 
 # Comparison to Manual Code
 
+## Adjusting for age at PSV
+
 ```{r}
+# Import mediation results
+load("./data/mediation/long_med_p_05_psv_age_manual.Rdata")
+# Get significant results
+psv_age = 
+  psv_age[!(psv_age[,"PM Lower"] < 0 & psv_age[,"PM Upper"] > 0),]
+# Get probe annotation
+load("./data/raw_data/annotation.450k.Rdata")
+anno = as.data.frame(anno)
+anno = anno[psv_age[psv_age[,"PM"]>0.2,"Probe"],
+            c("chr","pos","Relation_to_Island","UCSC_RefGene_Name","Enhancer","Regulatory_Feature_Group")]
+```
+
+Of the `r nrow(methyl_psv_candidates)` candidate pairs, `r length(psv_age[psv_age[,"PM"]>0.2,"Probe"])` had an average proportion mediated > 20%:
+
+```{r}
+kable(anno %>% arrange(as.numeric(sub("chr","",chr)),pos))
+```
+
+Of these, `r sum(psv_age[psv_age[,"PM"]>0.2,"Probe"] %in% psv_age_package_res[psv_age_package_res[,"PM"]>0.2,"Probe"])`.
+
+## Adjusting for Change in Age from PSV to SV
+
+```{r}
+# Import mediation results
+load("./data/mediation/long_med_p_05_delta_age_manual.Rdata")
+# Get significant results
+delta_age = 
+  delta_age[!(delta_age[,"PM Lower"] < 0 & delta_age[,"PM Upper"] > 0),]
+# Get probe annotation
+load("./data/raw_data/annotation.450k.Rdata")
+anno = as.data.frame(anno)
+anno = anno[delta_age[delta_age[,"PM"]>0.05,"Probe"],
+            c("chr","pos","Relation_to_Island","UCSC_RefGene_Name","Enhancer","Regulatory_Feature_Group")]
+```
+
+Of the `r nrow(methyl_psv_candidates)` candidate pairs, `r length(delta_age[delta_age[,"PM"]>0.05,"Probe"])` had an average proportion mediated > 5%.
+
+```{r}
+kable(delta_age)
+```
+
+## Difference in proportion mediated
+
+```{r}
+load("./data/mediation/psv_age_package_res.Rdata")
 load("./data/mediation/long_med_p_05_psv_age_manual.Rdata")
 psv_age = mediation_results
+psv_check = cbind(psv_age[,"PM"],psv_age_package_res[match(psv_age[,"Probe"],psv_age_package_res[,"Probe"]),"PM"])
+hist(as.numeric(psv_check[,1])-as.numeric(psv_check[,2]),
+     xlab = "Manual code - mediation package",main = "Age at PSV")
+
+load("./data/mediation/delta_age_package_res.Rdata")
 load("./data/mediation/long_med_p_05_delta_age_manual.Rdata")
 delta_age = mediation_results
+delta_check = cbind(delta_age[,"PM"],delta_age_package_res[match(delta_age[,"Probe"],delta_age_package_res[,"Probe"]),"PM"])
+hist(as.numeric(delta_check[,1])-as.numeric(delta_check[,2]),
+     xlab = "Manual code - mediation package",main = "Change in age")
 ```
 
 # Future Directions and Questions
 
-1. Perform a sensitivity analysis with manual mediation code 
-- Per VanderWeele, "the case–control study design needs to be explicitly taken into account for the mediator regression" (pg. 28)
-- IA is a rare outcome, so the case-control design oversamples the outcome.
-- Do we know the incidence of IA status in the general population?
+1. What is going on with age? 
 2. What else?
