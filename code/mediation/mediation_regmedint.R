@@ -4,7 +4,8 @@ set.seed(1017)
 # Load data
 #setwd("/home/vigerst/MS-Thesis/")
 setwd("/Users/timvigers/Dropbox/School/MS Thesis")
-load("./data/mediation/psv_age_package_res.Rdata")
+load("./data/mediation/long_med_p_05_psv_age_manual.Rdata")
+psv_age = mediation_results
 load("./data/mediation/methyl_psv_candidates_p_05.Rdata")
 methyl_psv_candidates = methyl_psv_candidates[methyl_psv_candidates[,1] %in% psv_age[,"Probe"],]
 load("./data/raw_data/psv_sv_dataset.Rdata")
