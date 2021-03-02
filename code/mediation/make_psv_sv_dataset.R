@@ -1,4 +1,5 @@
 setwd("/home/vigerst/MS-Thesis/data/raw_data")
+#setwd("/Users/timvigers/Dropbox/School/MS Thesis/data/raw_data")
 # Data import
 # Phenotype
 pheno = read.csv("./ivyomicssample_noIdentifyingInfo.csv",stringsAsFactors = F,na.strings = "")

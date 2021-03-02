@@ -1,48 +1,78 @@
 library(parallel)
-setwd("/home/vigerst/MS-Thesis/data/raw_data")
-load("./psv_sv_dataset.Rdata")
-load("./probesFromPipeline.Rdata")
+setwd("/home/vigerst/MS-Thesis/data")
+#setwd("/Users/timvigers/Dropbox/School/MS Thesis/data")
+load("./raw_data/psv_sv_dataset.Rdata")
+load("./raw_data/probesFromPipeline.Rdata")
 ia = factor(psv$IAgroup2)
 # Parallel
 n_cores = 16
-cl = makeCluster(n_cores,type = "FORK")
 # Methylation at PSV, metabolite at SV
-methyl_psv_candidates = parLapply(cl,probesFromPipeline, function(p){
-  candidates = lapply(metabolites, function(m){
+# Probes associated with outcome
+cl = makeCluster(n_cores,type = "FORK")
+probe_candidates = parLapply(cl,probesFromPipeline[1:8], function(p){
+  meth = psv[,p]
+  c = summary(glm(ia ~ meth,family = binomial("logit")))$coefficients[2,4]
+  if(c < 0.5){return(p)}else{return(NA)}
+})
+stopCluster(cl)
+probe_candidates = unlist(probe_candidates[!is.na(probe_candidates)])
+# Metabolites associated with outcome
+cl = makeCluster(n_cores,type = "FORK")
+metab_candidates = parLapply(cl,metabolites[1:8], function(m){
+  meta = sv[,m]
+  c = summary(glm(ia ~ meta,family = binomial("logit")))$coefficients[2,4]
+  if(c < 0.5){return(m)}else{return(NA)}
+})
+stopCluster(cl)
+metab_candidates = unlist(metab_candidates[!is.na(metab_candidates)])
+# Check if these are related
+cl = makeCluster(n_cores,type = "FORK")
+methyl_psv_candidates = parLapply(cl,probe_candidates, function(p){
+  candidates = lapply(metab_candidates, function(m){
     meth = psv[,p]
     meta = sv[,m]
     a = summary(lm(meta ~ meth))$coefficients[2,4]
-    b = summary(glm(ia ~ meta,family = binomial("logit")))$coefficients[2,4]
-    c = summary(glm(ia ~ meth,family = binomial("logit")))$coefficients[2,4]
-    if(a < 0.05 & b < 0.05 & c < 0.05){
-      return(c(p,m))
-    } else {return(c(NA,NA))}
+    if(a < 0.5){return(c(p,m))}else{return(c(NA,NA))}
   })
   candidates = do.call(rbind,candidates)
   candidates[complete.cases(candidates),]
 })
 stopCluster(cl)
 methyl_psv_candidates = do.call(rbind,methyl_psv_candidates)
-save(methyl_psv_candidates,file = "./methyl_psv_candidates_p_05.Rdata")
+save(methyl_psv_candidates,file = "./mediation/methyl_psv_candidates_p_05.Rdata")
 rm("methyl_psv_candidates")
-# Restart cluster
-cl = makeCluster(n_cores,type = "FORK")
 # Methylation at SV, metabolite at PSV
-metab_psv_candidates = parLapply(cl,probesFromPipeline, function(p){
-  candidates = lapply(metabolites, function(m){
-    ia = factor(psv$IAgroup2)
+# Probes associated with outcome
+cl = makeCluster(n_cores,type = "FORK")
+probe_candidates = parLapply(cl,probesFromPipeline[1:8], function(p){
+  meth = sv[,p]
+  c = summary(glm(ia ~ meth,family = binomial("logit")))$coefficients[2,4]
+  if(c < 0.5){return(p)}else{return(NA)}
+})
+stopCluster(cl)
+probe_candidates = unlist(probe_candidates[!is.na(probe_candidates)])
+# Metabolites associated with outcome
+cl = makeCluster(n_cores,type = "FORK")
+metab_candidates = parLapply(cl,metabolites[1:8], function(m){
+  meta = psv[,m]
+  c = summary(glm(ia ~ meta,family = binomial("logit")))$coefficients[2,4]
+  if(c < 0.5){return(m)}else{return(NA)}
+})
+stopCluster(cl)
+metab_candidates = unlist(metab_candidates[!is.na(metab_candidates)])
+# Check if these are related
+cl = makeCluster(n_cores,type = "FORK")
+metab_psv_candidates = parLapply(cl,probe_candidates, function(p){
+  candidates = lapply(metab_candidates, function(m){
     meth = sv[,p]
     meta = psv[,m]
     a = summary(lm(meta ~ meth))$coefficients[2,4]
-    b = summary(glm(ia ~ meta,family = binomial("logit")))$coefficients[2,4]
-    c = summary(glm(ia ~ meth,family = binomial("logit")))$coefficients[2,4]
-    if(a < 0.05 & b < 0.05 & c < 0.05){
-      return(c(p,m))
-    } else {return(c(NA,NA))}
+    if(a < 0.5){return(c(p,m))}else{return(c(NA,NA))}
   })
   candidates = do.call(rbind,candidates)
   candidates[complete.cases(candidates),]
 })
 stopCluster(cl)
 metab_psv_candidates = do.call(rbind,metab_psv_candidates)
-save(metab_psv_candidates,file = "./metab_psv_candidates_p_05.Rdata")
+save(metab_psv_candidates,file = "./mediation/metab_psv_candidates_p_05.Rdata")
+rm("metab_psv_candidates")
