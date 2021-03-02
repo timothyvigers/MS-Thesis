@@ -7,12 +7,13 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,message = FALSE)
-knitr::opts_knit$set(root.dir = "/Users/timvigers/Documents/School/MS Thesis")
+knitr::opts_knit$set(root.dir = "/Users/timvigers/Dropbox/School/MS Thesis")
 library(patchwork)
 library(DiagrammeR)
 library(knitr)
 library(tidyverse)
 library(mediation)
+library(blandr)
 ```
 
 
@@ -115,117 +116,36 @@ $$
 \text{TE: } \tau_i\equiv \delta_i(t)+\gamma_i(1−t)
 $$
 
-# Results
-
-## Adjusting for age at PSV
-
-```{r}
-# Import mediation results
-load("./data/mediation/psv_age_package_res.Rdata")
-# Get significant results
-psv_age_package_res = 
-  psv_age_package_res[!(psv_age_package_res[,"PM Lower"] < 0 & psv_age_package_res[,"PM Upper"] > 0),]
-# Get probe annotation
-load("./data/raw_data/annotation.450k.Rdata")
-anno = as.data.frame(anno)
-anno = anno[psv_age_package_res[psv_age_package_res[,"PM"]>0.2,"Probe"],
-            c("chr","pos","Relation_to_Island","UCSC_RefGene_Name","Enhancer","Regulatory_Feature_Group")]
-```
-
-Of the `r nrow(methyl_psv_candidates)` candidate pairs, `r length(psv_age_package_res[psv_age_package_res[,"PM"]>0.2,"Probe"])` had an average proportion mediated > 20%:
-
-```{r}
-kable(anno %>% arrange(as.numeric(sub("chr","",chr)),pos))
-```
-
-## Adjusting for Change in Age from PSV to SV
-
-```{r}
-# Import mediation results
-load("./data/mediation/delta_age_package_res.Rdata")
-# Get significant results
-delta_age_package_res = 
-  delta_age_package_res[!(delta_age_package_res[,"PM Lower"] < 0 & delta_age_package_res[,"PM Upper"] > 0),]
-# Get probe annotation
-load("./data/raw_data/annotation.450k.Rdata")
-anno = as.data.frame(anno)
-anno = anno[delta_age_package_res[delta_age_package_res[,"PM"]>0.05,"Probe"],
-            c("chr","pos","Relation_to_Island","UCSC_RefGene_Name","Enhancer","Regulatory_Feature_Group")]
-```
-
-Of the `r nrow(methyl_psv_candidates)` candidate pairs, `r length(delta_age_package_res[delta_age_package_res[,"PM"]>0.05,"Probe"])` had an average proportion mediated > 5%:
-
-```{r}
-kable(delta_age_package_res)
-```
-
 # Comparison to Manual Code
 
 ## Adjusting for age at PSV
 
 ```{r}
-# Import mediation results
+# Import manual mediation results
 load("./data/mediation/long_med_p_05_psv_age_manual.Rdata")
 psv_age = mediation_results
-# Get significant results
-psv_age = 
-  psv_age[!(psv_age[,"PM Lower"] < 0 & psv_age[,"PM Upper"] > 0),]
-# Get probe annotation
-load("./data/raw_data/annotation.450k.Rdata")
-anno = as.data.frame(anno)
-anno = anno[psv_age[psv_age[,"PM"]>0.2,"Probe"],
-            c("chr","pos","Relation_to_Island","UCSC_RefGene_Name","Enhancer","Regulatory_Feature_Group")]
-```
-
-Of the `r nrow(methyl_psv_candidates)` candidate pairs, `r length(psv_age[psv_age[,"PM"]>0.2,"Probe"])` had an average proportion mediated > 20%:
-
-```{r}
-kable(anno %>% arrange(as.numeric(sub("chr","",chr)),pos))
-```
-
-Of these, `r sum(psv_age[psv_age[,"PM"]>0.2,"Probe"] %in% psv_age_package_res[psv_age_package_res[,"PM"]>0.2,"Probe"])` were also significant according to the mediation package.
-
-## Adjusting for Change in Age from PSV to SV
-
-```{r}
-# Import mediation results
-load("./data/mediation/long_med_p_05_delta_age_manual.Rdata")
-delta_age = mediation_results
-# Get significant results
-delta_age = 
-  delta_age[!(delta_age[,"PM Lower"] < 0 & delta_age[,"PM Upper"] > 0),]
-# Get probe annotation
-load("./data/raw_data/annotation.450k.Rdata")
-anno = as.data.frame(anno)
-anno = anno[delta_age[delta_age[,"PM"]>0.05,"Probe"],
-            c("chr","pos","Relation_to_Island","UCSC_RefGene_Name","Enhancer","Regulatory_Feature_Group")]
-```
-
-Of the `r nrow(methyl_psv_candidates)` candidate pairs, `r length(delta_age[delta_age[,"PM"]>0.05,"Probe"])` had an average proportion mediated > 5%.
-
-```{r}
-kable(delta_age)
-```
-
-## Difference in proportion mediated
-
-```{r}
+# Import package results
 load("./data/mediation/psv_age_package_res.Rdata")
-load("./data/mediation/long_med_p_05_psv_age_manual.Rdata")
-psv_age = mediation_results
-psv_check = cbind(psv_age[,"PM"],psv_age_package_res[match(psv_age[,"Probe"],psv_age_package_res[,"Probe"]),"PM"])
-hist(as.numeric(psv_check[,1])-as.numeric(psv_check[,2]),
-     xlab = "Manual code - mediation package",main = "Age at PSV")
-
-load("./data/mediation/delta_age_package_res.Rdata")
-load("./data/mediation/long_med_p_05_delta_age_manual.Rdata")
-delta_age = mediation_results
-delta_check = cbind(delta_age[,"PM"],delta_age_package_res[match(delta_age[,"Probe"],delta_age_package_res[,"Probe"]),"PM"])
-hist(as.numeric(delta_check[,1])-as.numeric(delta_check[,2]),
-     xlab = "Manual code - mediation package",main = "Change in age")
+# Compare prop. mediated
+manual = as.numeric(psv_age[,"PM"])
+package = as.numeric(psv_age_package_res[match(psv_age[,"Probe"],psv_age_package_res[,"Probe"]),"PM"])
+# Plots
+hist(package-manual)
+plot(package,manual)
+abline(coef = c(0,1))
+# Linear model
+sfit = summary(lm(package~manual))
+kable(sfit$coefficients)
+t = (sfit$coefficients[2,1]-1/sfit$coefficients[2,2])
+p = 2 * pt(abs(t), df = 46, lower.tail = FALSE)
 ```
 
-# Future Directions and Questions
+The slope of this linear model is significantly different from 1 (p `r format.pval(p,eps = 0.001)`). However, a t test of the difference is not statistically significant (p = `r format.pval(t.test(package-manual)$p.value,eps = 0.001,digits = 3)`). All of the signs are the same at least.
 
-1. What is going on with age? 
-2. What else?
+```{r warning=FALSE}
+bland = blandr.statistics(package,manual)
+blandr.draw(package,manual,annotate = T,ciDisplay = F) + theme_bw()
+```
+
+### What is causing these differences?
+
