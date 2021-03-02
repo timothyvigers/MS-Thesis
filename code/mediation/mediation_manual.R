@@ -2,7 +2,7 @@ library(boot)
 set.seed(1017)
 # Load data
 setwd("/home/vigerst/MS-Thesis/")
-# setwd("/Users/timvigers/Documents/School/MS Thesis")
+# setwd("/Users/timvigers/Dropbox/School/MS Thesis")
 load("./data/mediation/methyl_psv_candidates_p_05.Rdata")
 load("./data/raw_data/psv_sv_dataset.Rdata")
 # Outcome and adjustment variables
