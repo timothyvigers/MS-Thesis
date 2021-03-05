@@ -20,7 +20,7 @@ metabolites = metabolites.astype(str).values.tolist()
 probe_candidates = [] # To store results
 for i in range(0,len(probes)):
     c = probes[i][0]
-    logit_model=sm.Logit(ia,sm.add_constant(psv[[c]]))
+    logit_model=sm.Logit(ia,sm.add_constant(psv[[c]]),missing='drop')
     result=logit_model.fit(disp=0)
     if result.pvalues[[1]][0] < pval:
         probe_candidates.append(c)
@@ -28,7 +28,7 @@ for i in range(0,len(probes)):
 metab_candidates = [] # To store results
 for i in range(0,len(metabolites)):
     m = metabolites[i][0]
-    logit_model=sm.Logit(ia,sm.add_constant(sv[[m]]))
+    logit_model=sm.Logit(ia,sm.add_constant(sv[[m]]),missing='drop')
     result=logit_model.fit(disp=0)
     if result.pvalues[[1]][0] < pval:
         metab_candidates.append(m)
@@ -38,18 +38,18 @@ for i in range(0,len(probe_candidates)):
     p = probe_candidates[i]
     for j in range(0,len(metab_candidates)):
         m = metab_candidates[j]
-        model=sm.OLS(sv[[m]],sm.add_constant(psv[[p]]))
+        model=sm.OLS(sv[[m]],sm.add_constant(psv[[p]]),missing='drop')
         result=model.fit(disp=0)
         if result.pvalues[[1]][0] < pval:
             methyl_psv_candidates.append([p,m])
 # Write results
-pd.DataFrame(methyl_psv_candidates).to_csv(wd+"mediation/methyl_psv_py.csv",index=False)
+pd.DataFrame(methyl_psv_candidates).to_csv(wd+"mediation/methyl_psv_p01_py.csv",index=False)
 # Same again, but switch psv and sv
 # Check probe association with outcome
 probe_candidates = [] # To store results
 for i in range(0,len(probes)):
     c = probes[i][0]
-    logit_model=sm.Logit(ia,sm.add_constant(sv[[c]]))
+    logit_model=sm.Logit(ia,sm.add_constant(sv[[c]]),missing='drop')
     result=logit_model.fit(disp=0)
     if result.pvalues[[1]][0] < pval:
         probe_candidates.append(c)
@@ -57,7 +57,7 @@ for i in range(0,len(probes)):
 metab_candidates = [] # To store results
 for i in range(0,len(metabolites)):
     m = metabolites[i][0]
-    logit_model=sm.Logit(ia,sm.add_constant(psv[[m]]))
+    logit_model=sm.Logit(ia,sm.add_constant(psv[[m]]),missing='drop')
     result=logit_model.fit(disp=0)
     if result.pvalues[[1]][0] < pval:
         metab_candidates.append(m)
@@ -67,9 +67,9 @@ for i in range(0,len(probe_candidates)):
     p = probe_candidates[i]
     for j in range(0,len(metab_candidates)):
         m = metab_candidates[j]
-        model=sm.OLS(psv[[m]],sm.add_constant(sv[[p]]))
+        model=sm.OLS(psv[[m]],sm.add_constant(sv[[p]]),missing='drop')
         result=model.fit(disp=0)
         if result.pvalues[[1]][0] < pval:
             metab_psv_candidates.append([p,m])
 # Write results
-pd.DataFrame(metab_psv_candidates).to_csv(wd+"mediation/metab_psv_py.csv",index=False)
+pd.DataFrame(metab_psv_candidates).to_csv(wd+"mediation/metab_psv_p01_py.csv",index=False)
