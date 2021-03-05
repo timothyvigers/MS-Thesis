@@ -1,6 +1,6 @@
 library(parallel)
-setwd("/home/vigerst/MS-Thesis/data")
-#setwd("/Users/timvigers/Dropbox/School/MS Thesis/data")
+#setwd("/home/vigerst/MS-Thesis/data")
+setwd("/Users/timvigers/Dropbox/School/MS Thesis/data")
 load("./raw_data/psv_sv_dataset.Rdata")
 load("./raw_data/probesFromPipeline.Rdata")
 ia = factor(psv$IAgroup2)

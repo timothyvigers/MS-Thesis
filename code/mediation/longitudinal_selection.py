@@ -2,7 +2,7 @@ import multiprocessing as mp
 import pandas as pd
 import statsmodels.api as sm
 # P value cutof for association
-pval = 0.5
+pval = 0.01
 # Home directory
 wd = "/Users/timvigers/Dropbox/School/MS Thesis/data/"
 # Import data (from pickle_csvs.py)
