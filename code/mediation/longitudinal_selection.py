@@ -1,6 +1,8 @@
 import multiprocessing as mp
 import pandas as pd
 import statsmodels.api as sm
+# P value cutof for association
+pval = 0.5
 # Home directory
 wd = "/Users/timvigers/Dropbox/School/MS Thesis/data/"
 # Import data (from pickle_csvs.py)
@@ -20,7 +22,7 @@ for i in range(0,len(probes)):
     c = probes[i][0]
     logit_model=sm.Logit(ia,sm.add_constant(psv[[c]]))
     result=logit_model.fit(disp=0)
-    if result.pvalues[[1]][0] < 0.5:
+    if result.pvalues[[1]][0] < pval:
         probe_candidates.append(c)
 # Now check metabolite association with outcome
 metab_candidates = [] # To store results
@@ -28,7 +30,7 @@ for i in range(0,len(metabolites)):
     m = metabolites[i][0]
     logit_model=sm.Logit(ia,sm.add_constant(sv[[m]]))
     result=logit_model.fit(disp=0)
-    if result.pvalues[[1]][0] < 0.5:
+    if result.pvalues[[1]][0] < pval:
         metab_candidates.append(m)
 # Check which pairs are associated with each other
 methyl_psv_candidates = []
@@ -38,7 +40,7 @@ for i in range(0,len(probe_candidates)):
         m = metab_candidates[j]
         model=sm.OLS(sv[[m]],sm.add_constant(psv[[p]]))
         result=model.fit(disp=0)
-        if result.pvalues[[1]][0] < 0.5:
+        if result.pvalues[[1]][0] < pval:
             methyl_psv_candidates.append([p,m])
 # Write results
 pd.DataFrame(methyl_psv_candidates).to_csv(wd+"mediation/methyl_psv_py.csv",index=False)
@@ -47,27 +49,27 @@ pd.DataFrame(methyl_psv_candidates).to_csv(wd+"mediation/methyl_psv_py.csv",inde
 probe_candidates = [] # To store results
 for i in range(0,len(probes)):
     c = probes[i][0]
-    logit_model=sm.Logit(ia,sm.add_constant(psv[[c]]))
+    logit_model=sm.Logit(ia,sm.add_constant(sv[[c]]))
     result=logit_model.fit(disp=0)
-    if result.pvalues[[1]][0] < 0.5:
+    if result.pvalues[[1]][0] < pval:
         probe_candidates.append(c)
 # Now check metabolite association with outcome
 metab_candidates = [] # To store results
 for i in range(0,len(metabolites)):
     m = metabolites[i][0]
-    logit_model=sm.Logit(ia,sm.add_constant(sv[[m]]))
+    logit_model=sm.Logit(ia,sm.add_constant(psv[[m]]))
     result=logit_model.fit(disp=0)
-    if result.pvalues[[1]][0] < 0.5:
+    if result.pvalues[[1]][0] < pval:
         metab_candidates.append(m)
 # Check which pairs are associated with each other
-methyl_psv_candidates = []
+metab_psv_candidates = []
 for i in range(0,len(probe_candidates)):
     p = probe_candidates[i]
     for j in range(0,len(metab_candidates)):
         m = metab_candidates[j]
-        model=sm.OLS(sv[[m]],sm.add_constant(psv[[p]]))
+        model=sm.OLS(psv[[m]],sm.add_constant(sv[[p]]))
         result=model.fit(disp=0)
-        if result.pvalues[[1]][0] < 0.5:
-            methyl_psv_candidates.append([p,m])
+        if result.pvalues[[1]][0] < pval:
+            metab_psv_candidates.append([p,m])
 # Write results
-pd.DataFrame(methyl_psv_candidates).to_csv(wd+"mediation/methyl_psv_py.csv",index=False)
+pd.DataFrame(metab_psv_candidates).to_csv(wd+"mediation/metab_psv_py.csv",index=False)
