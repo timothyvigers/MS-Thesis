@@ -47,7 +47,7 @@ methyl_psv_results = apply(methyl_psv_candidates,1,function(r){
 })
 stopCluster(cl)
 # Save
-save(methyl_psv_results,file = paste0("./data/mediation/",out_name,"methyl_psv_results.Rdata"))
+save(methyl_psv_results,file = "./data/mediation/methyl_psv_results.Rdata")
 # Same again for metab at PSV
 cl = makeCluster(n_cores,type = "FORK")
 # Iterate through all
@@ -79,4 +79,4 @@ metab_psv_results = apply(metab_psv_candidates,1,function(r){
 })
 stopCluster(cl)
 # Save
-save(metab_psv_results,file = paste0("./data/mediation/",out_name,"metab_psv_results.Rdata"))
+save(metab_psv_results,file = "./data/mediation/metab_psv_results.Rdata")
