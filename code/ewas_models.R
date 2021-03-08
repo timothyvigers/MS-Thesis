@@ -1,6 +1,6 @@
 library(parallel)
 library(nlme)
-setwd("/home/tim/.local/share/Cryptomator/mnt/Vault/School/Statistical Genomics/Final Project")
+setwd("~/Dropbox/School/Statistical Genomics/Final Project")
 load("./data/final_data.RData")
 rm(probes)
 load("./data/probesFromPipeline.Rdata")

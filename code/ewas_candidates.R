@@ -1,4 +1,4 @@
-setwd("/home/tim/.local/share/Cryptomator/mnt/Vault/School/Statistical Genomics/Final Project/data")
+setwd("~/Dropbox/School/Statistical Genomics/Final Project/data")
 # Annotation  
 annotate = c("UCSC_RefGene_Name","chr","pos","Probe_rs","Islands_Name","Relation_to_Island")
 load("annotation.450k.Rdata")
