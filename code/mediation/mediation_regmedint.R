@@ -74,7 +74,8 @@ metab_psv_results = apply(metab_psv_candidates,1,function(r){
               yreg = "logistic",
               ## Additional specification
               interaction = T,
-              casecontrol = T)
+              casecontrol = T,
+              na_omit = T)
   regmedint_obj
 })
 stopCluster(cl)
