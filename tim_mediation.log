@@ -1,8 +1,0 @@
-Error in paste0("./data/mediation/", out_name, "methyl_psv_results.Rdata") : 
-  object 'out_name' not found
-Calls: save -> paste0
-Execution halted
-
-real	0m32.856s
-user	0m30.019s
-sys	0m4.004s
