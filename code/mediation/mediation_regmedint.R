@@ -56,6 +56,7 @@ metab_psv_results = apply(metab_psv_candidates,1,function(r){
   metab = psv[,r[2]]
   # Dataframe 
   df = as.data.frame(cbind(methyl,metab,age,covariates))
+  df = df[complete.cases(df),]
   # Mediation
   regmedint_obj <- 
     regmedint(data = df,
@@ -74,8 +75,7 @@ metab_psv_results = apply(metab_psv_candidates,1,function(r){
               yreg = "logistic",
               ## Additional specification
               interaction = T,
-              casecontrol = T,
-              na_omit = T)
+              casecontrol = T)
   regmedint_obj
 })
 stopCluster(cl)
