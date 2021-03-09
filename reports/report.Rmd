@@ -18,13 +18,13 @@ library(blandr)
 
 
 ```{r}
-load("./data/mediation/methyl_psv_candidates_p_05.Rdata")
+load("./data/mediation/methyl_psv_candidates_p_01.Rdata")
 lipid_anno = read.csv("./data/raw_data/lipid.featureAnno.csv")
 ```
 
 # Pair Selection
 
-To look for candidate metabolite-methylation pairs, I ran three linear models and selected based on the p value cutoffs below (e.g. metabolite and methylation associated at p < 0.05, and both associated with IA status at p < 0.05).
+To look for candidate metabolite-methylation pairs, I ran three linear models and selected based on the p value cutoffs below (e.g. metabolite and methylation associated at p < 0.01, and both associated with IA status at p < 0.01).
 
 ```{r fig.height=8,fig.width=8}
 grViz("
@@ -33,9 +33,9 @@ grViz("
   a[label= 'Metabolite at SV']
   b[label= 'Methylation at PSV']
   c[label= 'IA']
-  a -- b [label = 'p < 0.05',fontsize = 9]
-  a -- c [label = 'p< 0.05',fontsize = 9]
-  {rank = same;b -- c [label = 'p< 0.05',fontsize = 9]}
+  a -- b [label = 'p < 0.01',fontsize = 9]
+  a -- c [label = 'p< 0.01',fontsize = 9]
+  {rank = same;b -- c [label = 'p< 0.01',fontsize = 9]}
   }
 ")
 ```
@@ -53,9 +53,9 @@ grViz("
   a[label= 'Methylation at SV']
   b[label= 'Metabolite at PSV']
   c[label= 'IA']
-  a -- b [label = 'p < 0.05',fontsize = 9]
-  a -- c [label = 'p< 0.05',fontsize = 9]
-  {rank = same;b -- c [label = 'p< 0.05',fontsize = 9]}
+  a -- b [label = 'p < 0.01',fontsize = 9]
+  a -- c [label = 'p< 0.01',fontsize = 9]
+  {rank = same;b -- c [label = 'p< 0.01',fontsize = 9]}
   }
 ")
 ```
@@ -111,239 +111,12 @@ grViz("
 Given, the observed outcome $Y_i(T_i, M_i(T_i))$, where $M_i(T_i)$ represents the observed value of the mediator:
 
 $$
-\text{CME: }\delta_i(t)\equiv Y_i(t, M_i(1)) − Y_i(t, M_i(0))\\
-\text{DE: } \gamma_i(t)\equiv Y_i(1, M_i(t)) − Y_i(0, M_i(t))\\
-\text{TE: } \tau_i\equiv \delta_i(t)+\gamma_i(1−t)
+\text{CME: }\\
+\text{DE: }\\
+\text{TE: }
 $$
 
-# Comparison to Manual Code
 
-## `mediation` package
-
-### Proportion Mediated
-
-```{r}
-# Import manual mediation results
-load("./data/mediation/long_med_p_05_psv_age_manual.Rdata")
-psv_age = mediation_results
-# Import package results
-load("./data/mediation/psv_age_package_res.Rdata")
-# Compare prop. mediated
-manual = as.numeric(psv_age[,"PM"])
-package = as.numeric(psv_age_package_res[match(psv_age[,"Probe"],psv_age_package_res[,"Probe"]),"PM"])
-# Plots
-hist(package-manual)
-plot(package,manual)
-abline(coef = c(0,1))
-# Linear model
-sfit = summary(lm(package~manual))
-kable(sfit$coefficients)
-t = (sfit$coefficients[2,1]-1/sfit$coefficients[2,2])
-p = 2 * pt(abs(t), df = 46, lower.tail = FALSE)
-```
-
-The slope of this linear model is significantly different from 1 (p `r format.pval(p,eps = 0.001)`). However, a t test of the difference is not statistically significant (p = `r format.pval(t.test(package-manual)$p.value,eps = 0.001,digits = 3)`). All of the signs are the same at least.
-
-```{r warning=FALSE}
-bland = blandr.statistics(package,manual)
-blandr.draw(package,manual,annotate = T,ciDisplay = F) + theme_bw()
-```
-
-#### Lower CI Bound
-
-```{r}
-# Compare prop. mediated LL
-manual = as.numeric(psv_age[,"PM Lower"])
-package = as.numeric(psv_age_package_res[match(psv_age[,"Probe"],psv_age_package_res[,"Probe"]),"PM Lower"])
-# Plots
-hist(package-manual)
-plot(package,manual)
-abline(coef = c(0,1))
-# Linear model
-sfit = summary(lm(package~manual))
-kable(sfit$coefficients)
-t = (sfit$coefficients[2,1]-1/sfit$coefficients[2,2])
-p = 2 * pt(abs(t), df = 46, lower.tail = FALSE)
-```
-
-The slope of this linear model is significantly different from 1 (p `r format.pval(p,eps = 0.001)`). However, a t test of the difference is not statistically significant (p = `r format.pval(t.test(package-manual)$p.value,eps = 0.001,digits = 3)`). The signs are not all the same, but the one that is different is very close (-0.00323 vs. 0.00209).
-
-```{r warning=FALSE}
-bland = blandr.statistics(package,manual)
-blandr.draw(package,manual,annotate = T,ciDisplay = F) + theme_bw()
-```
-
-#### Upper CI Bound
-
-```{r}
-# Compare prop. mediated LL
-manual = as.numeric(psv_age[,"PM Upper"])
-package = as.numeric(psv_age_package_res[match(psv_age[,"Probe"],psv_age_package_res[,"Probe"]),"PM Upper"])
-# Plots
-hist(package-manual)
-plot(package,manual)
-abline(coef = c(0,1))
-# Linear model
-sfit = summary(lm(package~manual))
-kable(sfit$coefficients)
-t = (sfit$coefficients[2,1]-1/sfit$coefficients[2,2])
-p = 2 * pt(abs(t), df = 46, lower.tail = FALSE)
-```
-
-The slope of this linear model is significantly different from 1 (p `r format.pval(p,eps = 0.001)`). However, a t test of the difference is not statistically significant (p = `r format.pval(t.test(package-manual)$p.value,eps = 0.001,digits = 3)`). All signs are the same.
-
-```{r warning=FALSE}
-bland = blandr.statistics(package,manual)
-blandr.draw(package,manual,annotate = T,ciDisplay = F) + theme_bw()
-```
-
-### Indirect Effect
-
-```{r}
-# Compare prop. mediated
-manual = as.numeric(psv_age[,"IE"])
-package = as.numeric(psv_age_package_res[match(psv_age[,"Probe"],psv_age_package_res[,"Probe"]),"IE"])
-# Plots
-hist(package-manual)
-plot(package,manual)
-abline(coef = c(0,1))
-# Linear model
-sfit = summary(lm(package~manual))
-kable(sfit$coefficients)
-t = (sfit$coefficients[2,1]-1/sfit$coefficients[2,2])
-p = 2 * pt(abs(t), df = 46, lower.tail = FALSE)
-```
-
-The slope of this linear model is significantly different from 1 (p `r format.pval(p,eps = 0.001)`). However, a t test of the difference is not statistically significant (p = `r format.pval(t.test(package-manual)$p.value,eps = 0.001,digits = 3)`). The signs are pretty different.
-
-```{r warning=FALSE}
-bland = blandr.statistics(package,manual)
-blandr.draw(package,manual,annotate = T,ciDisplay = F) + theme_bw()
-```
-
-#### Lower CI Bound
-
-```{r}
-# Compare prop. mediated LL
-manual = as.numeric(psv_age[,"IE Lower"])
-package = as.numeric(psv_age_package_res[match(psv_age[,"Probe"],psv_age_package_res[,"Probe"]),"IE Lower"])
-# Plots
-hist(package-manual)
-plot(package,manual)
-abline(coef = c(0,1))
-# Linear model
-sfit = summary(lm(package~manual))
-kable(sfit$coefficients)
-t = (sfit$coefficients[2,1]-1/sfit$coefficients[2,2])
-p = 2 * pt(abs(t), df = 46, lower.tail = FALSE)
-```
-
-The slope of this linear model is significantly different from 1 (p `r format.pval(p,eps = 0.001)`). Also, a t test of the difference was statistically significant (p = `r format.pval(t.test(package-manual)$p.value,eps = 0.001,digits = 3)`). The signs are not all the same.
-
-```{r warning=FALSE}
-bland = blandr.statistics(package,manual)
-blandr.draw(package,manual,annotate = T,ciDisplay = F) + theme_bw()
-```
-
-#### Upper CI Bound
-
-```{r}
-# Compare prop. mediated LL
-manual = as.numeric(psv_age[,"IE Upper"])
-package = as.numeric(psv_age_package_res[match(psv_age[,"Probe"],psv_age_package_res[,"Probe"]),"IE Upper"])
-# Plots
-hist(package-manual)
-plot(package,manual)
-abline(coef = c(0,1))
-# Linear model
-sfit = summary(lm(package~manual))
-kable(sfit$coefficients)
-t = (sfit$coefficients[2,1]-1/sfit$coefficients[2,2])
-p = 2 * pt(abs(t), df = 46, lower.tail = FALSE)
-```
-
-The slope of this linear model is significantly different from 1 (p `r format.pval(p,eps = 0.001)`). A t test of the difference was also statistically significant (p = `r format.pval(t.test(package-manual)$p.value,eps = 0.001,digits = 3)`). 
-
-```{r warning=FALSE}
-bland = blandr.statistics(package,manual)
-blandr.draw(package,manual,annotate = T,ciDisplay = F) + theme_bw()
-```
-
-### Direct Effect
-
-```{r}
-# Compare prop. mediated
-manual = as.numeric(psv_age[,"DE"])
-package = as.numeric(psv_age_package_res[match(psv_age[,"Probe"],psv_age_package_res[,"Probe"]),"DE"])
-# Plots
-hist(package-manual)
-plot(package,manual)
-abline(coef = c(0,1))
-# Linear model
-sfit = summary(lm(package~manual))
-kable(sfit$coefficients)
-t = (sfit$coefficients[2,1]-1/sfit$coefficients[2,2])
-p = 2 * pt(abs(t), df = 46, lower.tail = FALSE)
-```
-
-The slope of this linear model is significantly different from 1 (p `r format.pval(p,eps = 0.001)`). However, a t test of the difference is not statistically significant (p = `r format.pval(t.test(package-manual)$p.value,eps = 0.001,digits = 3)`). The signs are pretty different.
-
-```{r warning=FALSE}
-bland = blandr.statistics(package,manual)
-blandr.draw(package,manual,annotate = T,ciDisplay = F) + theme_bw()
-```
-
-# YIKES
-
-#### Lower CI Bound
-
-```{r}
-# Compare prop. mediated LL
-manual = as.numeric(psv_age[,"DE Lower"])
-package = as.numeric(psv_age_package_res[match(psv_age[,"Probe"],psv_age_package_res[,"Probe"]),"DE Lower"])
-# Plots
-hist(package-manual)
-plot(package,manual)
-abline(coef = c(0,1))
-# Linear model
-sfit = summary(lm(package~manual))
-kable(sfit$coefficients)
-t = (sfit$coefficients[2,1]-1/sfit$coefficients[2,2])
-p = 2 * pt(abs(t), df = 46, lower.tail = FALSE)
-```
-
-The slope of this linear model is significantly different from 1 (p `r format.pval(p,eps = 0.001)`). Also, a t test of the difference was statistically significant (p = `r format.pval(t.test(package-manual)$p.value,eps = 0.001,digits = 3)`). The signs are not all the same.
-
-```{r warning=FALSE}
-bland = blandr.statistics(package,manual)
-blandr.draw(package,manual,annotate = T,ciDisplay = F) + theme_bw()
-```
-
-What is happening here?
-
-#### Upper CI Bound
-
-```{r}
-# Compare prop. mediated LL
-manual = as.numeric(psv_age[,"DE Upper"])
-package = as.numeric(psv_age_package_res[match(psv_age[,"Probe"],psv_age_package_res[,"Probe"]),"DE Upper"])
-# Plots
-hist(package-manual)
-plot(package,manual)
-abline(coef = c(0,1))
-# Linear model
-sfit = summary(lm(package~manual))
-kable(sfit$coefficients)
-t = (sfit$coefficients[2,1]-1/sfit$coefficients[2,2])
-p = 2 * pt(abs(t), df = 46, lower.tail = FALSE)
-```
-
-The slope of this linear model is significantly different from 1 (p `r format.pval(p,eps = 0.001)`). A t test of the difference was also statistically significant (p = `r format.pval(t.test(package-manual)$p.value,eps = 0.001,digits = 3)`). 
-
-```{r warning=FALSE}
-bland = blandr.statistics(package,manual)
-blandr.draw(package,manual,annotate = T,ciDisplay = F) + theme_bw()
-```
 
 ## `regmedint` package
 
