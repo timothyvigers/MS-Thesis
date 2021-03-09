@@ -22,6 +22,8 @@ load("./data/mediation/methyl_psv_candidates_p_01.Rdata")
 load("./data/mediation/metab_psv_candidates_p_01.Rdata")
 load("./data/mediation/methyl_psv_results.Rdata")
 load("./data/mediation/metab_psv_results.Rdata")
+load("./data/raw_data/annotation.850K.Rdata")
+anno = as.data.frame(anno)
 lipid_anno = read.csv("./data/raw_data/lipid.featureAnno.csv")
 ```
 
@@ -125,14 +127,101 @@ OR^{NIE}=exp(\theta_2\beta_1+\theta_3\beta_1)\\
 \text{Proportion mediated (PM)}=\frac{OR^{NDE}(OR^{NIE}-1)}{(OR^{NDE}*OR^{NIE}-1)}
 $$
 
-### Results
+## Results
 
-#### Methylation at PSV
+In the `regmedint` summary table, "pure natural direct effect (pnde) is what is typically called the natural direct effect (NDE). The total natural indirect effect (tnie) is the corresponding natural indirect effect (NIE)." [link](https://kaz-yos.github.io/regmedint/)
+
+Because proportion mediated is a highly variables measure and is problematic when the NDE and NIE are in opposite directions, it is generally best to use the estimate and confidence interval for the NIE instead (pg. 48).
+
+### Methylation at PSV
 
 ```{r}
-
+r = lapply(names(methyl_psv_results),function(m){
+  mod = methyl_psv_results[[m]]
+  s = summary(mod,exponentiate = T)$summary_myreg
+  if (s["tnie","p"] < 0.05){return(m)}else{return(NA)}
+})
+r = unlist(r[!is.na(r)])
 ```
+
+There are `r length(r)` pairs with significant NIE:
+
+```{r results='asis'}
+invisible(lapply(r,function(m){
+  mod = methyl_psv_results[[m]]
+  s = summary(mod,exponentiate = T)$summary_myreg
+  print(kable(s,caption = m))
+}))
+```
+
+#### Annotation
+
+```{r}
+metab = sapply(strsplit(r," & "),"[",2)
+kable(lipid_anno[lipid_anno$feature_name %in% metab,])
+
+methyl = sapply(strsplit(r," & "),"[",1)
+met = anno[anno$Name %in% methyl,c("chr","pos","Name","Probe_rs","Relation_to_Island","UCSC_RefGene_Name")] %>%
+  arrange(as.numeric(sub("chr","",chr)),pos)
+kable(met)
+```
+
+HHAT (Hedgehog Acyltransferase) is a Protein Coding gene. Diseases associated with HHAT include Chondrodysplasia-Pseudohermaphroditism Syndrome and Ancylostomiasis. Among its related pathways are Signaling by GPCR and Notch Signaling Pathway (sino). Gene Ontology (GO) annotations related to this gene include GTP binding and palmitoyltransferase activity. An important paralog of this gene is HHATL.
+
+SH3TC2 (SH3 Domain And Tetratricopeptide Repeats 2) is a Protein Coding gene. Diseases associated with SH3TC2 include Charcot-Marie-Tooth Disease, Type 4C and Mononeuropathy Of The Median Nerve, Mild. An important paralog of this gene is SH3TC1.
+
+EGFL8 (EGF Like Domain Multiple 8) is a Protein Coding gene. Diseases associated with EGFL8 include Ludwig's Angina and Latent Syphilis. Gene Ontology (GO) annotations related to this gene include calcium ion binding. An important paralog of this gene is EGFL7.
+
+TUBGCP3 (Tubulin Gamma Complex Associated Protein 3) is a Protein Coding gene. Diseases associated with TUBGCP3 include Cardiomyopathy, Dilated, 1P. Among its related pathways are G-Beta Gamma Signaling and Regulation of PLK1 Activity at G2/M Transition. Gene Ontology (GO) annotations related to this gene include structural molecule activity and gamma-tubulin binding. An important paralog of this gene is TUBGCP6.
+
+RHOT2 (Ras Homolog Family Member T2) is a Protein Coding gene. Diseases associated with RHOT2 include 3-Methylglutaconic Aciduria, Type Iii and Neuropathy, Congenital Hypomyelinating, 1, Autosomal Recessive. Among its related pathways are Signaling by GPCR and Mitophagy - animal. Gene Ontology (GO) annotations related to this gene include calcium ion binding and GTPase activity. An important paralog of this gene is RHOT1.
+
+WDR90 (WD Repeat Domain 90) is a Protein Coding gene. An important paralog of this gene is EML5. EML5 (EMAP Like 5) is a Protein Coding gene. Diseases associated with EML5 include Mucopolysaccharidosis, Type Ivb. An important paralog of this gene is EML6.
+
+ZNF768 (Zinc Finger Protein 768) is a Protein Coding gene. Among its related pathways are Herpes simplex virus 1 infection. An important paralog of this gene is ZNF287. ZNF287 (Zinc Finger Protein 287) is a Protein Coding gene. Diseases associated with ZNF287 include Nanophthalmos. Among its related pathways are Gene Expression. Gene Ontology (GO) annotations related to this gene include nucleic acid binding and DNA-binding transcription factor activity, RNA polymerase II-specific. An important paralog of this gene is ZNF426.
+
+ATP5PO (ATP Synthase Peripheral Stalk Subunit OSCP) is a Protein Coding gene. Diseases associated with ATP5PO include Hashimoto Thyroiditis and Acute Thyroiditis. Among its related pathways are Respiratory electron transport, ATP synthesis by chemiosmotic coupling, and heat production by uncoupling proteins. and Parkinson disease. An important paralog of this gene is ENSG00000249209.
+
+#### Metabolite at PSV
+
+```{r}
+r = lapply(names(metab_psv_results),function(m){
+  mod = metab_psv_results[[m]]
+  s = summary(mod,exponentiate = T)$summary_myreg
+  if (s["tnie","p"] < 0.05){return(m)}else{return(NA)}
+})
+r = unlist(r[!is.na(r)])
+```
+
+There are `r length(r)` pairs with significant NIE:
+
+```{r results='asis'}
+invisible(lapply(r,function(m){
+  mod = metab_psv_results[[m]]
+  s = summary(mod,exponentiate = T)$summary_myreg
+  print(kable(s,caption = m))
+}))
+```
+
+#### Annotation
+
+```{r}
+metab = sapply(strsplit(r," & "),"[",2)
+kable(lipid_anno[lipid_anno$feature_name %in% metab,])
+
+methyl = sapply(strsplit(r," & "),"[",1)
+met = anno[anno$Name %in% methyl,c("chr","pos","Name","Probe_rs","Relation_to_Island","UCSC_RefGene_Name")] %>%
+  arrange(as.numeric(sub("chr","",chr)),pos)
+kable(met)
+```
+
+TBC1D8 (TBC1 Domain Family Member 8) is a Protein Coding gene. Among its related pathways are Cell cycle. Gene Ontology (GO) annotations related to this gene include calcium ion binding and GTPase activator activity. An important paralog of this gene is TBC1D8B.
+
+SLC6A18 (Solute Carrier Family 6 Member 18) is a Protein Coding gene. Diseases associated with SLC6A18 include Iminoglycinuria and Hyperglycinuria. Among its related pathways are Transport of glucose and other sugars, bile salts and organic acids, metal ions and amine compounds and NRF2 pathway. Gene Ontology (GO) annotations related to this gene include neurotransmitter:sodium symporter activity. An important paralog of this gene is SLC6A19.
+
+TCEA2 (Transcription Elongation Factor A2) is a Protein Coding gene. Diseases associated with TCEA2 include Hypotrichosis-Lymphedema-Telangiectasia Syndrome and Uv-Sensitive Syndrome. Among its related pathways are RNA Polymerase II Transcription Initiation And Promoter Clearance. Gene Ontology (GO) annotations related to this gene include nucleic acid binding and translation elongation factor activity. An important paralog of this gene is TCEA1.
 
 # Questions
 
 1. Do we want to include interaction effects? They can be quite difficult to interpret.
+2. I have not bootstrapped these CIs. For the selected pairs that we want to write up, are bootstrap CIs better than delta method? Or should I bootstrap everything and use that for significance testing?
