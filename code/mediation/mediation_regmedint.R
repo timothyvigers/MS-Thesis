@@ -2,8 +2,8 @@ library(regmedint)
 library(parallel)
 set.seed(1017)
 # Load data
-setwd("/home/vigerst/MS-Thesis/")
-#setwd("/Users/timvigers/Dropbox/School/MS Thesis")
+#setwd("/home/vigerst/MS-Thesis/")
+setwd("/Users/timvigers/Dropbox/School/MS Thesis")
 load("./data/raw_data/psv_sv_dataset.Rdata")
 load("./data/mediation/methyl_psv_candidates_p_01.Rdata")
 load("./data/mediation/metab_psv_candidates_p_01.Rdata")
@@ -16,7 +16,7 @@ age = psv$clinage
 covariates = as.data.frame(cbind(ia,SEX,dr34,age,age_delta))
 covariates = as.data.frame(lapply(covariates,function(x){as.numeric(as.factor(x))-1}))
 # Cluster
-n_cores = 8
+n_cores = 4
 cl = makeCluster(n_cores,type = "FORK")
 # Iterate through all
 methyl_psv_results = apply(methyl_psv_candidates,1,function(r){
@@ -75,7 +75,7 @@ metab_psv_results = apply(metab_psv_candidates,1,function(r){
               ## Additional specification
               interaction = T,
               casecontrol = T,
-              na.omit = T)
+              na_omit = T)
   regmedint_obj
 })
 stopCluster(cl)
