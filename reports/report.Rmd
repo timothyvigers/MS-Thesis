@@ -12,13 +12,14 @@ library(patchwork)
 library(DiagrammeR)
 library(knitr)
 library(tidyverse)
-library(mediation)
+library(regmedint)
 library(blandr)
 ```
 
 
 ```{r}
 load("./data/mediation/methyl_psv_candidates_p_01.Rdata")
+load("./data/mediation/metab_psv_candidates_p_01.Rdata")
 lipid_anno = read.csv("./data/raw_data/lipid.featureAnno.csv")
 ```
 
@@ -40,10 +41,10 @@ grViz("
 ")
 ```
 
-Using this mediation structure, there were `r nrow(methyl_psv_candidates)` pairs selected. The only metabolite selected was `r unique(methyl_psv_candidates[,2])`:
+Using this mediation structure, there were `r nrow(methyl_psv_candidates)` pairs selected with `r length(unique(methyl_psv_candidates[,2]))` unique metabolites.
 
 ```{r}
-kable(lipid_anno[lipid_anno$feature_name=="lipid_582",])
+kable(lipid_anno[lipid_anno$feature_name %in% unique(methyl_psv_candidates[,2]),])
 ```
 
 ```{r fig.height=8,fig.width=8}
@@ -60,11 +61,19 @@ grViz("
 ")
 ```
 
-No pairs were selected using this mediation structure.
+Using this mediation structure, there were `r nrow(metab_psv_candidates)` pairs selected with `r length(unique(metab_psv_candidates[,2]))` unique metabolites.
+
+```{r}
+kable(lipid_anno[lipid_anno$feature_name %in% unique(metab_psv_candidates[,2]),])
+```
+
+Some of the hilic metabolites are lacking annotation information.
 
 # Mediation Analysis
 
-## Models
+## Methylation at PSV
+
+### Models
 
 Terms:
 
@@ -72,55 +81,48 @@ $$
 Y = \text{IA Status}\\
 M = \text{Metabolite at SV}\\
 T = \text{Methylation at PSV}\\
-X_2 = \text{Age at PSV}\\
-X_3 = \text{Sex}\\
-X_4 = \text{DR3/4 Status}\\
+X_2 = \text{Sex}\\
+X_3 = \text{DR3/4 Status}\\
+X_4 = \text{Age at PSV}\\
+X_5 = \text{Time from PSV to SV}\\
 \text{i indexes subject}\\
 $$
 
-### Mediator Model
+#### Mediator Model
 
 $$
-M_i = \beta_0 + \beta_1 T_i+\beta_2 X_{i2}+\beta_3 X_{i3}+\beta_4 X_{i4}+\epsilon_i\\
+M_i = \beta_0 + \beta_1 T_i+\beta_2'C+\epsilon_i\\
 \text{With } \epsilon_i\text{ i.i.d. } N(0,\sigma^2)
 $$
 
-### Outcome Model
+In order to account for the case control design, the mediator model is fit to only the control subjects. The nature of case controls studies means that the cases are over-sampled compared to controls. The regression parameters in the outcome model are consistently estimated in logistic regression, but the study design needs to be taken into account in the mediator model. Fitting this model using only the controls is a good approximation for the regression coefficients that would be obtained in a cohort study, assuming the outcome is rare and that inclusion in the study depends only on the outcome (and not the mediator or exposure).
+
+#### Outcome Model
 
 $$
 \text{Let }p=\text{the probability a given subject is an IA case}=P(Y = 1)\\
-ln(\frac{p}{1-p}) = \theta_0 +\theta_1 T_i+\theta_2 M_i+\theta_3 X_{i2}+\theta_4 X_{i3}+\theta_5 X_{i4}
+ln(\frac{p}{1-p}) = \theta_0 +\theta_1 T_i+\theta_2 M_i+\theta_3(T_i*M_i)+\theta_4'C
 $$
 
-## Mediation
+Where $\beta_2'$ and $\theta_4'$ are vectors of estimates for multiple confounders $C$.
 
-```{r fig.height=8,fig.width=8}
-grViz("
-  graph{
-  node [shape = box,fontname = Helvetica]
-  a[label= 'Metabolite at SV']
-  b[label= 'Methylation at PSV']
-  c[label= 'IA']
-  a -- b [label = 'a',fontsize = 9]
-  a -- c [label = 'b',fontsize = 9]
-  {rank = same;b -- c [label = 'c',fontsize = 9]}
-  }
-")
-```
+### Mediation
 
-Given, the observed outcome $Y_i(T_i, M_i(T_i))$, where $M_i(T_i)$ represents the observed value of the mediator:
+CDE is the controlled direct effect. This is how much the outcome would change on average if the mediator was fixed (at m) across the whole population, and the "treatment" (exposure) changed from 0 to 1. 
+
+NDE is the natural direct effect. It represents the average change in outcome if the "exposure" changed from 0 to 1, and each individual's value for the mediator varied as it normally would (in the absence of the exposure). In other words, it is the effect of the exposure on the outcome that would remain if the path from exposure to mediator was removed. 
+
+NIE is the natural indirect effect. It is the average change in outcome if the exposure was fixed at 1, but "the mediator were changed from the level it would take if $t^*=0$ to the level it would take if $t=1$." This is essentially the effect of the exposure on the outcome that operates through changing the mediator. 
+
+If the interaction term is 0, both the CDE and NDE are equal to the direct effect under Baron and Kenny's formulation.
 
 $$
-\text{CME: }\\
-\text{DE: }\\
-\text{TE: }
+OR^{CDE}(m)=exp(\theta_1+\theta_3 m)\\
+OR^{NDE}=exp((\theta_1+\theta_3\beta_0+\theta_3\beta_1+\theta_3\beta_2'C+\theta_3\theta_2\sigma^2)+0.5\theta_3^2\sigma^2)\\
+OR^{NIE}=exp(\theta_2\beta_1+\theta_3\beta_1)
 $$
 
-
-
-## `regmedint` package
-
-### Proportion Mediated
+#### Results
 
 ```{r}
 # Import package results
