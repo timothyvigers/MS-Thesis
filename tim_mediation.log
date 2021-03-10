@@ -1,4 +1,7 @@
+Error in setwd("/Users/timvigers/Dropbox/School/MS Thesis") : 
+  cannot change working directory
+Execution halted
 
-real	1m3.270s
-user	0m59.161s
-sys	0m5.673s
+real	0m1.228s
+user	0m1.311s
+sys	0m1.086s
