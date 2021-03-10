@@ -15,9 +15,10 @@ age_delta = psv$clinage - sv$clinage
 age = psv$clinage
 covariates = as.data.frame(cbind(ia,SEX,dr34,age,age_delta))
 covariates = as.data.frame(lapply(covariates,function(x){as.numeric(as.factor(x))-1}))
-# Iterate through all
-boot_cores = 4
+# Bootstrap options
+boot_cores = 8
 boots = 10000
+# Iterate through all
 methyl_psv_results = apply(methyl_psv_candidates,1,function(r){
   methyl = psv[,r[1]]
   metab = sv[,r[2]]
@@ -44,46 +45,49 @@ methyl_psv_results = apply(methyl_psv_candidates,1,function(r){
                 ## Additional specification
                 interaction = T,
                 casecontrol = T)
-    coef(regmedint_obj)
+    summary(regmedint_obj)$summary_myreg[,1]
   }
   b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
            ncpus = boot_cores)
-  bci = boot.ci(b,type = "perc",index = 1)
+  return(broom::tidy(b,conf.int = F,conf.method = "bca"))
 })
 names(methyl_psv_results) = apply(methyl_psv_candidates,1,paste,collapse = " & ")
 # Save
 save(methyl_psv_results,file = "./data/mediation/methyl_psv_results.Rdata")
 # Same again for metab at PSV
-cl = makeCluster(n_cores,type = "FORK")
 # Iterate through all
 metab_psv_results = apply(metab_psv_candidates,1,function(r){
-  methyl = sv[,r[1]]
-  metab = psv[,r[2]]
+  methyl = psv[,r[1]]
+  metab = sv[,r[2]]
   # Dataframe 
   df = as.data.frame(cbind(methyl,metab,age,covariates))
   # Mediation
-  regmedint_obj <- 
-    regmedint(data = df,
-              ## Variables
-              yvar = "ia",
-              avar = "methyl",
-              mvar = "metab",
-              cvar = c("SEX","dr34","age","age_delta"),
-              ## Values at which effects are evaluated
-              a0 = 0,
-              a1 = 1,
-              m_cde = 1,
-              c_cond = c(1,1,1,1),
-              ## Model types
-              mreg = "linear",
-              yreg = "logistic",
-              ## Additional specification
-              interaction = T,
-              casecontrol = T,
-              na_omit = T)
-  regmedint_obj
+  # Bootstrap
+  regmed_boot = function(d,i){
+    regmedint_obj = 
+      regmedint(data = d[i,],
+                ## Variables
+                yvar = "ia",
+                avar = "methyl",
+                mvar = "metab",
+                cvar = c("SEX","dr34","age","age_delta"),
+                ## Values at which effects are evaluated
+                a0 = 0,
+                a1 = 1,
+                m_cde = 1,
+                c_cond = c(1,1,1,1),
+                ## Model types
+                mreg = "linear",
+                yreg = "logistic",
+                ## Additional specification
+                interaction = T,
+                casecontrol = T)
+    summary(regmedint_obj)$summary_myreg[,1]
+  }
+  b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
+           ncpus = boot_cores)
+  return(broom::tidy(b,conf.int = F,conf.method = "bca"))
 })
-stopCluster(cl)
 names(metab_psv_results) = apply(metab_psv_candidates,1,paste,collapse = " & ")
 # Save
 save(metab_psv_results,file = "./data/mediation/metab_psv_results.Rdata")
