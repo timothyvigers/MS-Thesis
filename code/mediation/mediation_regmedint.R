@@ -16,7 +16,7 @@ age = psv$clinage
 covariates = as.data.frame(cbind(ia,SEX,dr34,age,age_delta))
 covariates = as.data.frame(lapply(covariates,function(x){as.numeric(as.factor(x))-1}))
 # Bootstrap options
-boot_cores = 8
+boot_cores = 6
 boots = 10000
 # Iterate through all
 methyl_psv_results = apply(methyl_psv_candidates,1,function(r){
@@ -44,7 +44,8 @@ methyl_psv_results = apply(methyl_psv_candidates,1,function(r){
                 yreg = "logistic",
                 ## Additional specification
                 interaction = T,
-                casecontrol = T)
+                casecontrol = T,
+                na_omit = T)
     summary(regmedint_obj)$summary_myreg[,1]
   }
   b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
@@ -81,7 +82,8 @@ metab_psv_results = apply(metab_psv_candidates,1,function(r){
                 yreg = "logistic",
                 ## Additional specification
                 interaction = T,
-                casecontrol = T)
+                casecontrol = T,
+                na_omit = T)
     summary(regmedint_obj)$summary_myreg[,1]
   }
   b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
