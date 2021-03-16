@@ -1,5 +1,6 @@
 library(regmedint)
 library(boot)
+library(broom)
 set.seed(1017)
 # Load data
 #setwd("/home/vigerst/MS-Thesis/")
@@ -17,7 +18,7 @@ covariates = as.data.frame(cbind(ia,SEX,dr34,age,age_delta))
 covariates = as.data.frame(lapply(covariates,function(x){as.numeric(as.factor(x))-1}))
 # Bootstrap options
 boot_cores = 6
-boots = 10000
+boots = 1000
 # Iterate through all
 methyl_psv_results = apply(methyl_psv_candidates,1,function(r){
   methyl = psv[,r[1]]
@@ -50,7 +51,7 @@ methyl_psv_results = apply(methyl_psv_candidates,1,function(r){
   }
   b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
            ncpus = boot_cores)
-  return(broom::tidy(b,conf.int = T,conf.method = "bca"))
+  return(tidy(b,conf.int = T,conf.method = "bca"))
 })
 names(methyl_psv_results) = apply(methyl_psv_candidates,1,paste,collapse = " & ")
 # Save
@@ -88,7 +89,7 @@ metab_psv_results = apply(metab_psv_candidates,1,function(r){
   }
   b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
            ncpus = boot_cores)
-  return(broom::tidy(b,conf.int = T,conf.method = "bca"))
+  return(tidy(b,conf.int = T,conf.method = "bca"))
 })
 names(metab_psv_results) = apply(metab_psv_candidates,1,paste,collapse = " & ")
 # Save
