@@ -24,7 +24,24 @@ load("./data/mediation/methyl_psv_results.Rdata")
 load("./data/mediation/metab_psv_results.Rdata")
 load("./data/raw_data/annotation.850K.Rdata")
 anno = as.data.frame(anno)
-lipid_anno = read.csv("./data/raw_data/lipid.featureAnno.csv")
+# Import and format metabolite annotation
+gctof_anno = read.csv("./data/raw_data/gctof.featureAnno.csv") %>% 
+  select(feature_name,BinBase.name) %>%
+  rename(feature = feature_name,name = BinBase.name)
+hilic_anno = read.csv("./data/raw_data/hilic.featureAnno.csv") %>%
+  select(feature_name,Metabolite.name) %>%
+  rename(feature = feature_name,name = Metabolite.name)
+lipid_anno = read.csv("./data/raw_data/lipid.featureAnno.csv") %>%
+  select(feature_name,Metabolite.name) %>%
+  rename(feature = feature_name,name = Metabolite.name)
+oxy_anno = read.csv("./data/raw_data/oxylipin.featureAnno.csv") %>%
+  select(cleanedDat_name,full.name) %>%
+  rename(feature = cleanedDat_name,name = full.name)
+vitd_anno = read.csv("./data/raw_data/vitD.featureAnno.csv") %>% 
+  select(featureName,originalName) %>%
+  rename(feature = featureName,name = originalName)
+# Combine
+metab_anno = bind_rows(gctof_anno,hilic_anno,lipid_anno,oxy_anno,vitd_anno)
 ```
 
 # Pair Selection
@@ -48,7 +65,7 @@ grViz("
 Using this mediation structure, there were `r nrow(methyl_psv_candidates)` pairs selected with `r length(unique(methyl_psv_candidates[,2]))` unique metabolites.
 
 ```{r}
-kable(lipid_anno[lipid_anno$feature_name %in% unique(methyl_psv_candidates[,2]),])
+kable(metab_anno[metab_anno$feature %in% unique(methyl_psv_candidates[,2]),],row.names = F)
 ```
 
 ```{r fig.height=8,fig.width=8}
@@ -68,10 +85,8 @@ grViz("
 Using this mediation structure, there were `r nrow(metab_psv_candidates)` pairs selected with `r length(unique(metab_psv_candidates[,2]))` unique metabolites.
 
 ```{r}
-kable(lipid_anno[lipid_anno$feature_name %in% unique(metab_psv_candidates[,2]),])
+kable(metab_anno[metab_anno$feature %in% unique(metab_psv_candidates[,2]),],row.names = F)
 ```
-
-Some of the hilic metabolites are lacking annotation information.
 
 # Mediation Analysis
 
@@ -136,6 +151,9 @@ Because proportion mediated is a highly variables measure and is problematic whe
 ### Methylation at PSV
 
 ```{r}
+
+
+
 r = lapply(names(methyl_psv_results),function(m){
   mod = methyl_psv_results[[m]]
   s = summary(mod,exponentiate = T)$summary_myreg

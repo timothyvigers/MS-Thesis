@@ -50,7 +50,7 @@ methyl_psv_results = apply(methyl_psv_candidates,1,function(r){
   }
   b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
            ncpus = boot_cores)
-  return(broom::tidy(b,conf.int = F,conf.method = "bca"))
+  return(broom::tidy(b,conf.int = T,conf.method = "bca"))
 })
 names(methyl_psv_results) = apply(methyl_psv_candidates,1,paste,collapse = " & ")
 # Save
@@ -88,7 +88,7 @@ metab_psv_results = apply(metab_psv_candidates,1,function(r){
   }
   b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
            ncpus = boot_cores)
-  return(broom::tidy(b,conf.int = F,conf.method = "bca"))
+  return(broom::tidy(b,conf.int = T,conf.method = "bca"))
 })
 names(metab_psv_results) = apply(metab_psv_candidates,1,paste,collapse = " & ")
 # Save
