@@ -18,11 +18,11 @@ covariates = as.data.frame(cbind(ia,SEX,dr34,age,age_delta))
 covariates = as.data.frame(lapply(covariates,function(x){as.numeric(as.factor(x))-1}))
 # Bootstrap options
 boot_cores = 6
-boots = 1000
+boots = 10000
 # Iterate through all
 methyl_psv_results = apply(methyl_psv_candidates,1,function(r){
   methyl = psv[,r[1]]
-  metab = sv[,r[2]]
+  metab = as.numeric(scale(sv[,r[2]]))
   # Dataframe 
   df = as.data.frame(cbind(methyl,metab,age,covariates))
   # Mediation
@@ -55,12 +55,12 @@ methyl_psv_results = apply(methyl_psv_candidates,1,function(r){
 })
 names(methyl_psv_results) = apply(methyl_psv_candidates,1,paste,collapse = " & ")
 # Save
-save(methyl_psv_results,file = "./data/mediation/methyl_psv_results.Rdata")
+save(methyl_psv_results,file = "./data/mediation/methyl_psv_scaled_results.Rdata")
 # Same again for metab at PSV
 # Iterate through all
 metab_psv_results = apply(metab_psv_candidates,1,function(r){
-  methyl = psv[,r[1]]
-  metab = sv[,r[2]]
+  metab = as.numeric(scale(psv[,r[2]]))
+  methyl = sv[,r[1]]
   # Dataframe 
   df = as.data.frame(cbind(methyl,metab,age,covariates))
   # Mediation
@@ -93,4 +93,4 @@ metab_psv_results = apply(metab_psv_candidates,1,function(r){
 })
 names(metab_psv_results) = apply(metab_psv_candidates,1,paste,collapse = " & ")
 # Save
-save(metab_psv_results,file = "./data/mediation/metab_psv_results.Rdata")
+save(metab_psv_results,file = "./data/mediation/metab_psv_scaled_results.Rdata")
