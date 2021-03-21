@@ -1,0 +1,38 @@
+---
+title: "Table 2 for Elizabeth"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(arsenal)
+```
+
+```{r}
+pheno = read.csv("~/Dropbox/School/Statistical Genomics/Final Project/data/Infant_Diet_Methylation_Phenotype_Final.csv",
+                 na.strings = "")
+pheno = read.csv("~/Downloads/dataforanalysisfeb23.csv",na.strings = "")
+#pheno = pheno[!(pheno$ID %in% c('00354-0','10868-0','11121-0','14055-0','30030-0','50147-0')),]
+# Fix continuous variables
+month_vars = c("frstdairy","frstwbr","frstro","frstsolidfruit","frstveg","frstmeat")
+pheno[,month_vars] = lapply(pheno[,month_vars],function(c){
+  c[which(c==-999)] = 17
+  c = c - 1
+})
+# Make categorical bfdur
+pheno$bfdur_cat = cut(pheno$bfdur,c(-Inf,6,Inf),labels = c("<=6m",">6m"))
+# Binary variables
+pheno$frstmeat = cut(pheno$frstmeat,c(-Inf,6,Inf),right = F,labels = c("<6m",">=6m"))
+# Categorize
+pheno[,c("frstwbr","frstro","frstsolidfruit","frstveg")] = 
+  lapply(pheno[,c("frstwbr","frstro","frstsolidfruit","frstveg")],function(c){
+    cut(c,c(-Inf,4,6,Inf),right = F,labels = c("<4m","4-5m",">=6m"))
+  })
+```
+
+```{r results='asis'}
+t2 = tableby(Visit~bfdur+bfdur_cat+factor(bfwhbarn)+frstdairy+
+               factor(id_solidfoodn)+factor(id_cerealn)+frstwbr+frstro+frstsolidfruit+frstveg+frstmeat,
+             pheno,total=F)
+summary(t2)
+```
