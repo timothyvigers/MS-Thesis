@@ -41,7 +41,7 @@ regmed_boot = function(d,i){
 }
 # Bootstrap options
 boot_cores = 12
-boots = 1000
+boots = 10000
 # Iterate through all
 methyl_psv_results = apply(methyl_psv_candidates,1,function(r){
   methyl = as.numeric(scale(psv[,r[1]]))
@@ -51,7 +51,7 @@ methyl_psv_results = apply(methyl_psv_candidates,1,function(r){
   # Bootstrap
   b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
            ncpus = boot_cores)
-  return(tidy(b,conf.int = T,conf.method = "perc"))
+  return(tidy(b,conf.int = T,conf.method = "bca"))
 })
 names(methyl_psv_results) = apply(methyl_psv_candidates,1,paste,collapse = " & ")
 # Save
@@ -66,7 +66,7 @@ metab_psv_results = apply(metab_psv_candidates,1,function(r){
   # Mediation
   b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
            ncpus = boot_cores)
-  return(tidy(b,conf.int = T,conf.method = "perc"))
+  return(tidy(b,conf.int = T,conf.method = "bca"))
 })
 names(metab_psv_results) = apply(metab_psv_candidates,1,paste,collapse = " & ")
 # Save
