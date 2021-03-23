@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,message = FALSE)
-knitr::opts_knit$set(root.dir = "/Users/timvigers/Dropbox/School/MS Thesis")
+knitr::opts_knit$set(root.dir = "~/Documents/School/MS Thesis")
 library(patchwork)
 library(DiagrammeR)
 library(knitr)
@@ -18,10 +18,11 @@ library(blandr)
 
 
 ```{r}
+load("./data/raw_data/psv_sv_dataset.Rdata")
 load("./data/mediation/methyl_psv_candidates_p_01.Rdata")
 load("./data/mediation/metab_psv_candidates_p_01.Rdata")
-load("./data/mediation/methyl_psv_results.Rdata")
-load("./data/mediation/metab_psv_results.Rdata")
+load("./data/mediation/methyl_psv_scaled_results.Rdata")
+load("./data/mediation/metab_psv_scaled_results.Rdata")
 load("./data/raw_data/annotation.850K.Rdata")
 anno = as.data.frame(anno)
 # Import and format metabolite annotation
@@ -148,6 +149,39 @@ In the `regmedint` summary table, "pure natural direct effect (pnde) is what is 
 
 Because proportion mediated is a highly variables measure and is problematic when the NDE and NIE are in opposite directions, it is generally best to use the estimate and confidence interval for the NIE instead (pg. 48).
 
+```{r include=FALSE}
+regmed_check = function(df){
+  regmedint_obj = 
+    regmedint(data = df,
+              ## Variables
+              yvar = "ia",
+              avar = "methyl",
+              mvar = "metab",
+              cvar = c("SEX","dr34","age","age_delta"),
+              ## Values at which effects are evaluated
+              a0 = 0,
+              a1 = 1,
+              m_cde = 1,
+              c_cond = c(1,1,1,1),
+              ## Model types
+              mreg = "linear",
+              yreg = "logistic",
+              ## Additional specification
+              interaction = T,
+              casecontrol = T,
+              na_omit = T)
+  return(regmedint_obj)
+}
+# Outcome and adjustment variables
+ia = psv$IAgroup2
+SEX = psv$SEX
+dr34 = psv$dr34
+age_delta = psv$clinage - sv$clinage
+age = psv$clinage
+covariates = as.data.frame(cbind(ia,SEX,dr34,age,age_delta))
+covariates = as.data.frame(lapply(covariates,function(x){as.numeric(as.factor(x))-1}))
+```
+
 ### Methylation at PSV
 
 ```{r}
@@ -156,8 +190,8 @@ r = lapply(names(methyl_psv_results),function(m){
   if (mod[mod$term == "tnie","conf.low"] <= 0 & mod[mod$term == "tnie","conf.high"] >= 0){
     return(NA)
   } else {
-      return(c(m,as.numeric(mod[mod$term == "tnie","statistic"])))
-    }
+    return(c(m,as.numeric(mod[mod$term == "tnie","statistic"])))
+  }
 })
 r = as.data.frame(do.call(rbind,r[!is.na(r)]))
 colnames(r) = c("Pair","NIE")
@@ -165,10 +199,50 @@ r$NIE = as.numeric(r$NIE)
 r$NIE = exp(r$NIE)
 ```
 
-There are `r length(r)` pairs with significant NIE:
+There are `r nrow(r)` pairs with significant NIE:
 
 ```{r results='asis'}
 kable(r[order(r$NIE,decreasing = T),],row.names = F,digits = 3)
+```
+
+#### Data issues
+
+I think that the problem here is the fact that the metabolites and methylation values are on very different scales, so when you're multiplying the $\beta$ values they can occasionally blow up. 
+
+```{r}
+hist(scale(sv[,"hilic_467"]))
+hist(psv[,"cg26981432"])
+```
+
+When the methylation values are also scaled, the NIE value is much more reasonable:
+
+```{r}
+methyl = as.numeric(scale(psv[,"cg26981432"]))
+metab = as.numeric(scale(sv[,"hilic_467"]))
+# Dataframe 
+df = as.data.frame(cbind(methyl,metab,age,covariates))
+check = regmed_check(df)
+s = summary(check)$summary_myreg
+s[,"est"] = exp(s[,"est"])
+kable(s[1:6,"est"])
+```
+
+Same again for the next pair:
+
+```{r}
+hist(scale(sv[,"hilic_467"]))
+hist(psv[,"cg02223028"])
+```
+
+```{r}
+methyl = as.numeric(scale(psv[,"cg02223028"]))
+metab = as.numeric(scale(sv[,"hilic_32"]))
+# Dataframe 
+df = as.data.frame(cbind(methyl,metab,age,covariates))
+check = regmed_check(df)
+s = summary(check)$summary_myreg
+s[,"est"] = exp(s[,"est"])
+kable(s[1:6,"est"])
 ```
 
 #### Annotation
@@ -191,8 +265,8 @@ r = lapply(names(metab_psv_results),function(m){
   if (mod[mod$term == "tnie","conf.low"] <= 0 & mod[mod$term == "tnie","conf.high"] >= 0){
     return(NA)
   } else {
-      return(c(m,as.numeric(mod[mod$term == "tnie","statistic"])))
-    }
+    return(c(m,as.numeric(mod[mod$term == "tnie","statistic"])))
+  }
 })
 r = as.data.frame(do.call(rbind,r[!is.na(r)]))
 colnames(r) = c("Pair","NIE")
@@ -204,6 +278,46 @@ There are `r length(r)` pairs with significant NIE:
 
 ```{r results='asis'}
 kable(r[order(r$NIE,decreasing = T),],row.names = F,digits = 3)
+```
+
+#### Data issues
+
+Same for this structure:
+
+```{r}
+hist(scale(psv[,"lipid_329"]))
+hist(sv[,"cg02050985"])
+```
+
+When the methylation values are also scaled, the NIE value is much more reasonable:
+
+```{r}
+methyl = as.numeric(scale(sv[,"cg02050985"]))
+metab = as.numeric(scale(psv[,"lipid_329"]))
+# Dataframe 
+df = as.data.frame(cbind(methyl,metab,age,covariates))
+check = regmed_check(df)
+s = summary(check)$summary_myreg
+s[,"est"] = exp(s[,"est"])
+kable(s[1:6,"est"])
+```
+
+Next pair:
+
+```{r}
+hist(scale(psv[,"hilic_397"]))
+hist(sv[,"cg21507958"])
+```
+
+```{r}
+methyl = as.numeric(scale(sv[,"cg21507958"]))
+metab = as.numeric(scale(psv[,"hilic_397"]))
+# Dataframe 
+df = as.data.frame(cbind(methyl,metab,age,covariates))
+check = regmed_check(df)
+s = summary(check)$summary_myreg
+s[,"est"] = exp(s[,"est"])
+kable(s[1:6,"est"])
 ```
 
 #### Annotation
