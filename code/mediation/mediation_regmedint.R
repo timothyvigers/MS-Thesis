@@ -3,8 +3,8 @@ library(boot)
 library(broom)
 set.seed(1017)
 # Load data
-#setwd("/home/vigerst/MS-Thesis/")
-setwd("~/Documents/School/MS Thesis")
+setwd("/home/vigerst/MS-Thesis/")
+#setwd("~/Dropbox/School/MS Thesis")
 load("./data/raw_data/psv_sv_dataset.Rdata")
 load("./data/mediation/methyl_psv_candidates_p_01.Rdata")
 load("./data/mediation/metab_psv_candidates_p_01.Rdata")
@@ -40,7 +40,7 @@ regmed_boot = function(d,i){
   summary(regmedint_obj)$summary_myreg[,1]
 }
 # Bootstrap options
-boot_cores = 6
+boot_cores = 12
 boots = 1000
 # Iterate through all
 methyl_psv_results = apply(methyl_psv_candidates,1,function(r){
@@ -51,7 +51,7 @@ methyl_psv_results = apply(methyl_psv_candidates,1,function(r){
   # Bootstrap
   b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
            ncpus = boot_cores)
-  return(tidy(b,conf.int = T,conf.method = "bca"))
+  return(tidy(b,conf.int = T,conf.method = "perc"))
 })
 names(methyl_psv_results) = apply(methyl_psv_candidates,1,paste,collapse = " & ")
 # Save
@@ -66,7 +66,7 @@ metab_psv_results = apply(metab_psv_candidates,1,function(r){
   # Mediation
   b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
            ncpus = boot_cores)
-  return(tidy(b,conf.int = T,conf.method = "bca"))
+  return(tidy(b,conf.int = T,conf.method = "perc"))
 })
 names(metab_psv_results) = apply(metab_psv_candidates,1,paste,collapse = " & ")
 # Save
