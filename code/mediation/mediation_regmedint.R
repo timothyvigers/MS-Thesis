@@ -4,7 +4,7 @@ library(broom)
 set.seed(1017)
 # Load data
 #setwd("/home/vigerst/MS-Thesis/")
-setwd("~/Dropbox/School/MS Thesis")
+setwd("~/Documents/School/MS Thesis")
 load("./data/raw_data/psv_sv_dataset.Rdata")
 load("./data/mediation/methyl_psv_candidates_p_01.Rdata")
 load("./data/mediation/metab_psv_candidates_p_01.Rdata")
@@ -16,81 +16,58 @@ age_delta = psv$clinage - sv$clinage
 age = psv$clinage
 covariates = as.data.frame(cbind(ia,SEX,dr34,age,age_delta))
 covariates = as.data.frame(lapply(covariates,function(x){as.numeric(as.factor(x))-1}))
+# Bootstrap function
+regmed_boot = function(d,i){
+  regmedint_obj = 
+    regmedint(data = d[i,],
+              ## Variables
+              yvar = "ia",
+              avar = "methyl",
+              mvar = "metab",
+              cvar = c("SEX","dr34","age","age_delta"),
+              ## Values at which effects are evaluated
+              a0 = 0,
+              a1 = 1,
+              m_cde = 1,
+              c_cond = c(1,1,1,1),
+              ## Model types
+              mreg = "linear",
+              yreg = "logistic",
+              ## Additional specification
+              interaction = T,
+              casecontrol = T,
+              na_omit = T)
+  summary(regmedint_obj)$summary_myreg[,1]
+}
 # Bootstrap options
 boot_cores = 6
-boots = 10000
+boots = 1000
 # Iterate through all
 methyl_psv_results = apply(methyl_psv_candidates,1,function(r){
-  methyl = psv[,r[1]]
+  methyl = as.numeric(scale(psv[,r[1]]))
   metab = as.numeric(scale(sv[,r[2]]))
   # Dataframe 
   df = as.data.frame(cbind(methyl,metab,age,covariates))
-  # Mediation
   # Bootstrap
-  regmed_boot = function(d,i){
-    regmedint_obj = 
-      regmedint(data = d[i,],
-                ## Variables
-                yvar = "ia",
-                avar = "methyl",
-                mvar = "metab",
-                cvar = c("SEX","dr34","age","age_delta"),
-                ## Values at which effects are evaluated
-                a0 = 0,
-                a1 = 1,
-                m_cde = 1,
-                c_cond = c(1,1,1,1),
-                ## Model types
-                mreg = "linear",
-                yreg = "logistic",
-                ## Additional specification
-                interaction = T,
-                casecontrol = T,
-                na_omit = T)
-    summary(regmedint_obj)$summary_myreg[,1]
-  }
   b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
            ncpus = boot_cores)
   return(tidy(b,conf.int = T,conf.method = "bca"))
 })
 names(methyl_psv_results) = apply(methyl_psv_candidates,1,paste,collapse = " & ")
 # Save
-save(methyl_psv_results,file = "./data/mediation/methyl_psv_scaled_results.Rdata")
+save(methyl_psv_results,file = "./data/mediation/methyl_psv_both_scaled_results.Rdata")
 # Same again for metab at PSV
 # Iterate through all
 metab_psv_results = apply(metab_psv_candidates,1,function(r){
   metab = as.numeric(scale(psv[,r[2]]))
-  methyl = sv[,r[1]]
+  methyl = as.numeric(scale(sv[,r[1]]))
   # Dataframe 
   df = as.data.frame(cbind(methyl,metab,age,covariates))
   # Mediation
-  # Bootstrap
-  regmed_boot = function(d,i){
-    regmedint_obj = 
-      regmedint(data = d[i,],
-                ## Variables
-                yvar = "ia",
-                avar = "methyl",
-                mvar = "metab",
-                cvar = c("SEX","dr34","age","age_delta"),
-                ## Values at which effects are evaluated
-                a0 = 0,
-                a1 = 1,
-                m_cde = 1,
-                c_cond = c(1,1,1,1),
-                ## Model types
-                mreg = "linear",
-                yreg = "logistic",
-                ## Additional specification
-                interaction = T,
-                casecontrol = T,
-                na_omit = T)
-    summary(regmedint_obj)$summary_myreg[,1]
-  }
   b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
            ncpus = boot_cores)
   return(tidy(b,conf.int = T,conf.method = "bca"))
 })
 names(metab_psv_results) = apply(metab_psv_candidates,1,paste,collapse = " & ")
 # Save
-save(metab_psv_results,file = "./data/mediation/metab_psv_scaled_results.Rdata")
+save(metab_psv_results,file = "./data/mediation/metab_psv_both_scaled_results.Rdata")
