@@ -33,6 +33,8 @@ frstdairy = late_infancy$frstdairy
 id_solidfood = factor(late_infancy$id_solidfood,labels = labs)
 id_cereal = factor(late_infancy$id_cereal,labels = labs)
 id_wbr = factor(late_infancy$id_wbr,labels = labs)
+id_wbr6mon = cut(late_infancy$frstwbr,c(-Inf,6,Inf),right = F,
+                 labels = c("<6 months",">=6 months"))
 id_riceoat = factor(late_infancy$id_riceoat,labels = labs)
 id_solidfruit = factor(late_infancy$id_solidfruit,labels = labs)
 id_veg = factor(late_infancy$id_veg,labels = labs)
@@ -43,7 +45,8 @@ id_meat6mon = cut(late_infancy$frstmeat,c(-Inf,6,Inf),right = F,
 late_infancy = late_infancy[,probesFromPipeline]
 # List of variables
 analysis_vars = c("exbf","bfdur","bfwhbar","frstdairy","id_solidfood","id_cereal",
-                  "id_wbr","id_riceoat","id_solidfruit","id_veg","id_meat","id_meat6mon")
+                  "id_wbr","id_wbr6mon","id_riceoat","id_solidfruit","id_veg",
+                  "id_meat","id_meat6mon")
 # Cluster variables
 cores = 16
 # Model function
@@ -57,7 +60,7 @@ for(v in analysis_vars){
   save_obj = paste0(v,"_mods")
   save_path = paste0("./results/late_infancy",save_obj,".RData")
   cl = makeCluster(cores,type = "FORK")
-  mods = parLapply(cl,late_infancy,function(m){mod_fun(m,iv)})
+  mods = parLapply(cl,late_infancy[,1:10],function(m){mod_fun(m,iv)})
   stopCluster(cl)
   save(mods,file = save_path)
 }

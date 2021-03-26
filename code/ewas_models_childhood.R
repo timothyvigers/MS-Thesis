@@ -33,6 +33,8 @@ frstdairy = childhood$frstdairy
 id_solidfood = factor(childhood$id_solidfood,labels = labs)
 id_cereal = factor(childhood$id_cereal,labels = labs)
 id_wbr = factor(childhood$id_wbr,labels = labs)
+id_wbr6mon = cut(childhood$frstwbr,c(-Inf,6,Inf),right = F,
+                  labels = c("<6 months",">=6 months"))
 id_riceoat = factor(childhood$id_riceoat,labels = labs)
 id_solidfruit = factor(childhood$id_solidfruit,labels = labs)
 id_veg = factor(childhood$id_veg,labels = labs)
@@ -43,7 +45,8 @@ id_meat6mon = cut(childhood$frstmeat,c(-Inf,6,Inf),right = F,
 childhood = childhood[,probesFromPipeline]
 # List of variables
 analysis_vars = c("exbf","bfdur","bfwhbar","frstdairy","id_solidfood","id_cereal",
-                  "id_wbr","id_riceoat","id_solidfruit","id_veg","id_meat","id_meat6mon")
+                  "id_wbr","id_wbr6mon","id_riceoat","id_solidfruit","id_veg",
+                  "id_meat","id_meat6mon")
 # Cluster variables
 cores = 16
 # Model function
@@ -57,7 +60,7 @@ for(v in analysis_vars){
   save_obj = paste0(v,"_mods")
   save_path = paste0("./results/childhood/",save_obj,".RData")
   cl = makeCluster(cores,type = "FORK")
-  mods = parLapply(cl,childhood,function(m){mod_fun(m,iv)})
+  mods = parLapply(cl,childhood[,1:10],function(m){mod_fun(m,iv)})
   stopCluster(cl)
   save(mods,file = save_path)
 }
