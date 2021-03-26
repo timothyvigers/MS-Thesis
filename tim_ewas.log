@@ -1,1 +1,8 @@
-slurmstepd: error: *** JOB 200 ON localhost CANCELLED AT 2021-03-26T14:30:42 ***
+
+real	0m57.739s
+user	0m27.261s
+sys	0m59.818s
+
+real	0m53.401s
+user	0m24.729s
+sys	0m56.037s
