@@ -9,9 +9,8 @@ library(arsenal)
 ```
 
 ```{r}
-pheno = read.csv("~/Dropbox/School/Statistical Genomics/Final Project/data/Infant_Diet_Methylation_Phenotype_Final.csv",
+pheno = read.csv("~/Documents/School/Statistical Genomics/Final Project/data/Infant_Diet_Methylation_Phenotype_Final_19MARCH2021.csv",
                  na.strings = "")
-pheno = read.csv("~/Downloads/dataforanalysisfeb23.csv",na.strings = "")
 #pheno = pheno[!(pheno$ID %in% c('00354-0','10868-0','11121-0','14055-0','30030-0','50147-0')),]
 # Fix continuous variables
 month_vars = c("frstdairy","frstwbr","frstro","frstsolidfruit","frstveg","frstmeat")
@@ -31,8 +30,8 @@ pheno[,c("frstwbr","frstro","frstsolidfruit","frstveg")] =
 ```
 
 ```{r results='asis'}
-t2 = tableby(Visit~bfdur+bfdur_cat+factor(bfwhbarn)+frstdairy+
-               factor(id_solidfoodn)+factor(id_cerealn)+frstwbr+frstro+frstsolidfruit+frstveg+frstmeat,
+t2 = tableby(Visit~bfdur+bfdur_cat+factor(bfwhbar)+frstdairy+
+               factor(id_solidfood)+factor(id_cereal)+frstwbr+frstro+frstsolidfruit+frstveg+frstmeat,
              pheno,total=F)
 summary(t2)
 ```
