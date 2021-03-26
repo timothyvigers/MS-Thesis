@@ -1,8 +1,7 @@
 library(parallel)
 library(nlme)
-setwd("~/Dropbox/School/Statistical Genomics/Final Project")
+setwd("/home/vigerst/EWAS")
 load("./data/final_data.RData")
-rm(probes)
 load("./data/probesFromPipeline.Rdata")
 set.seed(1017)
 # Late infancy
@@ -19,93 +18,49 @@ Mono = late_infancy$Mono
 Gran = late_infancy$Gran # drop to make independent
 ID = late_infancy$ID
 Platform = factor(late_infancy$Data)
+# Fix continuous variables
+month_vars = c("frstdairy","frstwbr","frstro","frstsolidfruit","frstveg","frstmeat","frstwheat","frstbarley")
+late_infancy[,month_vars] = lapply(late_infancy[,month_vars],function(c){
+  c[which(c==-999)] = 17
+  c = c - 1
+})
+# Make vectors for models
 labs = c("<4 months","4-5 months","6+ months")
+exbf = late_infancy$exbf
 bfdur = late_infancy$bfdur
-dairy = cut(late_infancy$frstdairy,c(0,4,6,Inf),right = F,labels = labs)
-egg = cut(late_infancy$frstegg,c(0,median(late_infancy$frstegg,na.rm = T),Inf),
-          labels = c("0-11 months","> 11 months"))
-meat = cut(late_infancy$frstmeat,c(0,4,6,Inf),right = F,labels = labs)
-veg = cut(late_infancy$frstveg,c(0,4,6,Inf),right = F,labels = labs)
-fruit = cut(late_infancy$frstfruit,c(0,4,6,Inf),right = F,labels = labs)
-gluten = cut(late_infancy$frstwheat,c(0,4,6,Inf),right = F,labels = labs)
-cereal = factor(late_infancy$id_cerealn,labels = labs)
-# Cluster variables
-cores = 4
+bfwhbar = factor(late_infancy$bfwhbar,levels = c("n","y"),labels = c("N","Y"))
+frstdairy = late_infancy$frstdairy
+id_solidfood = factor(late_infancy$id_solidfood,labels = labs)
+id_cereal = factor(late_infancy$id_cereal,labels = labs)
+id_wbr = factor(late_infancy$id_wbr,labels = labs)
+id_riceoat = factor(late_infancy$id_riceoat,labels = labs)
+id_solidfruit = factor(late_infancy$id_solidfruit,labels = labs)
+id_veg = factor(late_infancy$id_veg,labels = labs)
+id_meat = factor(late_infancy$id_meat,labels = labs)
+id_meat6mon = cut(late_infancy$frstmeat,c(-Inf,6,Inf),right = F,
+                  labels = c("<6 months",">=6 months"))
 # Remove unnecessary columns
 late_infancy = late_infancy[,probesFromPipeline]
-# # Breastfeeding duration
-cl = makeCluster(cores,type = "FORK")
-bfdur_infancy_mods = parLapply(cl,late_infancy, function(m){
-  mod = try(lm(m ~ bfdur + Age + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform))
-  ifelse(class(mod) == "try-error",NA,return(summary(mod)$coefficients))
-})
-stopCluster(cl)
-save(bfdur_infancy_mods,file = "./data/ewas/bfdur_infancy_mods.RData")
-rm(bfdur_infancy_mods)
-# # Dairy
-cl = makeCluster(cores,type = "FORK")
-dairy_infancy_mods = parLapply(cl,late_infancy, function(m){
-  mod = try(lm(m ~ dairy + Age + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform))
-  ifelse(class(mod) == "try-error",NA,return(summary(mod)$coefficients))
-})
-stopCluster(cl)
-save(dairy_infancy_mods,file = "./data/ewas/dairy_infancy_mods.RData")
-rm(dairy_infancy_mods)
-# # Egg
-cl = makeCluster(cores,type = "FORK")
-egg_infancy_mods = parLapply(cl,late_infancy, function(m){
-  mod = try(lm(m ~ egg + Age + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform))
-  ifelse(class(mod) == "try-error",NA,return(summary(mod)$coefficients))
-})
-stopCluster(cl)
-save(egg_infancy_mods,file = "./data/ewas/egg_infancy_mods.RData")
-rm(egg_infancy_mods)
-# # Meat
-cl = makeCluster(cores,type = "FORK")
-meat_infancy_mods = parLapply(cl,late_infancy, function(m){
-  mod = try(lm(m ~ meat + Age + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform))
-  ifelse(class(mod) == "try-error",NA,return(summary(mod)$coefficients))
-})
-stopCluster(cl)
-save(meat_infancy_mods,file = "./data/ewas/meat_infancy_mods.RData")
-rm(meat_infancy_mods)
-# # Veg
-cl = makeCluster(cores,type = "FORK")
-veg_infancy_mods = parLapply(cl,late_infancy, function(m){
-  mod = try(lm(m ~ veg + Age + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform))
-  ifelse(class(mod) == "try-error",NA,return(summary(mod)$coefficients))
-})
-stopCluster(cl)
-save(veg_infancy_mods,file = "./data/ewas/veg_infancy_mods.RData")
-rm(veg_infancy_mods)
-# Fruit
-cl = makeCluster(cores,type = "FORK")
-fruit_infancy_mods = parLapply(cl,late_infancy, function(m){
-  mod = try(lm(m ~ fruit + Age + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform))
-  ifelse(class(mod) == "try-error",NA,return(summary(mod)$coefficients))
-})
-stopCluster(cl)
-save(fruit_infancy_mods,file = "./data/ewas/fruit_infancy_mods.RData")
-rm(fruit_infancy_mods)
-# Gluten
-cl = makeCluster(cores,type = "FORK")
-gluten_infancy_mods = parLapply(cl,late_infancy, function(m){
-  mod = try(lm(m ~ gluten + Age + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform))
-  ifelse(class(mod) == "try-error",NA,return(summary(mod)$coefficients))
-})
-stopCluster(cl)
-save(gluten_infancy_mods,file = "./data/ewas/gluten_infancy_mods.RData")
-rm(gluten_infancy_mods)
-# Cereal
-cl = makeCluster(cores,type = "FORK")
-cereal_infancy_mods = parLapply(cl,late_infancy, function(m){
-  mod = try(lm(m ~ cereal + Age + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform))
-  ifelse(class(mod) == "try-error",NA,return(summary(mod)$coefficients))
-})
-stopCluster(cl)
-save(cereal_infancy_mods,file = "./data/ewas/cereal_infancy_mods.RData")
-rm(cereal_infancy_mods)
-
+# List of variables
+analysis_vars = c("exbf","bfdur","bfwhbar","frstdairy","id_solidfood","id_cereal",
+                  "id_wbr","id_riceoat","id_solidfruit","id_veg","id_meat","id_meat6mon")
+# Cluster variables
+cores = 16
+# Model function
+mod_fun = function(m,var){
+  mod = try(lm(m ~ var + Age + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform))
+  ifelse(class(mod) == "try-error",NA,return(mod))
+}
+# Loop through all variables
+for(v in analysis_vars){
+  iv = get(v)
+  save_obj = paste0(v,"_mods")
+  save_path = paste0("./results/",save_obj,".RData")
+  cl = makeCluster(cores,type = "FORK")
+  mods = parLapply(cl,late_infancy[,1:10],function(m){mod_fun(m,iv)})
+  stopCluster(cl)
+  save(mods,file = save_path)
+}
 # Childhood
 rm(list=ls())
 library(parallel)
