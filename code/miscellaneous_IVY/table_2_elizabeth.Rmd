@@ -11,7 +11,6 @@ library(arsenal)
 ```{r}
 pheno = read.csv("~/Documents/School/Statistical Genomics/Final Project/data/Infant_Diet_Methylation_Phenotype_Final_19MARCH2021.csv",
                  na.strings = "")
-#pheno = pheno[!(pheno$ID %in% c('00354-0','10868-0','11121-0','14055-0','30030-0','50147-0')),]
 # Fix continuous variables
 month_vars = c("frstdairy","frstwbr","frstro","frstsolidfruit","frstveg","frstmeat")
 pheno[,month_vars] = lapply(pheno[,month_vars],function(c){

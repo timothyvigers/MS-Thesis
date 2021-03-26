@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,message = FALSE)
-knitr::opts_knit$set(root.dir = "~/Documents/School/MS Thesis")
+knitr::opts_knit$set(root.dir = "~/Dropbox/School/MS Thesis")
 library(patchwork)
 library(DiagrammeR)
 library(knitr)
@@ -230,7 +230,7 @@ kable(s[1:6,"est"])
 Same again for the next pair:
 
 ```{r}
-hist(scale(sv[,"hilic_467"]))
+hist(scale(sv[,"hilic_32"]))
 hist(psv[,"cg02223028"])
 ```
 
