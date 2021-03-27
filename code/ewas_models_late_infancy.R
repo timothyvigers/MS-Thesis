@@ -69,7 +69,8 @@ for(v in analysis_vars){
   save_obj = paste0(v,"_mods")
   save_path = paste0("./results/late_infancy/",save_obj,".RData")
   cl = makeCluster(cores,type = "FORK")
-  mods = parLapply(cl,late_infancy[,1:10],function(m){mod_fun(m,iv)})
+  mods = parLapply(cl,late_infancy,function(m){mod_fun(m,iv)})
   stopCluster(cl)
   save(mods,file = save_path)
+  rm(mods)
 }
