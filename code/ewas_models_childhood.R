@@ -34,7 +34,7 @@ id_solidfood = factor(childhood$id_solidfood,labels = labs)
 id_cereal = factor(childhood$id_cereal,labels = labs)
 id_wbr = factor(childhood$id_wbr,labels = labs)
 id_wbr6mon = cut(childhood$frstwbr,c(-Inf,6,Inf),right = F,
-                  labels = c("<6 months",">=6 months"))
+                 labels = c("<6 months",">=6 months"))
 id_riceoat = factor(childhood$id_riceoat,labels = labs)
 id_solidfruit = factor(childhood$id_solidfruit,labels = labs)
 id_veg = factor(childhood$id_veg,labels = labs)
@@ -52,7 +52,16 @@ cores = 16
 # Model function
 mod_fun = function(m,var){
   mod = try(lm(m ~ var + Age + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform))
-  ifelse(class(mod) == "try-error",NA,return(mod))
+  if(class(mod)=="lm"){
+    a = anova(mod)
+    if (a["var",4] <= 0.05) {
+      return(summary(mod)$coefficients))
+    } else {
+      return(NA)
+    }
+  } else {
+    return(NA)
+  }
 }
 # Loop through all variables
 for(v in analysis_vars){
@@ -60,7 +69,7 @@ for(v in analysis_vars){
   save_obj = paste0(v,"_mods")
   save_path = paste0("./results/childhood/",save_obj,".RData")
   cl = makeCluster(cores,type = "FORK")
-  mods = parLapply(cl,childhood,function(m){mod_fun(m,iv)})
+  mods = parLapply(cl,childhood[,1:10],function(m){mod_fun(m,iv)})
   stopCluster(cl)
   save(mods,file = save_path)
 }
