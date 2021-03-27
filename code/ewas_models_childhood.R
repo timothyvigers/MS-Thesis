@@ -54,8 +54,8 @@ mod_fun = function(m,var){
   mod = try(lm(m ~ var + Age + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform))
   if(class(mod)=="lm"){
     a = anova(mod)
-    if (a["var",4] <= 0.05) {
-      return(summary(mod)$coefficients))
+    if (a[1,5] <= 0.05) {
+      return(summary(mod)$coefficients)
     } else {
       return(NA)
     }
