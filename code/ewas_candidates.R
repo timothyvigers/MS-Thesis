@@ -1,50 +1,43 @@
-setwd("~/Dropbox/School/Statistical Genomics/Final Project/data")
+setwd("/home/vigerst/EWAS")
 # Annotation  
 annotate = c("UCSC_RefGene_Name","chr","pos","Probe_rs","Islands_Name","Relation_to_Island")
-load("annotation.450k.Rdata")
+load("/home/vigerst/MS-Thesis/data/raw_data/annotation.450k.Rdata")
 k450 = as.data.frame(anno)
 rm(anno)
-load("annotation.850K.Rdata")
+load("/home/vigerst/MS-Thesis/data/raw_data/annotation.850K.Rdata")
 k850 = as.data.frame(anno)
 rm(anno)
 anno = rbind(k450[,annotate],k850[,annotate])
 rm("k450","k850")
+load("./data/probesFromPipeline.Rdata")
+# List of variables
+analysis_vars = c("exbf","bfdur","bfwhbar","frstdairy","id_solidfood","id_cereal",
+                  "id_wbr","id_wbr6mon","id_riceoat","id_solidfruit","id_veg",
+                  "id_meat","id_meat6mon")
 # Function
-format_candidate = function(diet_var,mods,probe){
-  t = mods[[probe]]
-  t = t[,c("Estimate","Pr(>|t|)")]
-  n = rownames(t)
-  n = n[grep(diet_var,n)]
-  t = t[grep(diet_var,rownames(t)),]
-  t = c(t(t))
-  names(t) = paste(rep(n,each = length(n)),c("Beta","P"))
-  t
+format_candidate = function(t){
+  if (all(!is.na(t))){
+    t = t[,c("Estimate","Pr(>|t|)")]
+    n = rownames(t)
+    n = n[grep("var",n)]
+    t = t[grep("var",rownames(t)),]
+    t = c(t(t))
+    names(t) = paste(rep(n,each = length(n)),c("Beta","P"))
+    names(t) = gsub("var",v,names(t))
+    return(t)
+  } else {return(NA)}
 }
-# Infancy
-load("./ewas/bfdur_infancy_mods.RData")
-load("./ewas/dairy_infancy_mods.RData")
-load("./ewas/egg_infancy_mods.RData")
-load("./ewas/meat_infancy_mods.RData")
-load("./ewas/veg_infancy_mods.RData")
-load("./ewas/fruit_infancy_mods.RData")
-load("./ewas/gluten_infancy_mods.RData")
-load("./ewas/cereal_infancy_mods.RData")
-candidates = read.csv("./ewas/late_infancy_candidates.csv",na.strings = "")
-candidates = as.character(unlist(candidates))
-candidates = candidates[!is.na(candidates)]
-infancy_candidates = lapply(candidates, function(p){
-  b = format_candidate("bfdur",bfdur_infancy_mods,p)
-  d = format_candidate("dairy",dairy_infancy_mods,p)
-  e = format_candidate("egg",egg_infancy_mods,p)
-  m = format_candidate("meat",meat_infancy_mods,p)
-  v = format_candidate("veg",veg_infancy_mods,p)
-  f = format_candidate("fruit",fruit_infancy_mods,p)
-  g = format_candidate("gluten",gluten_infancy_mods,p)
-  c = format_candidate("cereal",cereal_infancy_mods,p)
-  r = c(b,d,e,m,v,f,g,c)
-})
-infancy_candidates = do.call(rbind,infancy_candidates)
-rownames(infancy_candidates) = candidates
+
+for(v in analysis_vars){
+  load(paste0("./results/late_infancy/",v,"_mods.RData"))
+  candidates = lapply(mods,format_candidate)
+  candidates = do.call(rbind,candidates)
+  save_obj = paste0(v,"_candidates")
+  save_path = paste0("./results/late_infancy/",save_obj,".csv")
+  write.csv(candidates,file = save_path,row.names = T,na="")
+}
+
+
 # Annotate
 infancy_anno = anno[match(rownames(infancy_candidates),rownames(anno)),]
 infancy_candidates = cbind(infancy_candidates,infancy_anno)
