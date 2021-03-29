@@ -16,22 +16,25 @@ analysis_vars = c("exbf","bfdur","bfwhbar","frstdairy","id_solidfood","id_cereal
                   "id_meat","id_meat6mon")
 # Function
 format_candidate = function(t){
-  if (all(!is.na(t))){
-    t = t[,c("Estimate","Pr(>|t|)")]
-    n = rownames(t)
-    n = n[grep("var",n)]
-    t = t[grep("var",rownames(t)),]
-    t = c(t(t))
-    names(t) = paste(rep(n,each = length(n)),c("Beta","P"))
-    names(t) = gsub("var",v,names(t))
-    return(t)
-  } else {return(NA)}
+  t = t[,c("Estimate","Pr(>|t|)")]
+  n = rownames(t)
+  n = n[grep("var",n)]
+  t = t[grep("var",rownames(t)),]
+  t = c(t(t))
+  names(t) = paste(rep(n,each = length(n)),c("Beta","P"))
+  names(t) = gsub("var",v,names(t))
+  return(t)
 }
 # Late infancy
 for(v in analysis_vars){
   load(paste0("./results/late_infancy/",v,"_mods.RData"))
+  mods = mods[!is.na(mods)]
   candidates = lapply(mods,format_candidate)
   candidates = do.call(rbind,candidates)
+  # Annotate
+  candidate_anno = anno[match(rownames(candidates),rownames(anno)),]
+  candidates = cbind(candidates,candidate_anno)
+  # Save
   save_obj = paste0(v,"_candidates")
   save_path = paste0("./results/late_infancy/",save_obj,".csv")
   write.csv(candidates,file = save_path,row.names = T,na="")
@@ -39,10 +42,14 @@ for(v in analysis_vars){
 # Childhood
 for(v in analysis_vars){
   load(paste0("./results/childhood/",v,"_mods.RData"))
+  mods = mods[!is.na(mods)]
   candidates = lapply(mods,format_candidate)
   candidates = do.call(rbind,candidates)
+  # Annotate
+  candidate_anno = anno[match(rownames(candidates),rownames(anno)),]
+  candidates = cbind(candidates,candidate_anno)
+  # Save
   save_obj = paste0(v,"_candidates")
   save_path = paste0("./results/childhood/",save_obj,".csv")
   write.csv(candidates,file = save_path,row.names = T,na="")
 }
-# Annotate
