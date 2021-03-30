@@ -21,8 +21,8 @@ library(blandr)
 load("./data/raw_data/psv_sv_dataset.Rdata")
 load("./data/mediation/methyl_psv_candidates_p_01.Rdata")
 load("./data/mediation/metab_psv_candidates_p_01.Rdata")
-load("./data/mediation/methyl_psv_scaled_results.Rdata")
-load("./data/mediation/metab_psv_scaled_results.Rdata")
+load("./data/mediation/methyl_psv_both_scaled_results.Rdata")
+load("./data/mediation/metab_psv_both_scaled_results.Rdata")
 load("./data/raw_data/annotation.850K.Rdata")
 anno = as.data.frame(anno)
 # Import and format metabolite annotation
@@ -205,46 +205,6 @@ There are `r nrow(r)` pairs with significant NIE:
 kable(r[order(r$NIE,decreasing = T),],row.names = F,digits = 3)
 ```
 
-#### Data issues
-
-I think that the problem here is the fact that the metabolites and methylation values are on very different scales, so when you're multiplying the $\beta$ values they can occasionally blow up. 
-
-```{r}
-hist(scale(sv[,"hilic_467"]))
-hist(psv[,"cg26981432"])
-```
-
-When the methylation values are also scaled, the NIE value is much more reasonable:
-
-```{r}
-methyl = as.numeric(scale(psv[,"cg26981432"]))
-metab = as.numeric(scale(sv[,"hilic_467"]))
-# Dataframe 
-df = as.data.frame(cbind(methyl,metab,age,covariates))
-check = regmed_check(df)
-s = summary(check)$summary_myreg
-s[,"est"] = exp(s[,"est"])
-kable(s[1:6,"est"])
-```
-
-Same again for the next pair:
-
-```{r}
-hist(scale(sv[,"hilic_32"]))
-hist(psv[,"cg02223028"])
-```
-
-```{r}
-methyl = as.numeric(scale(psv[,"cg02223028"]))
-metab = as.numeric(scale(sv[,"hilic_32"]))
-# Dataframe 
-df = as.data.frame(cbind(methyl,metab,age,covariates))
-check = regmed_check(df)
-s = summary(check)$summary_myreg
-s[,"est"] = exp(s[,"est"])
-kable(s[1:6,"est"])
-```
-
 #### Annotation
 
 ```{r}
@@ -274,50 +234,10 @@ r$NIE = as.numeric(r$NIE)
 r$NIE = exp(r$NIE)
 ```
 
-There are `r length(r)` pairs with significant NIE:
+There are `r nrow(r)` pairs with significant NIE:
 
 ```{r results='asis'}
 kable(r[order(r$NIE,decreasing = T),],row.names = F,digits = 3)
-```
-
-#### Data issues
-
-Same for this structure:
-
-```{r}
-hist(scale(psv[,"lipid_329"]))
-hist(sv[,"cg02050985"])
-```
-
-When the methylation values are also scaled, the NIE value is much more reasonable:
-
-```{r}
-methyl = as.numeric(scale(sv[,"cg02050985"]))
-metab = as.numeric(scale(psv[,"lipid_329"]))
-# Dataframe 
-df = as.data.frame(cbind(methyl,metab,age,covariates))
-check = regmed_check(df)
-s = summary(check)$summary_myreg
-s[,"est"] = exp(s[,"est"])
-kable(s[1:6,"est"])
-```
-
-Next pair:
-
-```{r}
-hist(scale(psv[,"hilic_397"]))
-hist(sv[,"cg21507958"])
-```
-
-```{r}
-methyl = as.numeric(scale(sv[,"cg21507958"]))
-metab = as.numeric(scale(psv[,"hilic_397"]))
-# Dataframe 
-df = as.data.frame(cbind(methyl,metab,age,covariates))
-check = regmed_check(df)
-s = summary(check)$summary_myreg
-s[,"est"] = exp(s[,"est"])
-kable(s[1:6,"est"])
 ```
 
 #### Annotation
