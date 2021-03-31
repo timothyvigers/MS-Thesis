@@ -66,7 +66,7 @@ metab_psv_results = apply(metab_psv_candidates,1,function(r){
   # Mediation
   b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
            ncpus = boot_cores)
-  return(tidy(b,conf.int = T,conf.method = "bca"))
+  return(b)
 })
 names(metab_psv_results) = apply(metab_psv_candidates,1,paste,collapse = " & ")
 # Save
