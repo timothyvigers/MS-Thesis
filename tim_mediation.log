@@ -1,0 +1,6 @@
+Error in library(broom) : there is no package called ‘broom’
+Execution halted
+
+real	0m2.370s
+user	0m2.612s
+sys	0m1.384s
