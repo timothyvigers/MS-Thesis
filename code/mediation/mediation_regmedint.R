@@ -1,6 +1,5 @@
 library(regmedint)
 library(boot)
-library(broom)
 set.seed(1017)
 # Load data
 setwd("/home/vigerst/MS-Thesis/")
@@ -51,7 +50,7 @@ methyl_psv_results = apply(methyl_psv_candidates,1,function(r){
   # Bootstrap
   b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
            ncpus = boot_cores)
-  return(tidy(b,conf.int = T,conf.method = "bca"))
+  return(b)
 })
 names(methyl_psv_results) = apply(methyl_psv_candidates,1,paste,collapse = " & ")
 # Save
@@ -66,7 +65,7 @@ metab_psv_results = apply(metab_psv_candidates,1,function(r){
   # Mediation
   b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
            ncpus = boot_cores)
-  return(tidy(b,conf.int = T,conf.method = "bca"))
+  return(b)
 })
 names(metab_psv_results) = apply(metab_psv_candidates,1,paste,collapse = " & ")
 # Save
