@@ -1,5 +1,4 @@
 library(parallel)
-library(nlme)
 setwd("/home/vigerst/EWAS")
 load("./data/final_data.RData")
 load("./data/probesFromPipeline.Rdata")
@@ -53,15 +52,8 @@ cores = 16
 mod_fun = function(m,var){
   mod = try(lm(m ~ var + Age + Sex + CD8T +	CD4T +	NK +	Bcell +	Mono + Platform))
   if(class(mod)=="lm"){
-    a = anova(mod)
-    if (a[1,5] <= 0.05) {
-      return(summary(mod)$coefficients)
-    } else {
-      return(NA)
-    }
-  } else {
-    return(NA)
-  }
+    return(summary(mod)$coefficients)
+  } else {return(NA)}
 }
 # Loop through all variables
 for(v in analysis_vars){
