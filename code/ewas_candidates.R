@@ -1,4 +1,4 @@
-library(tibble)
+library(dplyr)
 setwd("/home/vigerst/EWAS")
 # Annotation  
 annotate = c("UCSC_RefGene_Name","chr","pos","Probe_rs","Islands_Name","Relation_to_Island")
