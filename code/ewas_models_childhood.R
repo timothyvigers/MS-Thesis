@@ -61,7 +61,7 @@ for(v in analysis_vars){
   save_obj = paste0(v,"_mods")
   save_path = paste0("./results/childhood/",save_obj,".RData")
   cl = makeCluster(cores,type = "FORK")
-  mods = parLapply(cl,childhood,function(m){mod_fun(m,iv)})
+  mods = parLapply(cl,childhood[,1:100],function(m){mod_fun(m,iv)})
   stopCluster(cl)
   save(mods,file = save_path)
   rm(mods)
