@@ -1,3 +1,4 @@
+library(tibble)
 setwd("/home/vigerst/EWAS")
 # Annotation  
 annotate = c("UCSC_RefGene_Name","chr","pos","Probe_rs","Islands_Name","Relation_to_Island")
@@ -30,26 +31,34 @@ for(v in analysis_vars){
   load(paste0("./results/late_infancy/",v,"_mods.RData"))
   mods = mods[!is.na(mods)]
   candidates = lapply(mods,format_candidate)
-  candidates = do.call(rbind,candidates)
+  candidates = as.data.frame(do.call(rbind,candidates))
+  candidates = candidates %>% rownames_to_column("probe")
+  # Add adjusted p value columns
+  candidates = candidates %>% 
+    mutate(across(ends_with("P"), ~p.adjust(.,"fdr"), .names = "{col}.FDR"))
   # Annotate
-  candidate_anno = anno[match(rownames(candidates),rownames(anno)),]
+  candidate_anno = anno[match(candidates$probe,rownames(anno)),]
   candidates = cbind(candidates,candidate_anno)
   # Save
   save_obj = paste0(v,"_candidates")
   save_path = paste0("./results/late_infancy/",save_obj,".csv")
-  write.csv(candidates,file = save_path,row.names = T,na="")
+  write.csv(candidates,file = save_path,row.names = F,na="")
 }
 # Childhood
 for(v in analysis_vars){
-  load(paste0("./results/childhood/",v,"_mods.RData"))
+  load(paste0("./results/late_infancy/",v,"_mods.RData"))
   mods = mods[!is.na(mods)]
   candidates = lapply(mods,format_candidate)
-  candidates = do.call(rbind,candidates)
+  candidates = as.data.frame(do.call(rbind,candidates))
+  candidates = candidates %>% rownames_to_column("probe")
+  # Add adjusted p value columns
+  candidates = candidates %>% 
+    mutate(across(ends_with("P"), ~p.adjust(.,"fdr"), .names = "{col}.FDR"))
   # Annotate
-  candidate_anno = anno[match(rownames(candidates),rownames(anno)),]
+  candidate_anno = anno[match(candidates$probe,rownames(anno)),]
   candidates = cbind(candidates,candidate_anno)
   # Save
   save_obj = paste0(v,"_candidates")
-  save_path = paste0("./results/childhood/",save_obj,".csv")
-  write.csv(candidates,file = save_path,row.names = T,na="")
+  save_path = paste0("./results/late_infancy/",save_obj,".csv")
+  write.csv(candidates,file = save_path,row.names = F,na="")
 }
