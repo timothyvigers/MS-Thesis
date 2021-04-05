@@ -39,7 +39,7 @@ format_candidates = function(timepoint,variables){
     candidates = candidates %>% 
       mutate(across(ends_with("P"), ~p.adjust(.,"fdr"), .names = "{col}.FDR"))
     ps = grep("*FDR",colnames(candidates))
-    if(length(p)>1) {
+    if(length(ps)>1) {
       candidates$min.P.FDR = apply(candidates[,ps],1,function(r){min(c(r,Inf))})
     } else {
       candidates$min.P.FDR = candidates[,ps]
