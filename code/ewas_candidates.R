@@ -38,12 +38,21 @@ format_candidates = function(timepoint,variables){
     # Add adjusted p value columns
     candidates = candidates %>% 
       mutate(across(ends_with("P"), ~p.adjust(.,"fdr"), .names = "{col}.FDR"))
+    ps = grep("*FDR",colnames(candidates))
+    if(length(p)>1) {
+      candidates$min.P.FDR = apply(candidates[,ps],1,function(r){min(c(r,Inf))})
+    } else {
+      candidates$min.P.FDR = candidates[,ps]
+    }
+    # Filter
+    candidates = candidates[candidates$min.P.FDR < 0.1,]
+    candidates$min.P.FDR = NULL
     # Annotate
     candidate_anno = anno[match(candidates$probe,rownames(anno)),]
     candidates = cbind(candidates,candidate_anno)
     # Save
     save_obj = paste0(var,"_candidates")
-    save_path = paste0("./results/",timepoint,"/",save_obj,".csv")
+    save_path = paste0("./results/",timepoint,"/",save_obj,"_FDR_only.csv")
     write.csv(candidates,file = save_path,row.names = F,na="")
   }
 }
