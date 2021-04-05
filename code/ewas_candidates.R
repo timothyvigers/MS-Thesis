@@ -16,8 +16,8 @@ load("./data/probesFromPipeline.Rdata")
 analysis_vars = c("exbf","bfdur","bfwhbar","frstdairy","id_solidfood","id_cereal",
                   "id_wbr","id_wbr6mon","id_riceoat","id_solidfruit","id_veg",
                   "id_meat","id_meat6mon")
-# Function
-format_candidate = function(t){
+# Format function
+format_mods = function(t){
   t = t[,c("Estimate","Pr(>|t|)")]
   n = rownames(t)
   n = n[grep("var",n)]
@@ -27,39 +27,27 @@ format_candidate = function(t){
   names(t) = gsub("var",v,names(t))
   return(t)
 }
+# Candidate function
+format_candidates = function(timepoint){
+  for(v in analysis_vars){
+    load(paste0("./results/",timepoint,"/",v,"_mods.RData"))
+    mods = mods[!is.na(mods)]
+    candidates = lapply(mods,format_candidate)
+    candidates = as.data.frame(do.call(rbind,candidates))
+    candidates = candidates %>% rownames_to_column("probe")
+    # Add adjusted p value columns
+    candidates = candidates %>% 
+      mutate(across(ends_with("P"), ~p.adjust(.,"fdr"), .names = "{col}.FDR"))
+    # Annotate
+    candidate_anno = anno[match(candidates$probe,rownames(anno)),]
+    candidates = cbind(candidates,candidate_anno)
+    # Save
+    save_obj = paste0(v,"_candidates")
+    save_path = paste0("./results/",timepoint,"/",save_obj,".csv")
+    write.csv(candidates,file = save_path,row.names = F,na="")
+  }
+}
 # Late infancy
-for(v in analysis_vars){
-  load(paste0("./results/late_infancy/",v,"_mods.RData"))
-  mods = mods[!is.na(mods)]
-  candidates = lapply(mods,format_candidate)
-  candidates = as.data.frame(do.call(rbind,candidates))
-  candidates = candidates %>% rownames_to_column("probe")
-  # Add adjusted p value columns
-  candidates = candidates %>% 
-    mutate(across(ends_with("P"), ~p.adjust(.,"fdr"), .names = "{col}.FDR"))
-  # Annotate
-  candidate_anno = anno[match(candidates$probe,rownames(anno)),]
-  candidates = cbind(candidates,candidate_anno)
-  # Save
-  save_obj = paste0(v,"_candidates")
-  save_path = paste0("./results/late_infancy/",save_obj,".csv")
-  write.csv(candidates,file = save_path,row.names = F,na="")
-}
+format_candidates("late_infancy")
 # Childhood
-for(v in analysis_vars){
-  load(paste0("./results/late_infancy/",v,"_mods.RData"))
-  mods = mods[!is.na(mods)]
-  candidates = lapply(mods,format_candidate)
-  candidates = as.data.frame(do.call(rbind,candidates))
-  candidates = candidates %>% rownames_to_column("probe")
-  # Add adjusted p value columns
-  candidates = candidates %>% 
-    mutate(across(ends_with("P"), ~p.adjust(.,"fdr"), .names = "{col}.FDR"))
-  # Annotate
-  candidate_anno = anno[match(candidates$probe,rownames(anno)),]
-  candidates = cbind(candidates,candidate_anno)
-  # Save
-  save_obj = paste0(v,"_candidates")
-  save_path = paste0("./results/late_infancy/",save_obj,".csv")
-  write.csv(candidates,file = save_path,row.names = F,na="")
-}
+format_candidates("childhood")
