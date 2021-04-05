@@ -28,8 +28,8 @@ format_mods = function(t){
   return(t)
 }
 # Candidate function
-format_candidates = function(timepoint){
-  for(v in analysis_vars){
+format_candidates = function(timepoint,variables){
+  for(v in variables){
     load(paste0("./results/",timepoint,"/",v,"_mods.RData"))
     mods = mods[!is.na(mods)]
     candidates = lapply(mods,format_mods)
@@ -48,6 +48,6 @@ format_candidates = function(timepoint){
   }
 }
 # Late infancy
-format_candidates("late_infancy")
+format_candidates("late_infancy",analysis_vars)
 # Childhood
-format_candidates("childhood")
+format_candidates("childhood",analysis_vars)
