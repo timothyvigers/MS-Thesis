@@ -32,7 +32,7 @@ format_candidates = function(timepoint){
   for(v in analysis_vars){
     load(paste0("./results/",timepoint,"/",v,"_mods.RData"))
     mods = mods[!is.na(mods)]
-    candidates = lapply(mods,format_candidate)
+    candidates = lapply(mods,format_mods)
     candidates = as.data.frame(do.call(rbind,candidates))
     candidates = candidates %>% rownames_to_column("probe")
     # Add adjusted p value columns
