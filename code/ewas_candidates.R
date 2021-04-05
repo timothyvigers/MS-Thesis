@@ -17,7 +17,7 @@ analysis_vars = c("exbf","bfdur","bfwhbar","frstdairy","id_solidfood","id_cereal
                   "id_wbr","id_wbr6mon","id_riceoat","id_solidfruit","id_veg",
                   "id_meat","id_meat6mon")
 # Format function
-format_mods = function(t){
+format_mods = function(t,v){
   t = t[,c("Estimate","Pr(>|t|)")]
   n = rownames(t)
   n = n[grep("var",n)]
@@ -29,10 +29,10 @@ format_mods = function(t){
 }
 # Candidate function
 format_candidates = function(timepoint,variables){
-  for(v in variables){
-    load(paste0("./results/",timepoint,"/",v,"_mods.RData"))
+  for(var in variables){
+    load(paste0("./results/",timepoint,"/",var,"_mods.RData"))
     mods = mods[!is.na(mods)]
-    candidates = lapply(mods,format_mods)
+    candidates = lapply(mods,function(mod){format_mods(mod,var)})
     candidates = as.data.frame(do.call(rbind,candidates))
     candidates = candidates %>% rownames_to_column("probe")
     # Add adjusted p value columns
@@ -42,7 +42,7 @@ format_candidates = function(timepoint,variables){
     candidate_anno = anno[match(candidates$probe,rownames(anno)),]
     candidates = cbind(candidates,candidate_anno)
     # Save
-    save_obj = paste0(v,"_candidates")
+    save_obj = paste0(var,"_candidates")
     save_path = paste0("./results/",timepoint,"/",save_obj,".csv")
     write.csv(candidates,file = save_path,row.names = F,na="")
   }
