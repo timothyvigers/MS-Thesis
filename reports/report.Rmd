@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,message = FALSE)
 knitr::opts_knit$set(root.dir = "~/Documents/School/MS Thesis")
+library(data.table)
 library(patchwork)
 library(DiagrammeR)
 library(knitr)
@@ -179,10 +180,16 @@ get_results = function(mod_list,q = 0.05,conf.m = "perc"){
     }
   })
   r = as.data.frame(rbindlist(r[!is.na(r)]))
-  colnames(r) = c("Pair","NIE","NIE CI Low","NIE CI High")
-  r = r[order(r$NIE,decreasing = T),]
-  rownames(r) = 1: nrow(r)
-  return(r)
+  if (nrow(r)>0){
+    colnames(r) = c("Pair","NIE","NIE CI Low","NIE CI High")
+    r = r[order(r$NIE,decreasing = T),]
+    rownames(r) = 1: nrow(r)
+    return(r)
+  } else {
+    r = matrix(nrow = 0,ncol = 4)
+    colnames(r) = c("Pair","NIE","NIE CI Low","NIE CI High")
+    return(r)
+    }
 }
 # Annotation - requires output from get_results() and anno dataframe
 annotate_results = function(r){
@@ -197,49 +204,17 @@ annotate_results = function(r){
 
 ### Methylation at PSV
 
-```{r results='asis',cache=T}
+```{r results='asis',cache=TRUE}
 res = get_results(methyl_psv_results)
 kable(res,digits = 3)
 ```
 
 #### Annotation
 
-```{r}
+```{r results='asis',cache=TRUE}
 annotate_results(res)
 ```
 
-#### Metabolite at PSV
+### Metabolite at PSV
 
-```{r cache=TRUE}
-r = lapply(names(metab_psv_results),function(m){
-  mod = metab_psv_results[[m]]
-  mod = tidy(mod,conf.int = T,conf.method = "bca")
-  if (mod[mod$term == "tnie","conf.low"] <= 0 & mod[mod$term == "tnie","conf.high"] >= 0){
-    return(NA)
-  } else {
-    return(c(m,as.numeric(mod[mod$term == "tnie","statistic"])))
-  }
-})
-r = as.data.frame(do.call(rbind,r[!is.na(r)]))
-colnames(r) = c("Pair","NIE")
-r$NIE = as.numeric(r$NIE)
-r$NIE = exp(r$NIE)
-```
-
-There are `r nrow(r)` pairs with significant NIE:
-
-```{r results='asis'}
-kable(r[order(r$NIE,decreasing = T),],row.names = F,digits = 3)
-```
-
-#### Annotation
-
-```{r}
-metab = sapply(strsplit(r$Pair," & "),"[",2)
-kable(metab_anno[metab_anno$feature %in% metab,])
-
-methyl = sapply(strsplit(r$Pair," & "),"[",1)
-met = anno[anno$Name %in% methyl,c("chr","pos","Name","Probe_rs","Relation_to_Island","UCSC_RefGene_Name")] %>%
-  arrange(as.numeric(sub("chr","",chr)),pos)
-kable(met)
-```
+Before adjusting for multiple comparisons, there were 13 significant pairs. However, none were significant after false coverage rate (FCR) adjustment.
