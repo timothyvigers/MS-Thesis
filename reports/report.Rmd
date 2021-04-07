@@ -66,10 +66,6 @@ grViz("
 
 Using this mediation structure, there were `r nrow(methyl_psv_candidates)` pairs selected with `r length(unique(methyl_psv_candidates[,2]))` unique metabolites.
 
-```{r}
-kable(metab_anno[metab_anno$feature %in% unique(methyl_psv_candidates[,2]),],row.names = F)
-```
-
 ```{r fig.height=8,fig.width=8}
 grViz("
   graph{
@@ -85,10 +81,6 @@ grViz("
 ```
 
 Using this mediation structure, there were `r nrow(metab_psv_candidates)` pairs selected with `r length(unique(metab_psv_candidates[,2]))` unique metabolites.
-
-```{r}
-kable(metab_anno[metab_anno$feature %in% unique(metab_psv_candidates[,2]),],row.names = F)
-```
 
 # Mediation Analysis
 
@@ -194,11 +186,11 @@ get_results = function(mod_list,q = 0.05,conf.m = "perc"){
 # Annotation - requires output from get_results() and anno dataframe
 annotate_results = function(r){
   metab = sapply(strsplit(r$Pair," & "),"[",2)
-  kable(metab_anno[metab_anno$feature %in% metab,])
+  print(kable(metab_anno[metab_anno$feature %in% metab,]))
   methyl = sapply(strsplit(r$Pair," & "),"[",1)
   met = anno[anno$Name %in% methyl,c("chr","pos","Name","Probe_rs","Relation_to_Island","UCSC_RefGene_Name")] %>%
     arrange(as.numeric(sub("chr","",chr)),pos)
-  kable(met)
+  print(kable(met))
 }
 ```
 
@@ -211,10 +203,10 @@ kable(res,digits = 3)
 
 #### Annotation
 
-```{r results='asis',cache=TRUE}
+```{r results='asis'}
 annotate_results(res)
 ```
 
 ### Metabolite at PSV
 
-Before adjusting for multiple comparisons, there were 13 significant pairs. However, none were significant after false coverage rate (FCR) adjustment.
+Before adjusting for multiple comparisons, there were 13 significant pairs. However, none were significant after 95% false coverage rate (FCR) adjustment.
