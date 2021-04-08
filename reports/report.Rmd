@@ -196,7 +196,7 @@ annotate_results = function(r){
 
 ### Methylation at PSV
 
-```{r results='asis',cache=TRUE}
+```{r results='asis'}
 res = get_results(methyl_psv_results)
 kable(res,digits = 3)
 ```
