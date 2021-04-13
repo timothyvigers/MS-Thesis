@@ -7,7 +7,9 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,message = FALSE)
-knitr::opts_knit$set(root.dir = "~/Documents/School/MS Thesis")
+knitr::opts_knit$set(root.dir = "~/Dropbox/School/MS Thesis")
+library(biomaRt)
+library(GeneBook)
 library(data.table)
 library(patchwork)
 library(DiagrammeR)
@@ -190,7 +192,7 @@ annotate_results = function(r){
   methyl = sapply(strsplit(r$Pair," & "),"[",1)
   met = anno[anno$Name %in% methyl,c("chr","pos","Name","Probe_rs","Relation_to_Island","UCSC_RefGene_Name")] %>%
     arrange(as.numeric(sub("chr","",chr)),pos)
-  print(kable(met))
+  return(met)
 }
 ```
 
@@ -204,7 +206,38 @@ kable(res,digits = 3)
 #### Annotation
 
 ```{r results='asis'}
-annotate_results(res)
+met = annotate_results(res)
+kable(met)
+```
+
+```{r}
+gene_cards = lapply(met$UCSC_RefGene_Name[which(met$UCSC_RefGene_Name != "")], function(g){
+  genecard_description_summary[grep(g,genecard_description_summary$gene),]
+})
+gene_cards = do.call(rbind,gene_cards)
+kable(gene_cards,row.names = F)
+```
+
+#### SNPs
+
+rs IDs are from the BIOS QTL browser (`genenetwork.nl/biosqtlbrowser/`)
+
+```{r message=FALSE}
+# Import BIOS QTL information
+methyl = sapply(strsplit(res$Pair," & "),"[",1)
+snps = read.delim("~/Dropbox/Work/Methylation/BIOS QTL/2015_09_02_cis_meQTLsFDR0.05-CpGLevel.txt")
+snps = snps[snps$ProbeName %in% methyl,]
+rsids = snps$SNPName
+
+ensembl_snp = useMart("ENSEMBL_MART_SNP", dataset="hsapiens_snp")
+bm = getBM(attributes = c('refsnp_id',"refsnp_source",'chr_name','chrom_start',
+                          'chrom_end',"associated_gene","phenotype_name","phenotype_description",
+                          "consequence_type_tv",
+                          "clinical_significance"),
+           filters = 'snp_filter', values = rsids,mart = ensembl_snp)
+bm = bm %>% mutate(chr_num = suppressWarnings(as.numeric(chr_name))) %>% 
+  arrange(chr_num,chrom_start)
+kable(bm,row.names = F)
 ```
 
 ### Metabolite at PSV
