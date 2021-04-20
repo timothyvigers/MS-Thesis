@@ -8,7 +8,9 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,message = FALSE)
 knitr::opts_knit$set(root.dir = "~/Dropbox/School/MS Thesis")
+options(connectionObserver = NULL)
 library(biomaRt)
+library(missMethyl)
 library(GeneBook)
 library(data.table)
 library(patchwork)
@@ -183,7 +185,7 @@ get_results = function(mod_list,q = 0.05,conf.m = "perc"){
     r = matrix(nrow = 0,ncol = 4)
     colnames(r) = c("Pair","NIE","NIE CI Low","NIE CI High")
     return(r)
-    }
+  }
 }
 # Annotation - requires output from get_results() and anno dataframe
 annotate_results = function(r){
@@ -222,7 +224,7 @@ kable(gene_cards,row.names = F)
 
 rs IDs are from the BIOS QTL browser (`genenetwork.nl/biosqtlbrowser/`)
 
-```{r message=FALSE}
+```{r message=FALSE,cache=TRUE}
 # Import BIOS QTL information
 methyl = sapply(strsplit(res$Pair," & "),"[",1)
 snps = read.delim("~/Dropbox/Work/Methylation/BIOS QTL/2015_09_02_cis_meQTLsFDR0.05-CpGLevel.txt")
@@ -235,9 +237,61 @@ bm = getBM(attributes = c('refsnp_id',"refsnp_source",'chr_name','chrom_start',
                           "consequence_type_tv",
                           "clinical_significance"),
            filters = 'snp_filter', values = rsids,mart = ensembl_snp)
+bm$Probe = snps$ProbeName[match(bm$refsnp_id,snps$SNPName)]
+
 bm = bm %>% mutate(chr_num = suppressWarnings(as.numeric(chr_name))) %>% 
-  arrange(chr_num,chrom_start)
+  arrange(chr_num,chrom_start) %>% select(Probe,everything())
 kable(bm,row.names = F)
+```
+
+#### Panther
+
+I used the `missMethyl` R package to find Entrez IDs for the significant probes from above. These IDs were then used for gene list overrepresentation analysis. For the background list of all CpG sites tested, I used the list of probes that were selected for mediation testing during the pair selection step.
+
+```{r cache=TRUE}
+# Write ensembl IDs for significant and background probes
+ids = getMappedEntrezIDs(methyl)$sig.eg
+background = unique(methyl_psv_candidates[,1])
+background = getMappedEntrezIDs(background)$sig.eg
+write.table(paste0("GeneID:",ids),
+            file = "~/Dropbox/School/MS Thesis/results/final_probes_entrez_ids.csv",
+            row.names = F,col.names = F,sep = ",",quote = F)
+write.table(paste0("GeneID:",background),
+            file = "~/Dropbox/School/MS Thesis/results/background_entrez_ids.csv",
+            row.names = F,col.names = F,sep = ",",quote = F)
+```
+
+```{r}
+reactome = read.delim("./results/reactome_overrepresentation.txt")
+reactome$final_probes_entrez_ids.csv..raw.P.value. = 
+  as.numeric(sub("<","",reactome$final_probes_entrez_ids.csv..raw.P.value.))
+```
+
+There were no significant results using the Panther pathways, even without adjustment for multiple tests. Using the Reactome pathways, there were `r sum(reactome$final_probes_entrez_ids.csv..raw.P.value. <= 0.05)` pathways that were significantly over-represented (based on the binomial test). However, none of these were significant after FDR adjustment for multiple comparisons.
+
+```{r print reactome}
+kable(reactome[reactome$final_probes_entrez_ids.csv..raw.P.value. <= 0.05,])
+```
+
+#### Enrichr
+
+```{r enrichr,cache=TRUE}
+library(org.Hs.eg.db)
+genes = mapIds(org.Hs.eg.db, ids, 'SYMBOL', 'ENTREZID')
+write.table(genes,file = "~/Dropbox/School/MS Thesis/results/final_entrez_symbols.csv",
+            row.names = F,col.names = F,sep = ",",quote = F)
+```
+
+Again, the 18 significant probes were used for Enrichr analysis, the results of which can be found here: <https://maayanlab.cloud/Enrichr/enrich?dataset=e23adb5dffdee89b1d30b13107c3bfb7>. The Bioplanet 2019 results here look particularly interesting, but it's tough to say how much to read into them.
+
+#### HMDB
+
+```{r hmdb}
+metab = sapply(strsplit(res$Pair," & "),"[",2)
+names = metab_anno$name[match(metab,metab_anno$feature)]
+
+hmdb = read.delim("~/Dropbox/Work/Metabolomics/HMDB/HMDB_table.txt")
+
 ```
 
 ### Metabolite at PSV

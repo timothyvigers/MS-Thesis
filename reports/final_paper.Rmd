@@ -1,0 +1,49 @@
+---
+title: "A Mediation Approach to Discovering Causal Relationships Between the Metabolome and DNA Methylation in Type 1 Diabetes"
+author:
+- Timothy Vigers, B.A.^[UCD], Lauren A. Vanderlinden, M.S., Randi K. Johnson, Ph.D., Patrick M. Carry, M.S., Alexander M. Kaizer, Ph.D., Jill M. Norris, Ph.D., Katerina Kechris, Ph.D.
+date: "`r format(Sys.time(), '%Y/%m/%d')`"
+bibliography: "/Users/timvigers/Dropbox/School/MS Thesis/final_paper/references.bib"
+csl: "/Users/timvigers/Dropbox/School/MS Thesis/final_paper/american-medical-association.csl"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_knit$set(root.dir = "/Users/timvigers/Dropbox/School/MS Thesis/final_paper")
+library("knitcitations")
+cleanbib()
+options("citation_format" = "pandoc")
+```
+
+```{r}
+
+```
+
+# Abstract
+
+## Objective:
+
+## Methods:
+
+## Results:
+
+## Conclusion:
+
+\newpage
+
+# Introduction
+
+\newpage
+
+# Methods
+
+## Study Design and Participants
+
+The Diabetes Autoimmunity Study in the Young (DAISY) cohort follows 2547 high-risk children in Colorado for the development of IA and T1D. Study participants were recruited via newborn screening at St. Joseph’s Hospital in Denver, CO, USA and from unaffected first-degree relatives (FDR) of type 1 diabetes patients. The study follows participants prospectively and includes blood sample collection at 9, 15, and 24 months, then annual collection until islet autoimmunity (IA) is detected. IA is defined as the second consecutive visit at which a confirmed auto-antibody to insulin, GAD65, IA-2, or ZnT8 was detected.2 Participants who develop IA are asked to follow an accelerated protocol with visits and blood sample collection every 3-6 months, until they are diagnosed with diabetes by a physician. All DAISY protocols were approved by the Colorado Multiple Institutional Review Board (COMIRB 92-080), and informed consent was obtained from all participants. All research was performed in accordance with relevant guideline and regulations.[@johnsonLongitudinalDNAMethylation2020]
+
+Participants with both methylation and metabolomic measures at the visit at which seroconversion was detected (SV) and the visit immediately prior (pre-seroconversion or PSV) were selected for these analyses. T1D cases were matched to controls by age at SV, race/ethnicity, and sample availability. The majority of participants were Non-Hispanic White (NHW), and race/ethnicity was categorized into NHW and Other for matching and analysis.[@johnsonLongitudinalDNAMethylation2020]
+
+\newpage
+
+# References
