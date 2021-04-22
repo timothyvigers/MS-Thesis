@@ -3,14 +3,13 @@ title: "A Mediation Approach to Discovering Causal Relationships Between the Met
 date: ""
 author:
 - Timothy Vigers, B.A.^[UCD], Lauren A. Vanderlinden, M.S., Randi K. Johnson, Ph.D., Patrick M. Carry, M.S., Alexander M. Kaizer, Ph.D., Jill M. Norris, Ph.D., Katerina Kechris, Ph.D.
-bibliography: "/Users/timvigers/Dropbox/School/MS Thesis/final_paper/references.bib"
-csl: "/Users/timvigers/Dropbox/School/MS Thesis/final_paper/american-medical-association.csl"
+bibliography: "C:/Users/timbv/Dropbox/School/MS Thesis/final_paper/references.bib"
+csl: "C:/Users/timbv/Dropbox/School/MS Thesis/final_paper/american-medical-association.csl"
 output: word_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-knitr::opts_knit$set(root.dir = "/Users/timvigers/Dropbox/School/MS Thesis/final_paper")
 ```
 
 # Abstract
@@ -41,8 +40,26 @@ Participants with both methylation and metabolomic measures at the visit at whic
 
 T1D cases and matched controls were randomly assigned to either the 450 K group (which included duplicate samples for quality control) or EPIC group (which included replicates from the 450 K set for quality control). DNA methylation was profiled in peripheral whole blood using the Infinium HumanMethylation450K Beadchip (Illumina, San Diego, CA, USA, “450 K”) for the 450 K set, and the Infinium HumanMethylation EPIC Beadchip (“EPIC”) was used for the EPIC set. Both sets underwent identical pre-processing using the SeSAMe pipeline[@zhouSeSAMeReducingArtifactual2018], and measurement platform was included as a covariate in all statistical models in order to account for technological batch effects.
 
-The SeSAMe pipeline was implemented using the sesame package (v1.0.0) in R (v3.5.2), and consists of Noob normalization[@tricheLowlevelProcessingIllumina2013], non-linear dye bias correction, and pOOBAH to help identify failed hybridization. Next, arrays with high proportion of failed probes (100,000 failed probes for 450 K and 200,000 failed probes for EPIC) were removed (450 K = 6, EPIC = 2), along with arrays with discordant predicted sex and clinically recorded sex (450 K = 5, EPIC = 2) Probes missing in at least 1 sample were also removed from subsequent analyses (450 K = 109,956, EPIC = 202,222). ComBat[@leekSvaPackageRemoving2012] was used to remove batch effects using plate and row to delineate batch.
+The SeSAMe pipeline was implemented using the sesame package (v1.0.0) in R (v3.5.2), and consists of Noob normalization[@tricheLowlevelProcessingIllumina2013] , non-linear dye bias correction, and pOOBAH to help identify failed hybridization. Next, arrays with high proportion of failed probes (100,000 failed probes for 450 K and 200,000 failed probes for EPIC) were removed (450 K = 6, EPIC = 2), along with arrays with discordant predicted sex and clinically recorded sex (450 K = 5, EPIC = 2) Probes missing in at least 1 sample were also removed from subsequent analyses (450 K = 109,956, EPIC = 202,222). ComBat[@leekSvaPackageRemoving2012] was used to remove batch effects using plate and row to delineate batch.
 
+## Metabolomics
+
+Untargeted metabolomics wer obtained using gas chromotography-time of flight mass spectrometry (GC-TOF MS), charged surface hybrid column quadrupole time of flight mass spectrometry (CSH-QTOF MS), and hydrophilic interaction chromatography quadrupole time of flight mass spectrometry (HILIC-QTOF MS), at the NIH West Coast Metabolomics Center at the University of California, Davis. Non-fasting plasma samples were prepared and analyzed as previously described in Johnson et al. [@johnsonMetabolomicsrelatedNutrientPatterns2020]
+
+For GC-TOF data, peak picking and annotation was performed using BinBase.[@skogersonVolatileCompoundBinBase2011] CSH-QTOF MS and HILIC-QTOF M were processed using MS-Dial[@tsugawaMSDIALDataindependentMS2015] and complex lipids were annotated with LipidBlast[@kindLipidBlastSilicoTandem2013] and Massbank of North America (http://mona.fiehnlab.ucdavis.edu/), and erroneous peaks were removed using MSFLO.[@defeliceMassSpectralFeature2017]
+
+After collection, annotation, and postprocessing, metabolomics data were normalized using SERRF[@fanSystematicErrorRemoval2019],a QC-based method designed to account for batch effects. Samples with low abundance (n = 2) and metabolites with a coefficient of variation more than two absolute deviations from the median (n = 344) were excluded, and data were transformed using the box-cox method.[@boxAnalysisTransformations1964] After processing and quality checks, 2457 untargeted metabolites (including 1905 annotated) remained.[@johnsonMetabolomicsrelatedNutrientPatterns2020]
+
+## Statistical Analysis
+
+
+
+# Results
+
+# Discussion
+
+- Limitations:
+  - Non-fasting plasma samples for metabolomics, and these analyses did not account for dietary patterns.
 
 \newpage
 
