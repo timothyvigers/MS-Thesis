@@ -34,7 +34,7 @@ regmed_boot = function(d,i,probe){
 }
 # Bootstrap options
 boot_cores = 16
-boots = 1000
+boots = 10000
 # Iterate through all
 probes = colnames(df)[grep("^cg\\d",colnames(df))]
 results = lapply(probes,function(p){
