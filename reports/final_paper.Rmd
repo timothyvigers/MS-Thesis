@@ -3,8 +3,8 @@ title: "A Mediation Approach to Discovering Causal Relationships Between the Met
 date: ""
 author:
 - Timothy Vigers, B.A.^[UCD], Lauren A. Vanderlinden, M.S., Randi K. Johnson, Ph.D., Patrick M. Carry, M.S., Alexander M. Kaizer, Ph.D., Jill M. Norris, Ph.D., Katerina Kechris, Ph.D.
-bibliography: "C:/Users/timbv/Dropbox/School/MS Thesis/final_paper/references.bib"
-csl: "C:/Users/timbv/Dropbox/School/MS Thesis/final_paper/american-medical-association.csl"
+bibliography: "C:/Users/timbv/Dropbox/Miscellaneous/references.bib"
+csl: "C:/Users/timbv/Dropbox/Miscellaneous/american-medical-association.csl"
 output: word_document
 ---
 
@@ -52,7 +52,7 @@ After collection, annotation, and postprocessing, metabolomics data were normali
 
 ## Statistical Analysis
 
-
+All analyses included only participants with methylation and metabolomics data at both their SV and PSV study visits (n = 183). To reduce the number of methylation probe-metabolite pairs examined in the mediation analysis, we performed simple linear regression to find probes and metabolites that are correlated at a nominal p < 0.01 level. 
 
 # Results
 
