@@ -17,13 +17,13 @@ regmed_boot = function(d,i,probe){
               yvar = "T1D_time",
               avar = "Sugar.Z",
               mvar = probe,
-              cvar = c("dr34","NHW","Age_SV","Female_YN","calor","FFQ_type"),
+              cvar = c("dr34","NHW","Age_SV","Female_YN","calor","FFQ_type","fruc"),
               eventvar = "T1D_Event",
               ## Values at which effects are evaluated
               a0 = 0,
               a1 = 1,
               m_cde = 1,
-              c_cond = c(1,1,1,1,1,1),
+              c_cond = c(1,1,1,1,1,1,1),
               ## Model types
               mreg = "linear",
               yreg = "survAFT_weibull",
@@ -45,4 +45,5 @@ results = lapply(probes,function(p){
 })
 names(results) = probes
 # Save
-save(results,file = "./results/aft_results_no_fruc.RData")
+results_fruc_adjusted = results
+save(results_fruc_adjusted,file = "./results/aft_results_fruc_adjusted.RData")
