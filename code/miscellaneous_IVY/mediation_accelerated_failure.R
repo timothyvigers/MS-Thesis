@@ -44,5 +44,4 @@ results = lapply(probes,function(p){
 })
 names(results) = probes
 # Save
-results_fruc_adjusted = results
-save(results_fruc_adjusted,file = "./results/aft_results_fruc_adjusted.RData")
+save(results,file = "./results/aft_results_no_fruc.RData")
