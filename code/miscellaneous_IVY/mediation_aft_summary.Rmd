@@ -1,0 +1,30 @@
+---
+title: "Methylation AFT Models"
+author: "Tim Vigers"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "/Users/timvigers/Dropbox/School/Statistical Genomics/EWAS/results")
+library(broom)
+```
+
+```{r cars}
+# Import
+load("aft_results_no_fruc.RData")
+# See if CI covers 0
+sig = lapply(names(results),function(m){
+    mod = results[[m]]
+    mod = tidy(mod,conf.int = T,conf.method = "perc")
+    if (mod[mod$term == "tnie","conf.low"] <= 0 & mod[mod$term == "tnie","conf.high"] >= 0){
+      return(NA)
+    } else {
+      return(m)
+    }
+  })
+# Remove NAs
+sig = sig[!is.na(sig)]
+# 
+```
