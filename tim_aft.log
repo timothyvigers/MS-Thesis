@@ -6,3 +6,7 @@ During startup - Warning messages:
 5: Setting LC_MONETARY failed, using "C" 
 6: Setting LC_PAPER failed, using "C" 
 7: Setting LC_MEASUREMENT failed, using "C" 
+
+real	6m11.584s
+user	89m13.908s
+sys	3m25.995s
