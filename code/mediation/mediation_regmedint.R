@@ -33,8 +33,7 @@ regmed_boot = function(d,i){
               yreg = "logistic",
               ## Additional specification
               interaction = T,
-              casecontrol = T,
-              na_omit = T)
+              casecontrol = T)
   summary(regmedint_obj)$summary_myreg[,1]
 }
 # Bootstrap options
@@ -50,6 +49,7 @@ methyl_psv_results = apply(all,1,function(r){
   metab = as.numeric(scale(sv[,metab]))
   # Dataframe 
   df = as.data.frame(cbind(methyl,metab,covariates))
+  df = df[complete.cases(df),]
   # Bootstrap
   b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
            ncpus = boot_cores)
@@ -68,6 +68,7 @@ metab_psv_results = apply(all,1,function(r){
   methyl = as.numeric(scale(sv[,methyl]))
   # Dataframe 
   df = as.data.frame(cbind(methyl,metab,age,covariates))
+  df = df[complete.cases(df),]
   # Mediation
   b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
            ncpus = boot_cores)
