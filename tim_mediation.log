@@ -1,7 +1,0 @@
-Error in setwd("~/Dropbox/School/MS Thesis") : 
-  cannot change working directory
-Execution halted
-
-real	0m1.347s
-user	0m1.134s
-sys	0m0.201s
