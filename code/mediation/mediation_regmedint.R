@@ -39,7 +39,7 @@ regmed = function(d){
   m["tnie","p"]
 }
 # Iterate through all - parallel
-cores = 16
+cores = 12
 cl = makeCluster(cores,type = "FORK")
 methyl_psv_pvalues = parApply(cl,all,1,function(r){
   methyl = as.character(r["Var1"])
