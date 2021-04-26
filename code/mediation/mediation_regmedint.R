@@ -1,12 +1,13 @@
 library(regmedint)
-library(boot)
-library(broom)
+library(parallel)
 set.seed(1017)
 # Load data
 setwd("/home/vigerst/MS-Thesis/")
 #setwd("~/Dropbox/School/MS Thesis")
 load("./data/raw_data/probesFromPipeline.Rdata")
 load("./data/raw_data/psv_sv_dataset.Rdata")
+# List pairs
+all = expand.grid(probesFromPipeline,metabolites,stringsAsFactors = F)
 # Outcome and adjustment variables
 ia = as.numeric(factor(psv$IAgroup2)) - 1
 SEX = as.numeric(factor(psv$SEX)) - 1
@@ -14,10 +15,10 @@ dr34 = psv$dr34
 age_delta = as.numeric(sv$clinage) - as.numeric(psv$clinage)
 age = as.numeric(psv$clinage)
 covariates = as.data.frame(cbind(ia,SEX,dr34,age,age_delta))
-# Bootstrap function
-regmed_boot = function(d,i){
+# Mediation function
+regmed = function(d){
   regmedint_obj = 
-    regmedint(data = d[i,],
+    regmedint(data = d,
               ## Variables
               yvar = "ia",
               avar = "methyl",
@@ -34,15 +35,13 @@ regmed_boot = function(d,i){
               ## Additional specification
               interaction = T,
               casecontrol = T)
-  summary(regmedint_obj)$summary_myreg[,1]
+  m = summary(regmedint_obj)$summary_myreg
+  m["tnie","p"]
 }
-# Bootstrap options
-boot_cores = 16
-boots = 10000
-conf.m = "perc"
-# Iterate through all
-all = expand.grid(probesFromPipeline,metabolites,stringsAsFactors = F)
-methyl_psv_results = apply(all,1,function(r){
+# Iterate through all - parallel
+cores = 16
+cl = makeCluster(cores,type = "FORK")
+methyl_psv_pvalues = parApply(cl,all,1,function(r){
   methyl = as.character(r["Var1"])
   methyl = as.numeric(scale(psv[,methyl]))
   metab = as.character(r["Var2"])
@@ -50,18 +49,19 @@ methyl_psv_results = apply(all,1,function(r){
   # Dataframe 
   df = as.data.frame(cbind(methyl,metab,covariates))
   df = df[complete.cases(df),]
-  # Bootstrap
-  b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
-           ncpus = boot_cores)
-  b = tidy(b,conf.int = T,conf.method = conf.m)
-  return(b)
+  # Mediation
+  med = regmed(df)
+  return(med)
 })
-names(methyl_psv_results) = apply(all,1,paste,collapse = " & ")
+methyl_psv_pvalues = as.data.frame(methyl_psv_pvalues)
+rownames(methyl_psv_pvalues) = apply(all,1,paste,collapse = " & ")
 # Save
-save(methyl_psv_results,file = "./data/mediation/methyl_psv_all_results.Rdata")
+save(methyl_psv_pvalues,file = "./data/mediation/methyl_psv_all_pvalues.Rdata")
+stopCluster(cl)
 # Same again for metab at PSV
-# Iterate through all
-metab_psv_results = apply(all,1,function(r){
+# Iterate through all - parallel
+cl = makeCluster(cores,type = "FORK")
+metab_psv_pvalues = apply(all,1,function(r){
   metab = as.character(r["Var2"])
   metab = as.numeric(scale(psv[,metab]))
   methyl = as.character(r["Var1"])
@@ -70,11 +70,11 @@ metab_psv_results = apply(all,1,function(r){
   df = as.data.frame(cbind(methyl,metab,age,covariates))
   df = df[complete.cases(df),]
   # Mediation
-  b = boot(data = df, statistic = regmed_boot, R = boots,parallel = "multicore",
-           ncpus = boot_cores)
-  b = tidy(b,conf.int = T,conf.method = conf.m)
-  return(b)
+  med = regmed(df)
+  return(med)
 })
-names(metab_psv_results) = apply(all,1,paste,collapse = " & ")
+metab_psv_pvalues = as.data.frame(metab_psv_pvalues)
+rownames(metab_psv_pvalues) = apply(all,1,paste,collapse = " & ")
 # Save
-save(metab_psv_results,file = "./data/mediation/metab_psv_all_results.Rdata")
+save(metab_psv_pvalues,file = "./data/mediation/metab_psv_all_pvalues.Rdata")
+stopCluster(cl)
