@@ -3,8 +3,8 @@ library(boot)
 library(broom)
 set.seed(1017)
 # Load data
-#setwd("/home/vigerst/MS-Thesis/")
-setwd("~/Dropbox/School/MS Thesis")
+setwd("/home/vigerst/MS-Thesis/")
+#setwd("~/Dropbox/School/MS Thesis")
 load("./data/raw_data/probesFromPipeline.Rdata")
 load("./data/raw_data/psv_sv_dataset.Rdata")
 # Outcome and adjustment variables
