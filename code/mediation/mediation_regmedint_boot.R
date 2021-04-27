@@ -7,6 +7,10 @@ setwd("/home/vigerst/MS-Thesis/")
 #setwd("~/Dropbox/School/MS Thesis")
 load("./data/raw_data/probesFromPipeline.Rdata")
 load("./data/raw_data/psv_sv_dataset.Rdata")
+load("./data/mediation/methyl_psv_candidates_p_01.Rdata")
+colnames(methyl_psv_candidates) = c("Var1","Var2")
+load("./data/mediation/metab_psv_candidates_p_01.Rdata")
+colnames(metab_psv_candidates) = c("Var1","Var2")
 # Outcome and adjustment variables
 ia = as.numeric(factor(psv$IAgroup2)) - 1
 SEX = as.numeric(factor(psv$SEX)) - 1
@@ -41,8 +45,7 @@ boot_cores = 16
 boots = 10000
 conf.m = "perc"
 # Iterate through all
-all = expand.grid(probesFromPipeline,metabolites,stringsAsFactors = F)
-methyl_psv_results = apply(all,1,function(r){
+methyl_psv_results = apply(methyl_psv_candidates,1,function(r){
   methyl = as.character(r["Var1"])
   methyl = as.numeric(scale(psv[,methyl]))
   metab = as.character(r["Var2"])
@@ -56,12 +59,12 @@ methyl_psv_results = apply(all,1,function(r){
   b = tidy(b,conf.int = T,conf.method = conf.m)
   return(b)
 })
-names(methyl_psv_results) = apply(all,1,paste,collapse = " & ")
+names(methyl_psv_results) = apply(methyl_psv_candidates,1,paste,collapse = " & ")
 # Save
-save(methyl_psv_results,file = "./data/mediation/methyl_psv_all_results.Rdata")
+save(methyl_psv_results,file = "./data/mediation/methyl_psv_results.Rdata")
 # Same again for metab at PSV
 # Iterate through all
-metab_psv_results = apply(all,1,function(r){
+metab_psv_results = apply(metab_psv_candidates,1,function(r){
   metab = as.character(r["Var2"])
   metab = as.numeric(scale(psv[,metab]))
   methyl = as.character(r["Var1"])
@@ -75,6 +78,6 @@ metab_psv_results = apply(all,1,function(r){
   b = tidy(b,conf.int = T,conf.method = conf.m)
   return(b)
 })
-names(metab_psv_results) = apply(all,1,paste,collapse = " & ")
+names(metab_psv_results) = apply(metab_psv_candidates,1,paste,collapse = " & ")
 # Save
-save(metab_psv_results,file = "./data/mediation/metab_psv_all_results.Rdata")
+save(metab_psv_results,file = "./data/mediation/metab_psv_results.Rdata")
