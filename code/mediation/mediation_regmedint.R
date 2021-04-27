@@ -41,7 +41,7 @@ regmed = function(d){
 # Iterate through all - parallel
 cores = 8
 cl = makeCluster(cores,type = "FORK")
-methyl_psv_pvalues = parApply(cl,all,1,function(r){
+methyl_psv_pvalues = parApply(cl,all[1:4,],1,function(r){
   methyl = as.character(r["Var1"])
   methyl = as.numeric(scale(psv[,methyl]))
   metab = as.character(r["Var2"])
@@ -58,6 +58,7 @@ rownames(methyl_psv_pvalues) = apply(all,1,paste,collapse = " & ")
 # Save
 save(methyl_psv_pvalues,file = "./data/mediation/methyl_psv_all_pvalues.Rdata")
 stopCluster(cl)
+rm(methyl_psv_pvalues)
 # Same again for metab at PSV
 # Iterate through all - parallel
 cl = makeCluster(cores,type = "FORK")
