@@ -28,7 +28,8 @@ regmed_boot = function(d,i,probe){
               mreg = "linear",
               yreg = "survAFT_exp",
               ## Additional specification
-              na_omit = T)
+              na_omit = T,
+              interaction = F)
   summary(regmedint_obj)$summary_myreg[,1]
 }
 # Bootstrap options
@@ -44,4 +45,4 @@ results = lapply(probes,function(p){
 })
 names(results) = probes
 # Save
-save(results,file = "./results/aft_results_no_fruc.RData")
+save(results,file = "./results/aft_results_no_fruc_no_int.RData")
