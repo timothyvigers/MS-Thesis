@@ -1,9 +1,0 @@
-Error in serialize(data, node$con, xdr = FALSE) : 
-  error writing to connection
-Calls: parApply ... postNode -> sendData -> sendData.SOCK0node -> serialize
-Execution halted
-
-real	48m13.275s
-user	55m36.993s
-sys	9m39.727s
-slurmstepd: error: Detected 1 oom-kill event(s) in step 229.batch cgroup. Some of your processes may have been killed by the cgroup out-of-memory handler.
