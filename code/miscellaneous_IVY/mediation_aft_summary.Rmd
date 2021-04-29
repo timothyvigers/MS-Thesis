@@ -6,15 +6,21 @@ output: word_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE,results = 'asis')
 knitr::opts_knit$set(root.dir = "/Users/timvigers/Dropbox/School/Statistical Genomics/EWAS/results")
 library(knitr)
 library(broom)
 ```
 
-```{r check results}
+# No interaction term
+
+## Exponential survival model
+
+### Conditional effects evaluated at 1
+
+```{r}
 # Import
-load("aft_results_no_fruc.RData")
+load("aft_results_cond1_exp.RData")
 # See if CI covers 0
 sig = lapply(names(results),function(m){
   mod = results[[m]]
@@ -27,9 +33,88 @@ sig = lapply(names(results),function(m){
 })
 # Remove NAs
 sig = sig[!is.na(sig)]
+# Print
+invisible(lapply((sig), function(m){
+  mod = results[[m]]
+  mod = tidy(mod,conf.int = T,conf.method = "perc")
+  print(kable(mod,caption = m))
+}))
 ```
 
-```{r print,results='asis'}
+\newpage
+
+### Conditional effects evaluated at average values
+
+```{r}
+# Import
+load("aft_results_condmean_exp.RData")
+# See if CI covers 0
+sig = lapply(names(results),function(m){
+  mod = results[[m]]
+  mod = tidy(mod,conf.int = T,conf.method = "perc")
+  if (mod[mod$term == "tnie","conf.low"] <= 0 & mod[mod$term == "tnie","conf.high"] >= 0){
+    return(NA)
+  } else {
+    return(m)
+  }
+})
+# Remove NAs
+sig = sig[!is.na(sig)]
+# Print
+invisible(lapply((sig), function(m){
+  mod = results[[m]]
+  mod = tidy(mod,conf.int = T,conf.method = "perc")
+  print(kable(mod,caption = m))
+}))
+```
+\newpage
+
+## Weibull survival model
+
+### Conditional effects evaluated at 1
+
+```{r}
+# Import
+load("aft_results_cond1_weibull.RData")
+# See if CI covers 0
+sig = lapply(names(results),function(m){
+  mod = results[[m]]
+  mod = tidy(mod,conf.int = T,conf.method = "perc")
+  if (mod[mod$term == "tnie","conf.low"] <= 0 & mod[mod$term == "tnie","conf.high"] >= 0){
+    return(NA)
+  } else {
+    return(m)
+  }
+})
+# Remove NAs
+sig = sig[!is.na(sig)]
+# Print
+invisible(lapply((sig), function(m){
+  mod = results[[m]]
+  mod = tidy(mod,conf.int = T,conf.method = "perc")
+  print(kable(mod,caption = m))
+}))
+```
+
+\newpage
+
+### Conditional effects evaluated at average values
+
+```{r}
+# Import
+load("aft_results_condmean_weibull.RData")
+# See if CI covers 0
+sig = lapply(names(results),function(m){
+  mod = results[[m]]
+  mod = tidy(mod,conf.int = T,conf.method = "perc")
+  if (mod[mod$term == "tnie","conf.low"] <= 0 & mod[mod$term == "tnie","conf.high"] >= 0){
+    return(NA)
+  } else {
+    return(m)
+  }
+})
+# Remove NAs
+sig = sig[!is.na(sig)]
 # Print
 invisible(lapply((sig), function(m){
   mod = results[[m]]
