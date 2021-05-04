@@ -7,7 +7,9 @@ setwd("/home/vigerst/MS-Thesis/")
 load("./data/raw_data/probesFromPipeline.Rdata")
 load("./data/raw_data/psv_sv_dataset.Rdata")
 # List pairs
-all = expand.grid(probesFromPipeline,metabolites,stringsAsFactors = F)
+metabolites = read.csv("./data/metabolomics/liz_candidates.csv",na.strings = "")
+metabolites = as.character(unlist(metabolites))
+all = expand.grid(probesFromPipeline,metabolites[!is.na(metabolites)],stringsAsFactors = F)
 # Outcome and adjustment variables
 ia = as.numeric(factor(psv$IAgroup2)) - 1
 SEX = as.numeric(factor(psv$SEX)) - 1
@@ -35,13 +37,13 @@ regmed = function(d){
               ## Additional specification
               interaction = T,
               casecontrol = T)
-  m = summary(regmedint_obj)$summary_myreg
-  m["tnie","p"]
+  m = as.data.frame(summary(regmedint_obj)$summary_myreg)
+  return(m)
 }
 # Iterate through all - parallel
-cores = 8
+cores = 12
 cl = makeCluster(cores,type = "FORK")
-methyl_psv_pvalues = parApply(cl,all[1:4,],1,function(r){
+methyl_psv_results = parApply(cl,all,1,function(r){
   methyl = as.character(r["Var1"])
   methyl = as.numeric(scale(psv[,methyl]))
   metab = as.character(r["Var2"])
@@ -53,16 +55,15 @@ methyl_psv_pvalues = parApply(cl,all[1:4,],1,function(r){
   med = regmed(df)
   return(med)
 })
-methyl_psv_pvalues = as.data.frame(methyl_psv_pvalues)
-rownames(methyl_psv_pvalues) = apply(all,1,paste,collapse = " & ")
-# Save
-save(methyl_psv_pvalues,file = "./data/mediation/methyl_psv_all_pvalues.Rdata")
 stopCluster(cl)
-rm(methyl_psv_pvalues)
+# Save
+names(methyl_psv_results) = apply(all,1,paste,collapse = " & ")
+save(methyl_psv_results,file = "./data/mediation/methyl_psv_liz_results.Rdata")
+rm(methyl_psv_results)
 # Same again for metab at PSV
 # Iterate through all - parallel
 cl = makeCluster(cores,type = "FORK")
-metab_psv_pvalues = apply(all,1,function(r){
+metab_psv_results = apply(all,1,function(r){
   metab = as.character(r["Var2"])
   metab = as.numeric(scale(psv[,metab]))
   methyl = as.character(r["Var1"])
@@ -74,8 +75,7 @@ metab_psv_pvalues = apply(all,1,function(r){
   med = regmed(df)
   return(med)
 })
-metab_psv_pvalues = as.data.frame(metab_psv_pvalues)
-rownames(metab_psv_pvalues) = apply(all,1,paste,collapse = " & ")
-# Save
-save(metab_psv_pvalues,file = "./data/mediation/metab_psv_all_pvalues.Rdata")
 stopCluster(cl)
+# Save
+names(metab_psv_results) = apply(all,1,paste,collapse = " & ")
+save(metab_psv_results,file = "./data/mediation/metab_psv_liz_results.Rdata")
