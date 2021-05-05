@@ -27,6 +27,8 @@ load("./data/mediation/methyl_psv_candidates_p_01.Rdata")
 load("./data/mediation/metab_psv_candidates_p_01.Rdata")
 load("./data/mediation/methyl_psv_results.Rdata")
 load("./data/mediation/metab_psv_results.Rdata")
+load("./data/mediation/methyl_psv_candidate_pvalues.Rdata")
+load("./data/mediation/metab_psv_candidate_pvalues.Rdata")
 load("./data/raw_data/annotation.850K.Rdata")
 load("./data/raw_data/probesFromPipeline.Rdata")
 anno = as.data.frame(anno)
@@ -252,9 +254,11 @@ kable(bm,row.names = F)
 
 #### Panther
 
-I used the `missMethyl` R package to find Entrez IDs for the significant probes from above. These IDs were then used for gene list overrepresentation analysis. For the background list of all CpG sites tested, I used the list of probes that were selected for mediation testing during the pair selection step.
+I used the `missMethyl` R package to find Entrez IDs for the top 100 probes (based on delta method p values). These IDs were then used for gene list over-representation analysis. For the background list of all CpG sites tested, I used the list of probes that were selected for mediation testing during the pair selection step.
 
 ```{r cache=TRUE}
+methyl = rownames(methyl_psv_pvalues)[order(methyl_psv_pvalues$methyl_psv_pvalues)[1:100]]
+methyl = sapply(strsplit(methyl," & "),"[",1)
 # Write ensembl IDs for significant and background probes
 ids = getMappedEntrezIDs(methyl)$sig.eg
 background = unique(probesFromPipeline)
@@ -269,19 +273,19 @@ write.table(paste0("GeneID:",background),
 
 ```{r results='asis'}
 # Panther
-t = read.delim("./results/panther_probe_background.txt")
+t = read.delim("./results/panther_probe_background_top_100.txt")
 t = t %>% arrange(final_probes_entrez_ids.csv..raw.P.value.)
 kable(head(t,10),caption = "Panther (Probe Background)")
 
-t = read.delim("./results/panther_generic_background.txt")
+t = read.delim("./results/panther_generic_background_top_100.txt")
 t = t %>% arrange(final_probes_entrez_ids.csv..raw.P.value.)
 kable(head(t,10),caption = "Panther (Generic Background)")
 # Reactome
-t = read.delim("./results/reactome_probe_background.txt")
+t = read.delim("./results/reactome_probe_background_top_100.txt")
 t = t %>% arrange(final_probes_entrez_ids.csv..raw.P.value.)
 kable(head(t,10),caption = "Reactome (Probe Background)")
 
-t = read.delim("./results/reactome_generic_background.txt")
+t = read.delim("./results/reactome_generic_background_top_100.txt")
 t = t %>% arrange(final_probes_entrez_ids.csv..raw.P.value.)
 kable(head(t,10),caption = "Reactome (Generic Background)")
 ```
@@ -297,7 +301,7 @@ write.table(genes,file = "~/Dropbox/School/MS Thesis/results/final_entrez_symbol
             row.names = F,col.names = F,sep = ",",quote = F)
 ```
 
-Again, the 9 significant probes were used for Enrichr analysis, the results of which can be found here: <https://maayanlab.cloud/Enrichr/enrich?dataset=1e23019346c30f1b9edbf92e9dce4d64>. The Bioplanet 2019 results here look particularly interesting, but it's tough to say how much to read into them.
+Again, the 9 significant probes were used for Enrichr analysis, the results of which can be found here: <https://maayanlab.cloud/Enrichr/enrich?dataset=3956a9b88bf72fe1b472fdc9186d5da3>.
 
 ### Metabolite at PSV
 
