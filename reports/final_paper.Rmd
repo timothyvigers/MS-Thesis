@@ -16,6 +16,7 @@ library(DiagrammeR)
 library(broom)
 library(data.table)
 library(knitr)
+library(dplyr)
 ```
 
 # Abstract
@@ -83,6 +84,7 @@ Model-based mediation analyses were performed using the regmedint package[@yoshi
 load("./data/mediation/methyl_psv_results.Rdata")
 load("./data/mediation/methyl_psv_candidates_p_01.Rdata")
 load("./data/mediation/metab_psv_candidates_p_01.Rdata")
+load("./data/raw_data/all_metabolite_anno.RData")
 unknowns = read.csv("./data/raw_data/unknown_metabs.csv")
 unknowns = unknowns$metab
 # Results functions
@@ -159,7 +161,7 @@ res = get_results(methyl_psv_no_unknowns)
 kable(res,digits = 3)
 ```
 
-## Table 3: Reactome Pathway Analysis
+## Table 3: Reactome Pathways
 
 ```{r}
 t = read.delim("./results/reactome_probe_background_top_100.txt")
