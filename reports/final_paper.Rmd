@@ -12,6 +12,10 @@ output: word_document
 knitr::opts_chunk$set(echo = FALSE)
 knitr::opts_knit$set(root.dir = "~/Dropbox/School/MS Thesis")
 library(arsenal)
+library(DiagrammeR)
+library(broom)
+library(data.table)
+library(knitr)
 ```
 
 # Abstract
@@ -38,7 +42,9 @@ Environmental factors including viruses, diet, and the metabolome have also been
 
 Although the effects of the metabolome and DNA methylation have been studied separately in T1D, the combined nutri-epigenetics of T1D remain unclear. Early in-vitro studies confirmed metabolome-dependent alterations in DNA methylation associated with various cancers,[@chiacchieraEpigeneticMethylationsTheir2013;@putluriMetabolomicProfilingReveals2011] and even identified oncometabolites associated with the development of glioma.[@wellerIsocitrateDehydrogenaseMutations2011] More recent human studies also support the connection between the metabolome and methylation in breast cancer,[@alakwaaBioinformaticsAnalysisMetabolomics2020] colorectal cancer,[@wangMultiomicProfilingReveals2020] and smoking-related diseases.[@huangUntargetedMetabolomicsReveals2018] A 2018 study by Zaghlool et al. used linear models to link metabolomics and DNA methylation with type 2 diabetes (T2D) and obesity, and Mendelian randomization (MR) analyses suggest "a causal effect of metabolite levels on methylation of obesity-associated CpG sites."[@zaghloolDeepMolecularPhenotypes2018] 
 
-Integration of epigenetic and metabolomics data requires statistical methods capable of evaluating associations between many different variables in complex multilevel networks. Bayesian networks are becoming increasingly popular for analysis of large-scale systems biology ("omics") data, including protein-protein interactions and gene regulatory networks.32 This approach can be used to generate intuitive graphical models, which represent probabilistic dependence between multiple variables32,33 and avoid many of the pitfalls of traditional mediation analyses.34 Also, probabilistic dependence relationships can be interpreted as causal pathways, which clarifies the biological interpretation of results. We hope to derive a graphical model of the relationships between metabolites and methylation sites, to illustrate and make inferences on the epigenetic and environmental pathways that lead to T1D.
+Causal interpretations are of particular interest when integrating epigenetic and metabolomics data. The counterfactual framework for mediation analyses is widely used in statistics and epidemiology because it can allow for causal interpretations of observational data. Also, it provides a relatively intuitive interpretation of mediation effects by quantifying how much an outcome of interest would likely differ given a change in either the exposure or mediator.[@vanderweeleExplanationCausalInference2015] Because mediation is defined based on an assumed causal model and is not defined statistically, it is important that causality assumptions are reasonable.[@fiskeHandbookSocialPsychology2010] It is difficult to evaluate these assumptions across the epigenome due to the lack of literature in this are, so we only considered mediation models in which the exposure variable was measured prior to the mediator (i.e. methylation measure prior to seroconversion and metabolite measured at seroconversion and vice versa). Thus, the exposure and mediator are temporally separated in a way that aids in interpretation of the results and does not violate the assumptions of a mediation analysis. 
+
+We discovered 7 methylation probe-metabolite pairs with significant indirect mediation effects, all of which included methylation measured prior to metabolite. However, because these findings are exploratory, future research aimed at careful investigation of these mediation effects is necessary.
 
 \newpage
 
@@ -62,21 +68,70 @@ Untargeted metabolomics were obtained using gas chromatography-time of flight ma
 
 For GC-TOF data, peak picking and annotation was performed using BinBase.[@skogersonVolatileCompoundBinBase2011] CSH-QTOF MS and HILIC-QTOF MS were processed using MS-Dial[@tsugawaMSDIALDataindependentMS2015] and complex lipids were annotated with LipidBlast[@kindLipidBlastSilicoTandem2013] and Massbank of North America (http://mona.fiehnlab.ucdavis.edu/), and erroneous peaks were removed using MSFLO.[@defeliceMassSpectralFeature2017]
 
-After collection, annotation, and postprocessing, metabolomics data were normalized using SERRF[@fanSystematicErrorRemoval2019],a QC-based method designed to account for batch effects. Samples with low abundance (n = 2) and metabolites with a coefficient of variation more than two absolute deviations from the median (n = 344) were excluded, and data were transformed using the box-cox method.[@boxAnalysisTransformations1964] After processing and quality checks, 2457 untargeted metabolites (including 1905 annotated) remained.[@johnsonMetabolomicsrelatedNutrientPatterns2020]
+After collection, annotation, and postprocessing, metabolomics data were normalized using SERRF[@fanSystematicErrorRemoval2019],a QC-based method designed to account for batch effects. Samples with low abundance (n = 2) and metabolites with a coefficient of variation more than two absolute deviations from the median (n = 344) were excluded, and data were transformed using the box-cox method.[@boxAnalysisTransformations1964] After processing and quality checks, 2457 untargeted metabolites (including 1905 annotated) remained.[@johnsonMetabolomicsrelatedNutrientPatterns2020] Only annotated metabolites were considered for these analyses.
 
 ## Statistical Analysis
 
-All analyses were performed using the R programming environment[@rcoreteamLanguageEnvironmentStatistical2021] and included only participants with methylation and metabolomics data at both their SV and PSV study visits (n = 183). Because regression-based mediation analyses test hypotheses about causal networks, the approach is only valid if the causal assumptions are appropriate.[@fiskeHandbookSocialPsychology2010] As such, we only considered mediation models in which the methylation probe and metabolite were temporally separated. For example, it is more reasonable to assume that a methylation site measured at PSV has a causal relationship with a metabolite measured at the SV visit (or vice versa) than to assume a causal relationship between two variables measured at the same time.
+All analyses were performed using the R programming environment[@rcoreteamLanguageEnvironmentStatistical2021] and included only participants with methylation and metabolomics data at both their SV and PSV study visits (n = 183). To reduce the number of methylation probe-metabolite pairs examined in the mediation analysis, we performed simple linear regression to find probes and metabolites that are correlated at a nominal p < 0.01 level. Next, we performed independent logistic regression on all significantly correlated pairs to determine those that were significantly associated with the IA outcome, again at a nominal 0.01 level. Pairs in which both metabolite and probe were correlated with one another, and both variables were associated with the outcome were selected for the mediation analysis. These p values were not adjusted for multiple comparisons because this was simply a candidate filtering step intended to save computing time later on. 
 
-To reduce the number of methylation probe-metabolite pairs examined in the mediation analysis, we performed simple linear regression to find probes and metabolites that are correlated at a nominal p < 0.01 level. Next, we performed independent logistic regression on all significantly correlated pairs to determine those that were significantly associated with the IA outcome, again at a nominal 0.01 level. Pairs in which both metabolite and probe were correlated with one another, and both variables were associated with the outcome were selected for the mediation analysis. These p values were not adjusted for multiple comparisons because this was simply a candidate filtering step intended to save computing time later on. We selected 1490 pairs with methylation measured at PSV and metabolite measured at SV and 600 pairs with metabolite measured at PSV and methylation measured at SV for further investigation.
-
-Model-based mediation analyses were performed using the regmedint package[@yoshidaRegmedintRegressionbasedCausal2020], an R implementation of Valeri and VanderWeele's SAS macros.[@valeriMediationAnalysisAllowing2013] We report the natural indirect effect (NIE), which can be interpreted as the effect of the exposure on the outcome that operates through changing the mediator.[@vanderweeleExplanationCausalInference2015] All regression models were adjusted for HLA-DR3/4 haplotype, age, time from PSV to SV, and sex. Confidence intervals for the NIE were calculated based on 10,000 bootstrap simulations using the percentile method.
+Model-based mediation analyses were performed using the regmedint package[@yoshidaRegmedintRegressionbasedCausal2020], an R implementation of Valeri and VanderWeele's SAS macros.[@valeriMediationAnalysisAllowing2013] We report the natural indirect effect (NIE), which can be interpreted as the effect of the exposure on the outcome that operates through changing the mediator.[@vanderweeleExplanationCausalInference2015] All regression models were adjusted for HLA-DR3/4 haplotype, age, time from PSV to SV, and sex. Confidence intervals for the NIE were calculated based on 10,000 bootstrap simulations using the percentile method and adjusted using Benjamini and Yekutieli's False Coverage–Statement Rate (FCR) method [@benjaminiFalseDiscoveryRate2005] at the q = 0.05 level (equivalent selection based on an FDR-adjusted p value < 0.05).
 
 # Results
 
+```{r results functions}
+# Results data
+load("./data/mediation/methyl_psv_results.Rdata")
+load("./data/mediation/methyl_psv_candidates_p_01.Rdata")
+load("./data/mediation/metab_psv_candidates_p_01.Rdata")
+unknowns = read.csv("./data/raw_data/unknown_metabs.csv")
+unknowns = unknowns$metab
+# Results functions
+get_results = function(mod_list,q = 0.05,conf.m = "perc"){
+  # Count number of significant parameters (at nominal 95% CI level)
+  sig = lapply(names(mod_list),function(m){
+    mod = mod_list[[m]]
+    mod = tidy(mod,conf.int = T,conf.method = conf.m)
+    if (mod[mod$term == "tnie","conf.low"] <= 0 & mod[mod$term == "tnie","conf.high"] >= 0){
+      return(NA)
+    } else {
+      return(m)
+    }
+  })
+  sig = sig[!is.na(sig)]
+  k = length(sig)
+  m = length(mod_list)
+  BYci = 1-(k*q/m)
+  # Recalculate CIs 
+  r = lapply(sig, function(m){
+    mod = mod_list[[m]]
+    mod = tidy(mod,conf.int = T,conf.level = BYci,conf.method = conf.m)
+    if (mod[mod$term == "tnie","conf.low"] <= 0 & mod[mod$term == "tnie","conf.high"] >= 0){
+      return(NA)
+    } else {
+      return(c(strsplit(m," & ")[[1]],exp(mod[mod$term == "tnie","statistic"]),
+               exp(mod[mod$term == "tnie","conf.low"]),
+               exp(mod[mod$term == "tnie","conf.high"])))
+    }
+  })
+  r = as.data.frame(rbindlist(r[!is.na(r)]))
+  if (nrow(r)>0){
+    colnames(r) = c("Probe","Metabolite","NIE","NIE CI Low","NIE CI High")
+    r = r[order(r$NIE,decreasing = T),]
+    rownames(r) = 1: nrow(r)
+  } else {
+    r = matrix(nrow = 0,ncol = 4)
+    colnames(r) = c("Probe","Metabolite","NIE","NIE CI Low","NIE CI High")
+  }
+  r$Metabolite = metab_anno$name[match(r$Metabolite,metab_anno$feature)]
+  return(r)
+}
+```
+
+A total of 183 participants had both metabolite and methylation data at their PSV and SV study visits. Age, sex, race/ethnicity, DR3/4 status, and first-degree relative (FDR) status were similar between IA cases and controls. Participant characteristics are shown in Table 1.
+
 ## Table 1: Participant Characteristics at PSV
 
-```{r}
+```{r results='asis'}
 demo = read.csv("./data/raw_data/demographics.csv")
 # Pretty factor labels
 demo$IAgroup2 = factor(demo$IAgroup2,levels = c("case","control"),labels = c("Case","Control"))
@@ -90,13 +145,42 @@ t1 = tableby(IAgroup2 ~ clinage+NHW+dr34+SEX+cohortgrp2,
              data = demo)
 new_labels = list(clinage = "Age",NHW = "Non-Hispanic White",dr34 = "DR3/4",
                   SEX = "Sex",cohortgrp2 = "FDR Status")
-summary(t1,labelTranslations = new_labels)
+summary(t1,labelTranslations = new_labels,pfootnote = T)
+```
+
+Our simple linear regression filtering step identified `r nrow(methyl_psv_candidates)` pairs with methylation measured at PSV and metabolite measured at SV, where metabolite and methylation probe were significantly associated with one another and both associated with IA at the p < 0.01 level. We also identified `r nrow(metab_psv_candidates)` pairs with metabolite measured at PSV and methylation measured at SV for mediation analysis. After FCR adjustment, 7 pairs had a confidence interval for the estimate of NIE that did not contain 0. Each pair contained a unique probe, but the metabolite histidine was the mediator in five of the pairs. Our group has previously hypothesized that histidine is associated with the progression from IA to T1D.[@johnsonMetabolomicsrelatedNutrientPatterns2020]
+
+## Table 2: Methylation-Metabolite Pairs With Significant Natural Indirect Effects
+
+```{r results='asis'}
+metab = sapply(strsplit(names(methyl_psv_results)," & "),"[",2)
+methyl_psv_no_unknowns = methyl_psv_results[-which(metab %in% unknowns)]
+res = get_results(methyl_psv_no_unknowns)
+kable(res,digits = 3)
+```
+
+## Table 3: Reactome Pathway Analysis
+
+```{r}
+t = read.delim("./results/reactome_probe_background_top_100.txt")
+t = t %>% arrange(final_probes_entrez_ids.csv..raw.P.value.) %>% 
+  select(Reactome.pathways,background_entrez_ids.csv...REFLIST..16495.,
+         final_probes_entrez_ids.csv..51.,final_probes_entrez_ids.csv..expected.,
+         final_probes_entrez_ids.csv..fold.Enrichment.,final_probes_entrez_ids.csv..raw.P.value.)
+colnames(t) = c("Pathway","Background","Significant","Expected","Fold Enrichment","p value")
+t = t %>% filter(Background >= 5 & Expected >= 2)
+t[,"FDR q value"] = p.adjust(t$`p value`,"fdr")
+kable(t)
 ```
 
 # Discussion
 
 - Limitations:
   - Non-fasting plasma samples for metabolomics, and these analyses did not account for dietary patterns.
+  - Potential bias in our selection process.
+  
+- Future directions
+  - Look at DCMP instead of individual probes
 
 \newpage
 
