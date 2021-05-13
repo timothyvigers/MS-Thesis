@@ -56,7 +56,7 @@ We discovered 7 methylation probe-metabolite pairs with significant indirect med
 
 ## Study Design and Participants
 
-Study participants were recruited via newborn screening at St. Joseph's Hospital in Denver, CO, USA and from unaffected first-degree relatives (FDR) of type 1 diabetes patients. T1D cases were matched to controls by age at SV, race/ethnicity, and sample availability. The majority of participants were Non-Hispanic White (NHW), and race/ethnicity was categorized into NHW and Other for matching and analysis. All DAISY protocols were approved by the Colorado Multiple Institutional Review Board (COMIRB 92-080), and informed consent was obtained from all participants. All research was performed in accordance with relevant guidelines and regulations.[@johnsonLongitudinalDNAMethylation2020] Participants with both methylation and metabolomic measures at the visit at which seroconversion was detected (SV) and the visit immediately prior (pre-seroconversion or PSV) were selected for these analyses. 
+Study participants were recruited via newborn screening at St. Joseph's Hospital in Denver, CO, USA and from unaffected first-degree relatives (FDR) of type 1 diabetes patients. T1D cases were matched to controls by age at SV, race/ethnicity, and sample availability. The majority of participants were Non-Hispanic White (NHW), and race/ethnicity was categorized into NHW and Other for matching and analysis. All DAISY protocols were approved by the Colorado Multiple Institutional Review Board (COMIRB 92-080), and informed consent was obtained from all participants. All research was performed in accordance with relevant guidelines and regulations.[@johnsonLongitudinalDNAMethylation2020] Participants with both methylation and metabolomic measures at the visit at PSV and SV were selected for these analyses.
 
 ## DNA Methylation
 
@@ -68,7 +68,7 @@ Untargeted metabolomics were obtained using gas chromatography-time of flight ma
 
 For GC-TOF data, peak picking and annotation was performed using BinBase.[@skogersonVolatileCompoundBinBase2011] CSH-QTOF MS and HILIC-QTOF MS were processed using MS-Dial[@tsugawaMSDIALDataindependentMS2015] and complex lipids were annotated with LipidBlast[@kindLipidBlastSilicoTandem2013] and Massbank of North America (http://mona.fiehnlab.ucdavis.edu/), and erroneous peaks were removed using MSFLO.[@defeliceMassSpectralFeature2017]
 
-After collection, annotation, and postprocessing, metabolomics data were normalized using SERRF[@fanSystematicErrorRemoval2019],a QC-based method designed to account for batch effects. Samples with low abundance (n = 2) and metabolites with a coefficient of variation more than two absolute deviations from the median (n = 344) were excluded, and data were transformed using the box-cox method.[@boxAnalysisTransformations1964] After processing and quality checks, 2457 untargeted metabolites remained.[@johnsonMetabolomicsrelatedNutrientPatterns2020] Of these, only the 1,905 annotated metabolites were considered for these analyses.
+After collection, annotation, and post-processing, metabolomics data were normalized using SERRF[@fanSystematicErrorRemoval2019],a QC-based method designed to account for batch effects. Samples with low abundance (n = 2) and metabolites with a coefficient of variation more than two absolute deviations from the median (n = 344) were excluded, and data were transformed using the box-cox method.[@boxAnalysisTransformations1964] After processing and quality checks, 2457 untargeted metabolites remained.[@johnsonMetabolomicsrelatedNutrientPatterns2020] Of these, only the 1,905 annotated metabolites were considered for these analyses.
 
 ## Statistical Analysis
 
@@ -111,7 +111,7 @@ birth -> first -> second -> t1d;
 birth -> age9 -> age15 -> age24 -> annual;
 {rank=same; second -> sv}
 }")
-med = grViz("
+med1 = grViz("
   graph{
   node [shape = box,fontname = Helvetica]
   a[label= 'Metabolite at SV']
@@ -122,9 +122,20 @@ med = grViz("
   {rank = same;b -- c [label = 'p< 0.01',fontsize = 9]}
   }
 ")
+med2 = grViz("
+  graph{
+  node [shape = box,fontname = Helvetica]
+  a[label= 'Methylation at SV']
+  b[label= 'Metabolite at PSV']
+  c[label= 'IA']
+  a -- b [label = 'p < 0.01',fontsize = 9]
+  a -- c [label = 'p< 0.01',fontsize = 9]
+  {rank = same;b -- c [label = 'p< 0.01',fontsize = 9]}
+  }
+")
 ```
 
-![Study Design](/Users/timvigers/Dropbox/School/MS Thesis/images/flow.png) ![Candidate Selection Criteria](/Users/timvigers/Dropbox/School/MS Thesis/images/med.png)
+![Study Design](/Users/timvigers/Dropbox/School/MS Thesis/images/flow.png) ![Candidate Selection Criteria](/Users/timvigers/Dropbox/School/MS Thesis/images/med1.png) ![](/Users/timvigers/Dropbox/School/MS Thesis/images/med1.png)
 
 # Results
 
@@ -176,6 +187,7 @@ get_results = function(mod_list,q = 0.05,conf.m = "perc"){
     colnames(r) = c("Probe","Metabolite","NIE","NIE CI Low","NIE CI High")
   }
   r$Metabolite = metab_anno$name[match(r$Metabolite,metab_anno$feature)]
+  r = r %>% select(Metabolite,everything())
   return(r)
 }
 # Annotation - requires output from get_results() and anno dataframe
@@ -183,11 +195,12 @@ annotate_results = function(r){
   methyl = r$Probe
   met = anno[anno$Name %in% methyl,c("chr","pos","Name","Relation_to_Island","UCSC_RefGene_Name")] %>%
     arrange(as.numeric(sub("chr","",chr)),pos)
+  met = met %>% rename(Probe = "Name")
   return(met)
 }
 ```
 
-A total of 183 participants had both metabolite and methylation data at their PSV and SV study visits. Age, sex, race/ethnicity, DR3/4 status, and first-degree relative (FDR) status were similar between IA cases and controls. Participant characteristics are shown in Table 1.
+A total of 183 participants had both metabolite and methylation data at their PSV and SV study visits. articipant characteristics are shown in Table 1, and there were no statistically significant differences between IA cases and controls with respect to age, sex, race/ethnicity, DR3/4 status, and first-degree relative (FDR) status.
 
 ## Table 1: Participant Characteristics at PSV
 
@@ -210,14 +223,30 @@ summary(t1,labelTranslations = new_labels,pfootnote = T)
 
 \newpage
 
-Our simple linear regression filtering step identified `r nrow(methyl_psv_candidates)` pairs with methylation measured at PSV and metabolite measured at SV, where metabolite and methylation probe were significantly associated with one another and both associated with IA at the p < 0.01 level. We also identified `r nrow(metab_psv_candidates)` pairs with metabolite measured at PSV and methylation measured at SV for mediation analysis. After FCR adjustment, 7 pairs had a confidence interval for the estimate of NIE that did not contain 0 (Table 2). Each pair contained a unique probe, but the metabolite histidine was the mediator in five of the pairs. No pairs in which metabolite was measured at PSV and methylation was measured at SV were significant after FCR adjustment.
+Out of a total 379,557,915 possible pairs, our simple linear regression filtering step identified `r nrow(methyl_psv_candidates)` with methylation measured at PSV and metabolite measured at SV, where metabolite and methylation probe were significantly associated with one another and both associated with IA at the p < 0.01 level. We also identified `r nrow(metab_psv_candidates)` pairs with metabolite measured at PSV and methylation measured at SV for mediation analysis. After FCR adjustment, 7 pairs had a confidence interval for the estimate of NIE that did not contain 0 (Table 2). Each pair contained a unique probe, but the metabolite histidine was the mediator in five of the pairs. No pairs in which metabolite was measured at PSV and methylation was measured at SV were significant after FCR adjustment.
 
 ## Table 2: Methylation-Metabolite Pairs With Significant Natural Indirect Effects
 
 ```{r results='asis'}
+# Mediation results
 metab = sapply(strsplit(names(methyl_psv_results)," & "),"[",2)
 methyl_psv_no_unknowns = methyl_psv_results[-which(metab %in% unknowns)]
 res = get_results(methyl_psv_no_unknowns)
+# Annotation
+met = annotate_results(res)
+gene_cards = lapply(met$UCSC_RefGene_Name[which(met$UCSC_RefGene_Name != "")], function(g){
+  genecard_description_summary[grep(g,genecard_description_summary$gene),]
+})
+gene_cards = do.call(rbind,gene_cards)
+gene_cards$gene = as.character(gsub('\\"',"",gene_cards$gene))
+gene_cards = gene_cards %>% select(gene,type,description,summary_genecard) %>%
+  rename(UCSC_RefGene_Name = "gene",Type = "type",Description = "description",Summary = "summary_genecard")
+gene_cards$UCSC_RefGene_Name = sub("-.*","",gene_cards$UCSC_RefGene_Name)
+# Combine and format
+res = left_join(res,met,by = "Probe")
+res = full_join(res,gene_cards,by = "UCSC_RefGene_Name")
+res = res %>% select()
+# Print
 kable(res,digits = 3)
 ```
 
@@ -251,22 +280,6 @@ kable(head(bioplanet,10))
 ```
 
 \newpage
-
-However, none of the probes were found to have clinical significance.
-
-## Table 5: GeneCard Annotation
-
-```{r}
-met = annotate_results(res)
-gene_cards = lapply(met$UCSC_RefGene_Name[which(met$UCSC_RefGene_Name != "")], function(g){
-  genecard_description_summary[grep(g,genecard_description_summary$gene),]
-})
-gene_cards = do.call(rbind,gene_cards)
-gene_cards$gene = as.character(gsub('\\"',"",gene_cards$gene))
-gene_cards = gene_cards %>% select(gene,type,description,summary_genecard) %>%
-  rename(Gene = "gene",Type = "type",Description = "description",Summary = "summary_genecard")
-kable(list(met,gene_cards))
-```
 
 # Discussion
 
