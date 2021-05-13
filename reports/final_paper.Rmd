@@ -18,6 +18,8 @@ library(broom)
 library(data.table)
 library(knitr)
 library(dplyr)
+library(tidyr)
+options(knitr.kable.NA = '')
 ```
 
 # Abstract
@@ -137,6 +139,8 @@ med2 = grViz("
 
 ![Study Design](/Users/timvigers/Dropbox/School/MS Thesis/images/flow.png) ![Candidate Selection Criteria](/Users/timvigers/Dropbox/School/MS Thesis/images/med1.png) ![](/Users/timvigers/Dropbox/School/MS Thesis/images/med1.png)
 
+\newpage
+
 # Results
 
 ```{r results functions}
@@ -245,14 +249,18 @@ gene_cards$UCSC_RefGene_Name = sub("-.*","",gene_cards$UCSC_RefGene_Name)
 # Combine and format
 res = left_join(res,met,by = "Probe")
 res = full_join(res,gene_cards,by = "UCSC_RefGene_Name")
-res = res %>% select()
+res = res %>% 
+  select(Metabolite,Probe,chr,pos,Relation_to_Island,UCSC_RefGene_Name,
+         Type,Description,NIE,`NIE CI Low`,`NIE CI High`) %>% 
+  arrange(as.numeric(sub("chr","",chr))) %>% unite(Position,chr,pos,sep = ":") %>% 
+  rename(Gene = "UCSC_RefGene_Name",`Relation to Island` = "Relation_to_Island")
 # Print
 kable(res,digits = 3)
 ```
 
 \newpage
 
-No pathways were significantly over-represented at the 0.05 level after false discovery rate p value adjustment. However, 6 pathways were tied for the smallest q value of 0.071 (Table 3).
+Six pathways were enriched (FDR q-value < 0.10) (Table 3).
 
 ## Table 3: Reactome Pathways
 
@@ -270,7 +278,7 @@ kable(t[t$`FDR q value` < 0.1,],digits = 3)
 
 \newpage
 
-None of the pathways were significant after p value adjustment. However, several immune system-related pathways were significant at an unadjusted p < 0.05 level, including interleukin signaling and eosinophil response to allergy. Cytochrome P450 metabolism of vitamins was also nominally significant.
+None of the Biopathways were significant after p value adjustment. However, several immune system-related pathways were significant at an unadjusted p < 0.05 level, including interleukin signaling and eosinophil response to allergy. Cytochrome P450 metabolism of vitamins was also nominally significant.
 
 ## Table 4: Bioplanet Enrichment (Top Ten)
 
@@ -283,9 +291,21 @@ kable(head(bioplanet,10))
 
 # Discussion
 
-Our group has previously hypothesized that histidine is associated with the progression from IA to T1D.[@johnsonMetabolomicsrelatedNutrientPatterns2020]
+We found seven unique pairs of DNAm probes and metabolites with significant natural indirect mediation effects. The natural indirect effect is interpreted on the odds scale, and represents the average change in outcome if the exposure $a$ (methylation at PSV) was fixed at 1, but the mediator $t$ (metabolite at SV) were changed from the level it would take if $a^*=0$ to the level it would take if $a=1$."[@vanderweeleExplanationCausalInference2015] In other words, it is the effect of the exposure on the outcome that operates through changing the mediator. Because the NIE estimate for all seven pairs were less than 1, the NIE can be interpreted as the average reduction in the effect of the exposure that is a results of the metabolite.
 
-What is NIE and what do the estimates mean?
+- Histidine:
+   - Histidine-rich loop in ZnT8 antibody [@lampasonaIsletAutoantibodies2016]
+   - Histidylphenylalanine, higher in T1D than T2D and higher in CKD progressors among T1D, is a competitive inhibitor of histidine decarboxylase, the enzyme responsible for histamine formation.[@mancaDifferentialMetabolomicSignatures2020]
+   - Our group has previously found nominal histidine is associated with the progression from IA to T1D.[@johnsonMetabolomicsrelatedNutrientPatterns2020]
+   - "A particularly strong class II contributor to T1D in humans is the DQ8 variant characterized by histidine and serine, rather than the more common proline and aspartic acid residues at positions 56 and 57 of the chain".
+   - "The pathways that are corrected by good glycemic control include nucleotide metabolism, lysine, histidine-glutamate-glutamine, propionate, urea cycle, cortisol, and aldosterone metabolism." [@duttaImpactLongTermPoor2016]
+   - "There are 9 pathways related with T1D including histidine metabolism, glutathione metabolism, other glycan degradation, spliceosome, endocytosis, TGF-beta signaling pathway, insulin signaling pathway, GnRH signaling pathway and Vibrio cholerae infection" [@luanSharedSpecificMechanism2017]
+   - " Histamine-Deficient Mice Are Partially Protected against Type-1 Diabetes" [@]
+
+
+Why is there a negative indirect effect when histidine is positively associated with T1D? Is it because all of the probes are protective?
+
+
 
 
 - Limitations:
