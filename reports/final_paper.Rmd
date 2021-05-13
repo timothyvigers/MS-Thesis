@@ -38,13 +38,15 @@ Type 1 diabetes (T1D) is an autoimmune disease characterized by the production o
 
 Genetic predisposition accounts for some of the etiology of T1D (sibling relative risk has been estimated at 15)[@polychronakosUnderstandingTypeDiabetes2011] and explains some geographic variation in incidence.[@tuomilehtoEmergingGlobalEpidemic2013] Human leukocyte antigen (HLA) genes were the first to be linked to T1D and account for much of the genetic predisposition to the disease, but genome-wide association studies (GWAS) have also identified more than 40 other loci associated with increased relative risk of T1D. However, it is still unclear how these multiple loci interact with one another and the environment to produce a T1D diagnosis. In addition to the complex genetics of T1D, low monozygotic (MZ) twin concordance (approximately 50%) and studies of migrant populations support the theory that non-genetic factors play an important role in T1D development.[@rakyanIdentificationTypeDiabetes2011] 
 
-Epigenetic differences may be important contributors to non-genetic T1D etiology. Changes in methylation have been associated with other autoimmune conditions, and monozygotic twins can be epigenetically heterogeneous despite sharing identical genetic code.[@rakyanIdentificationTypeDiabetes2011]  Rakyan et al. and Stefan et al. performed epigenome-wide association studies (EWAS) in discordant and concordant twin pairs and found that methylation profiles were more similar among participants with T1D than to unaffected twins. Epigenetics profiles were also combined with GWAS data and differentially expressed methylation sites were mapped to 6 well known T1D susceptibility genes, including two major histocompatibility complex (MHC) genes and several HLA loci.[@stefanDNAMethylationProfiles2014;@rakyanIdentificationTypeDiabetes2011] Finally, the Norris group has found that T1D cases had different longitudinal methylation patterns compared to controls prior to diagnosis.[@johnsonLongitudinalDNAMethylation2020] 
+Epigenetic differences may be important contributors to T1D etiology. Changes in methylation have been associated with other autoimmune conditions, and monozygotic twins can be epigenetically heterogeneous despite sharing identical genetic code.[@rakyanIdentificationTypeDiabetes2011]  Rakyan et al. and Stefan et al. performed epigenome-wide association studies (EWAS) in discordant and concordant twin pairs and found that methylation profiles were more similar among participants with T1D than to unaffected twins. Epigenetics profiles were also combined with GWAS data and differentially expressed methylation sites were mapped to 6 well known T1D susceptibility genes, including two major histocompatibility complex (MHC) genes and several HLA loci.[@stefanDNAMethylationProfiles2014;@rakyanIdentificationTypeDiabetes2011] Finally, the Norris group has found that T1D cases had different longitudinal methylation patterns compared to controls prior to diagnosis.[@johnsonLongitudinalDNAMethylation2020] 
 
-Environmental factors including viruses, diet, and the metabolome have also been linked with islet autoimmunity[@oresicDysregulationLipidAmino2008] and T1D etiology.[@atkinsonTypeDiabetes2014] Previous studies have found associations between T1D and differentially expressed phospholipids and sphingolipids, excretion of modified amino acids, and vitamin D (and related compounds on its metabolic pathway).[@frohnertMetabolomicsChildhoodDiabetes2016;@atkinsonTypeDiabetes2014] Branched chain amino acids (BCAAs) have also been associated with insulin resistance.[@guasch-ferreMetabolomicsPrediabetesDiabetes2016]
+Environmental factors including viruses, diet, and the metabolome have also been linked with islet autoimmunity (IA)[@oresicDysregulationLipidAmino2008] and T1D etiology.[@atkinsonTypeDiabetes2014] Previous studies have found associations between T1D and differentially expressed phospholipids and sphingolipids, excretion of modified amino acids, and vitamin D (and related compounds on its metabolic pathway).[@frohnertMetabolomicsChildhoodDiabetes2016;@atkinsonTypeDiabetes2014] Branched chain amino acids (BCAAs) have also been associated with insulin resistance.[@guasch-ferreMetabolomicsPrediabetesDiabetes2016]
 
-Although the effects of the metabolome and DNA methylation have been studied separately in T1D, the combined nutri-epigenetics of T1D remain unclear. Early in-vitro studies confirmed metabolome-dependent alterations in DNA methylation associated with various cancers,[@chiacchieraEpigeneticMethylationsTheir2013;@putluriMetabolomicProfilingReveals2011] and even identified oncometabolites associated with the development of glioma.[@wellerIsocitrateDehydrogenaseMutations2011] More recent human studies also support the connection between the metabolome and methylation in breast cancer,[@alakwaaBioinformaticsAnalysisMetabolomics2020] colorectal cancer,[@wangMultiomicProfilingReveals2020] and smoking-related diseases.[@huangUntargetedMetabolomicsReveals2018] A 2018 study by Zaghlool et al. used linear models to link metabolomics and DNA methylation with type 2 diabetes (T2D) and obesity, and Mendelian randomization (MR) analyses suggest "a causal effect of metabolite levels on methylation of obesity-associated CpG sites."[@zaghloolDeepMolecularPhenotypes2018] 
+Although the effects of the metabolome and DNA methylation have been studied separately in T1D, the combined nutri-epigenetics of T1D remain unclear. Early in-vitro studies confirmed metabolome-dependent alterations in DNA methylation associated with various cancers,[@chiacchieraEpigeneticMethylationsTheir2013;@putluriMetabolomicProfilingReveals2011] and even identified oncometabolites associated with the development of glioma.[@wellerIsocitrateDehydrogenaseMutations2011] More recent human studies also support the connection between the metabolome and methylation in breast cancer,[@alakwaaBioinformaticsAnalysisMetabolomics2020] colorectal cancer,[@wangMultiomicProfilingReveals2020] and smoking-related diseases.[@huangUntargetedMetabolomicsReveals2018] A 2018 study by Zaghlool et al. used linear models to link metabolomics and DNA methylation with type 2 diabetes (T2D) and obesity, and used Mendelian randomization (MR) to provide evidence for "a causal effect of metabolite levels on methylation of obesity-associated CpG sites."[@zaghloolDeepMolecularPhenotypes2018] 
 
-Causal interpretations are of particular interest when integrating epigenetic and metabolomics data. The counterfactual framework for mediation analyses is widely used in statistics and epidemiology because it can allow for causal interpretations of observational data. Also, it provides a relatively intuitive interpretation of mediation effects by quantifying how much an outcome of interest would likely differ given a change in either the exposure or mediator.[@vanderweeleExplanationCausalInference2015] Because mediation is defined based on an assumed causal model and is not defined statistically, it is important that causality assumptions are reasonable.[@fiskeHandbookSocialPsychology2010] It is difficult to evaluate these assumptions across the epigenome due to the lack of literature in this are, so we only considered mediation models in which the exposure variable was measured prior to the mediator (i.e. methylation measure prior to seroconversion and metabolite measured at seroconversion and vice versa). Thus, the exposure and mediator are temporally separated in a way that aids in interpretation of the results and does not violate the assumptions of a mediation analysis. 
+Causal interpretations are of particular interest when integrating epigenetic and metabolomics data. The counterfactual framework for mediation analyses is widely used in statistics and epidemiology because it can allow for causal interpretations of observational data. Also, it provides a relatively intuitive interpretation of mediation effects by quantifying how much an outcome of interest would likely differ given a change in either the exposure or mediator.[@vanderweeleExplanationCausalInference2015] Because mediation is defined based on an assumed causal model and is not defined statistically, it is important that causality assumptions are reasonable.[@fiskeHandbookSocialPsychology2010] It is difficult to evaluate causal assumptions across the epigenome due to the lack of literature in this area, but longitudinal study designs allow for mediation models in which the exposure variable was measured prior to the mediator (i.e. methylation measure prior to seroconversion [PSV] and metabolite measured at seroconversion [SV] and vice versa).
+
+The Diabetes Autoimmunity Study in the Young (DAISY) cohort follows 2547 high-risk children in Colorado for the development of IA and T1D. The study follows participants prospectively and includes blood sample collection at 9, 15, and 24 months, then annual collection until islet autoimmunity (IA) is detected. IA is defined as the second consecutive visit at which a confirmed auto-antibody to insulin, GAD65, IA-2, or ZnT8 was detected.[@johnsonMetaboliterelatedDietaryPatterns2019] Participants who develop IA are asked to follow an accelerated protocol with visits and blood sample collection every 3-6 months, until they are diagnosed with diabetes by a physician. Thus, DAISY's study design allows us to include exposure and mediator variables that are temporally separated in our mediation models, which aids in interpretation of the results and in theory does not violate the assumptions of a mediation analysis. 
 
 We discovered 7 methylation probe-metabolite pairs with significant indirect mediation effects, all of which included methylation measured prior to metabolite. However, because these findings are exploratory, future research aimed at careful investigation of these mediation effects is necessary.
 
@@ -54,15 +56,11 @@ We discovered 7 methylation probe-metabolite pairs with significant indirect med
 
 ## Study Design and Participants
 
-The Diabetes Autoimmunity Study in the Young (DAISY) cohort follows 2547 high-risk children in Colorado for the development of IA and T1D. Study participants were recruited via newborn screening at St. Joseph's Hospital in Denver, CO, USA and from unaffected first-degree relatives (FDR) of type 1 diabetes patients. The study follows participants prospectively and includes blood sample collection at 9, 15, and 24 months, then annual collection until islet autoimmunity (IA) is detected. IA is defined as the second consecutive visit at which a confirmed auto-antibody to insulin, GAD65, IA-2, or ZnT8 was detected.2 Participants who develop IA are asked to follow an accelerated protocol with visits and blood sample collection every 3-6 months, until they are diagnosed with diabetes by a physician. T1D cases were matched to controls by age at SV, race/ethnicity, and sample availability. The majority of participants were Non-Hispanic White (NHW), and race/ethnicity was categorized into NHW and Other for matching and analysis. All DAISY protocols were approved by the Colorado Multiple Institutional Review Board (COMIRB 92-080), and informed consent was obtained from all participants. All research was performed in accordance with relevant guidelines and regulations.[@johnsonLongitudinalDNAMethylation2020]
-
-Participants with both methylation and metabolomic measures at the visit at which seroconversion was detected (SV) and the visit immediately prior (pre-seroconversion or PSV) were selected for these analyses. 
+Study participants were recruited via newborn screening at St. Joseph's Hospital in Denver, CO, USA and from unaffected first-degree relatives (FDR) of type 1 diabetes patients. T1D cases were matched to controls by age at SV, race/ethnicity, and sample availability. The majority of participants were Non-Hispanic White (NHW), and race/ethnicity was categorized into NHW and Other for matching and analysis. All DAISY protocols were approved by the Colorado Multiple Institutional Review Board (COMIRB 92-080), and informed consent was obtained from all participants. All research was performed in accordance with relevant guidelines and regulations.[@johnsonLongitudinalDNAMethylation2020] Participants with both methylation and metabolomic measures at the visit at which seroconversion was detected (SV) and the visit immediately prior (pre-seroconversion or PSV) were selected for these analyses. 
 
 ## DNA Methylation
 
-T1D cases and matched controls were randomly assigned to either the 450 K group (which included duplicate samples for quality control) or EPIC group (which included replicates from the 450 K set for quality control). DNA methylation was profiled in peripheral whole blood using the Infinium HumanMethylation450K Beadchip (Illumina, San Diego, CA, USA, "450 K") for the 450 K set, and the Infinium HumanMethylation EPIC Beadchip ("EPIC") was used for the EPIC set. Both sets underwent identical pre-processing using the SeSAMe pipeline[@zhouSeSAMeReducingArtifactual2018], and measurement platform was included as a covariate in all statistical models in order to account for technological batch effects.
-
-The SeSAMe pipeline was implemented using the sesame package (v1.0.0) in R (v3.5.2), and consists of Noob normalization[@tricheLowlevelProcessingIllumina2013] , non-linear dye bias correction, and pOOBAH to help identify failed hybridization. Next, arrays with high proportion of failed probes (100,000 failed probes for 450 K and 200,000 failed probes for EPIC) were removed (450 K = 6, EPIC = 2), along with arrays with discordant predicted sex and clinically recorded sex (450 K = 5, EPIC = 2) Probes missing in at least 1 sample were also removed from subsequent analyses (450 K = 109,956, EPIC = 202,222). ComBat[@leekSvaPackageRemoving2012] was used to remove batch effects using plate and row to delineate batch. Normalized M values were used in all statistical analyses.
+T1D cases and matched controls were randomly assigned to either the 450 K group (which included duplicate samples for quality control) or EPIC group (which included replicates from the 450 K set for quality control). DNA methylation was profiled in peripheral whole blood using the Infinium HumanMethylation450K Beadchip (Illumina, San Diego, CA, USA, "450 K") for the 450 K set, and the Infinium HumanMethylation EPIC Beadchip ("EPIC") was used for the EPIC set. Both sets underwent identical pre-processing using the SeSAMe pipeline[@zhouSeSAMeReducingArtifactual2018], and measurement platform was included as a covariate in all statistical models in order to account for technological batch effects. Johnson and colleagues performed quality control and removed poor quality samples and DNAm probes.  For details see Johnson et al.[@johnsonLongitudinalDNAMethylation2020]  This resulted in 199,243 quality DNA methylation probes and  183 subjects having DNAm at both PSV and SV timepoints. Normalized M values were used in all statistical analyses.
 
 ## Metabolomics
 
@@ -70,15 +68,63 @@ Untargeted metabolomics were obtained using gas chromatography-time of flight ma
 
 For GC-TOF data, peak picking and annotation was performed using BinBase.[@skogersonVolatileCompoundBinBase2011] CSH-QTOF MS and HILIC-QTOF MS were processed using MS-Dial[@tsugawaMSDIALDataindependentMS2015] and complex lipids were annotated with LipidBlast[@kindLipidBlastSilicoTandem2013] and Massbank of North America (http://mona.fiehnlab.ucdavis.edu/), and erroneous peaks were removed using MSFLO.[@defeliceMassSpectralFeature2017]
 
-After collection, annotation, and postprocessing, metabolomics data were normalized using SERRF[@fanSystematicErrorRemoval2019],a QC-based method designed to account for batch effects. Samples with low abundance (n = 2) and metabolites with a coefficient of variation more than two absolute deviations from the median (n = 344) were excluded, and data were transformed using the box-cox method.[@boxAnalysisTransformations1964] After processing and quality checks, 2457 untargeted metabolites (including 1905 annotated) remained.[@johnsonMetabolomicsrelatedNutrientPatterns2020] Only annotated metabolites were considered for these analyses.
+After collection, annotation, and postprocessing, metabolomics data were normalized using SERRF[@fanSystematicErrorRemoval2019],a QC-based method designed to account for batch effects. Samples with low abundance (n = 2) and metabolites with a coefficient of variation more than two absolute deviations from the median (n = 344) were excluded, and data were transformed using the box-cox method.[@boxAnalysisTransformations1964] After processing and quality checks, 2457 untargeted metabolites remained.[@johnsonMetabolomicsrelatedNutrientPatterns2020] Of these, only the 1,905 annotated metabolites were considered for these analyses.
 
 ## Statistical Analysis
 
 All analyses were performed using the R programming environment[@rcoreteamLanguageEnvironmentStatistical2021] and included only participants with methylation and metabolomics data at both their SV and PSV study visits (n = 183). To reduce the number of methylation probe-metabolite pairs examined in the mediation analysis, we performed simple linear regression to find probes and metabolites that are correlated at a nominal p < 0.01 level. Next, we performed independent logistic regression on all significantly correlated pairs to determine those that were significantly associated with the IA outcome, again at a nominal 0.01 level. Pairs in which both metabolite and probe were correlated with one another, and both variables were associated with the outcome were selected for the mediation analysis. These p values were not adjusted for multiple comparisons because this was simply a candidate filtering step intended to save computing time later on. 
 
-Model-based mediation analyses were performed using the regmedint package[@yoshidaRegmedintRegressionbasedCausal2020], an R implementation of Valeri and VanderWeele's SAS macros.[@valeriMediationAnalysisAllowing2013] We report the natural indirect effect (NIE), which can be interpreted as the effect of the exposure on the outcome that operates through changing the mediator.[@vanderweeleExplanationCausalInference2015] All regression models were adjusted for HLA-DR3/4 haplotype, age, time from PSV to SV, and sex. Confidence intervals for the NIE were calculated based on 10,000 bootstrap simulations using the percentile method and adjusted using Benjamini and Yekutieli's False Coverage–Statement Rate (FCR) method [@benjaminiFalseDiscoveryRate2005] at the q = 0.05 level (equivalent selection based on a false discovery rate-adjusted p value < 0.05).
+Model-based mediation analyses were performed using the regmedint package[@yoshidaRegmedintRegressionbasedCausal2020], an R implementation of Valeri and VanderWeele's SAS macros.[@valeriMediationAnalysisAllowing2013] We report the natural indirect effect (NIE), which can be interpreted as the effect of the exposure on the outcome that operates through changing the mediator.[@vanderweeleExplanationCausalInference2015] All regression models were adjusted for HLA-DR3/4 haplotype, age at PSV, time from PSV to SV, and sex. Confidence intervals for the NIE were calculated based on 10,000 bootstrap simulations using the percentile method and adjusted using Benjamini and Yekutieli's False Coverage–Statement Rate (FCR) method [@benjaminiFalseDiscoveryRate2005] at the q = 0.05 level (equivalent selection based on a false discovery rate-adjusted p value < 0.05).
+
+##  Biological Interpretation
+
+Pathway over-representation was examined the top 100 probes measured at PSV (based on p values for NIE) using PANTHER's[@miPANTHERVersion162021] implementation of Reactome pathways[@fabregatReactomePathwayKnowledgebase2018]. These p values were based on standard error of NIE estimated using the multivariate delta method.[@vanderweeleExplanationCausalInference2015] CpG sites were converted to Entrez IDs using the missMethyl R package[@phipsonMissMethylPackageAnalyzing2016a] and the 199,243 original probes were used as the reference list. Pathways with less than 5 genes in the reference list and less than two genes in analysis list were excluded.
+
+Pathway enrichment analysis was performed using the Enrichr (https://maayanlab.cloud/Enrichr/)[@xieGeneSetKnowledge2021] Biopathways 2019 module[@huangNCATSBioPlanetIntegrated2019], again with the top 100 candidate probes. 
+
+We also searched for known genotypes at certain loci with allele-specific methylation using the BIOS QTL browser (https://genenetwork.nl/biosqtlbrowser/)[@bonderDiseaseVariantsAlter2017]. These methylation quantitative trait loci (meQTLs) can alter methylation patterns across genomic regions.[@smithMethylationQuantitativeTrait2014]  We then used the biomaRt R package[@durinckMappingIdentifiersIntegration2009] to obtain UCSC gene names, which were annotated using GeneCards[@stelzerGeneCardsSuiteGene2016] via the GeneBook R package[@xuGeneBookMultitypesGene2019].
 
 \newpage
+
+## Figure 1: Study Design and Candidate Selection
+
+```{r fig.height=8,fig.width=8,eval=FALSE,include=FALSE}
+flow = grViz("digraph {
+
+graph [layout = dot, rankdir = LR]
+
+node [shape = rectangle]
+
+birth [label = 'Birth']
+first [label = 'First Abx+ \n Visit']
+second [label = 'Second Abx+ \n Visit (IA)']
+sv [label = 'SV']
+t1d [label = 'T1D']
+
+age9 [label =  '9 Month Visit']
+age15 [label =  '15 Month Visit']
+age24 [label =  '24 Month Visit']
+annual [label =  'Annual Visits']
+
+# edge definitions with the node IDs
+birth -> first -> second -> t1d;
+birth -> age9 -> age15 -> age24 -> annual;
+{rank=same; second -> sv}
+}")
+med = grViz("
+  graph{
+  node [shape = box,fontname = Helvetica]
+  a[label= 'Metabolite at SV']
+  b[label= 'Methylation at PSV']
+  c[label= 'IA']
+  a -- b [label = 'p < 0.01',fontsize = 9]
+  a -- c [label = 'p< 0.01',fontsize = 9]
+  {rank = same;b -- c [label = 'p< 0.01',fontsize = 9]}
+  }
+")
+```
+
+![Study Design](/Users/timvigers/Dropbox/School/MS Thesis/images/flow.png) ![Candidate Selection Criteria](/Users/timvigers/Dropbox/School/MS Thesis/images/med.png)
 
 # Results
 
@@ -177,7 +223,7 @@ kable(res,digits = 3)
 
 \newpage
 
-Pathway over-representation was examined the top 100 probes measured at PSV (based on p values for NIE) using PANTHER's[@miPANTHERVersion162021] implementation of Reactome pathways[@fabregatReactomePathwayKnowledgebase2018]. These p values were based on standard error of NIE estimated using the multivariate delta method.[@vanderweeleExplanationCausalInference2015] CpG sites were converted to Entrez IDs using the missMethyl R package[@phipsonMissMethylPackageAnalyzing2016a] and the 199,243 original probes were used as the reference list. Pathways with less than 5 genes in the reference list and less than two genes in analysis list were excluded. No pathways were significantly over-represented at the 0.05 level after false discovery rate p value adjustment. However, 6 pathways were tied for the smallest q value of 0.071 (Table 3).
+No pathways were significantly over-represented at the 0.05 level after false discovery rate p value adjustment. However, 6 pathways were tied for the smallest q value of 0.071 (Table 3).
 
 ## Table 3: Reactome Pathways
 
@@ -195,7 +241,7 @@ kable(t[t$`FDR q value` < 0.1,],digits = 3)
 
 \newpage
 
-Pathway enrichemnt analysis was performed using the Enrichr (https://maayanlab.cloud/Enrichr/)[@xieGeneSetKnowledge2021] Biopathways 2019 module[@huangNCATSBioPlanetIntegrated2019], again with the top 100 candidate probes. None of the pathways were significant after p value adjustment. However, several immune system-related pathways were significant at an unadjusted p < 0.05 level, including interleukin signaling and eosinophil response to allergy. Cytochrome P450 metabolism of vitamins was also nominally significant.
+None of the pathways were significant after p value adjustment. However, several immune system-related pathways were significant at an unadjusted p < 0.05 level, including interleukin signaling and eosinophil response to allergy. Cytochrome P450 metabolism of vitamins was also nominally significant.
 
 ## Table 4: Bioplanet Enrichment (Top Ten)
 
@@ -206,7 +252,7 @@ kable(head(bioplanet,10))
 
 \newpage
 
-We searched for known meQTLs associated with the significant probes using the BIOS QTL browser (https://genenetwork.nl/biosqtlbrowser/)[@bonderDiseaseVariantsAlter2017]. However, none of the probes were found to have clinical significance. We used the biomaRt R package[@durinckMappingIdentifiersIntegration2009] to obtain UCSC gene names, we were then annotated using GeneCards[@stelzerGeneCardsSuiteGene2016] (Table 5) via the GeneBook R package[@xuGeneBookMultitypesGene2019].
+However, none of the probes were found to have clinical significance.
 
 ## Table 5: GeneCard Annotation
 
@@ -232,6 +278,7 @@ What is NIE and what do the estimates mean?
 - Limitations:
   - Non-fasting plasma samples for metabolomics, and these analyses did not account for dietary patterns.
   - Potential bias in our selection process.
+  - Is censoring a problem (i.e. we don't know exactly when seroconversion happens)?
 
 - Future directions
   - Look at DCMP instead of individual probes
