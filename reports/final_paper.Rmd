@@ -291,7 +291,9 @@ kable(head(bioplanet,10))
 
 # Discussion
 
-We found seven unique pairs of DNAm probes and metabolites with significant natural indirect mediation effects. The natural indirect effect is interpreted on the odds scale, and represents the average change in outcome if the exposure $a$ (methylation at PSV) was fixed at 1, but the mediator $t$ (metabolite at SV) were changed from the level it would take if $a^*=0$ to the level it would take if $a=1$."[@vanderweeleExplanationCausalInference2015] In other words, it is the effect of the exposure on the outcome that operates through changing the mediator. Because the NIE estimate for all seven pairs were less than 1, the NIE can be interpreted as the average reduction in the effect of the exposure that is a results of the metabolite.
+We found seven unique pairs of DNAm probes and metabolites with significant natural indirect mediation effects. The natural indirect effect is interpreted on the odds scale, and represents the average change in outcome if the exposure $a$ (methylation at PSV) was fixed at 1, but the mediator $t$ (metabolite at SV) were changed from the level it would take if $a^*=0$ to the level it would take if $a=1$."[@vanderweeleExplanationCausalInference2015] In other words, it is the effect of the exposure on the outcome that operates through changing the mediator. For all seven pairs, metabolite was positively associated with IA, and DNAm was negatively associated with both the metabolite and IA. Thus, an indirect effect less than one suggests that the protective effect of the DNAm probe is reduced by the metabolite. 
+
+
 
 - Histidine:
    - Histidine-rich loop in ZnT8 antibody [@lampasonaIsletAutoantibodies2016]
@@ -300,7 +302,7 @@ We found seven unique pairs of DNAm probes and metabolites with significant natu
    - "A particularly strong class II contributor to T1D in humans is the DQ8 variant characterized by histidine and serine, rather than the more common proline and aspartic acid residues at positions 56 and 57 of the chain".
    - "The pathways that are corrected by good glycemic control include nucleotide metabolism, lysine, histidine-glutamate-glutamine, propionate, urea cycle, cortisol, and aldosterone metabolism." [@duttaImpactLongTermPoor2016]
    - "There are 9 pathways related with T1D including histidine metabolism, glutathione metabolism, other glycan degradation, spliceosome, endocytosis, TGF-beta signaling pathway, insulin signaling pathway, GnRH signaling pathway and Vibrio cholerae infection" [@luanSharedSpecificMechanism2017]
-   - " Histamine-Deficient Mice Are Partially Protected against Type-1 Diabetes" [@]
+   - " Histamine-Deficient Mice Are Partially Protected against Type-1 Diabetes" [@alkanHistidineDecarboxylaseDeficiency2015]
 
 
 Why is there a negative indirect effect when histidine is positively associated with T1D? Is it because all of the probes are protective?
