@@ -293,13 +293,12 @@ kable(head(bioplanet,10))
 
 We found seven unique pairs of DNAm probes and metabolites with significant natural indirect mediation effects. The natural indirect effect is interpreted on the odds scale, and represents the average change in outcome if the exposure $a$ (methylation at PSV) was fixed at 1, but the mediator $t$ (metabolite at SV) were changed from the level it would take if $a^*=0$ to the level it would take if $a=1$."[@vanderweeleExplanationCausalInference2015] In other words, it is the effect of the exposure on the outcome that operates through changing the mediator. For all seven pairs, metabolite was positively associated with IA, and DNAm was negatively associated with both the metabolite and IA. Thus, an indirect effect less than one suggests that the protective effect of the DNAm probe is reduced by the metabolite. 
 
-
+Our group has previously discovered nominally significant positive associations between histidine and the risk of progression from IA to T1D.[@johnsonMetabolomicsrelatedNutrientPatterns2020]
 
 
 - Histidine:
 - Histidine-rich loop in ZnT8 antibody [@lampasonaIsletAutoantibodies2016]
 - Histidylphenylalanine, higher in T1D than T2D and higher in CKD progressors among T1D, is a competitive inhibitor of histidine decarboxylase, the enzyme responsible for histamine formation.[@mancaDifferentialMetabolomicSignatures2020]
-- Our group has previously found nominal histidine is associated with the progression from IA to T1D.[@johnsonMetabolomicsrelatedNutrientPatterns2020]
 - "A particularly strong class II contributor to T1D in humans is the DQ8 variant characterized by histidine and serine, rather than the more common proline and aspartic acid residues at positions 56 and 57 of the chain".
 - "The pathways that are corrected by good glycemic control include nucleotide metabolism, lysine, histidine-glutamate-glutamine, propionate, urea cycle, cortisol, and aldosterone metabolism." [@duttaImpactLongTermPoor2016]
 - "There are 9 pathways related with T1D including histidine metabolism, glutathione metabolism, other glycan degradation, spliceosome, endocytosis, TGF-beta signaling pathway, insulin signaling pathway, GnRH signaling pathway and Vibrio cholerae infection" [@luanSharedSpecificMechanism2017]
