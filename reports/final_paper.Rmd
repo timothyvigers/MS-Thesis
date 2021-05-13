@@ -295,28 +295,72 @@ We found seven unique pairs of DNAm probes and metabolites with significant natu
 
 
 
+
 - Histidine:
-   - Histidine-rich loop in ZnT8 antibody [@lampasonaIsletAutoantibodies2016]
-   - Histidylphenylalanine, higher in T1D than T2D and higher in CKD progressors among T1D, is a competitive inhibitor of histidine decarboxylase, the enzyme responsible for histamine formation.[@mancaDifferentialMetabolomicSignatures2020]
-   - Our group has previously found nominal histidine is associated with the progression from IA to T1D.[@johnsonMetabolomicsrelatedNutrientPatterns2020]
-   - "A particularly strong class II contributor to T1D in humans is the DQ8 variant characterized by histidine and serine, rather than the more common proline and aspartic acid residues at positions 56 and 57 of the chain".
-   - "The pathways that are corrected by good glycemic control include nucleotide metabolism, lysine, histidine-glutamate-glutamine, propionate, urea cycle, cortisol, and aldosterone metabolism." [@duttaImpactLongTermPoor2016]
-   - "There are 9 pathways related with T1D including histidine metabolism, glutathione metabolism, other glycan degradation, spliceosome, endocytosis, TGF-beta signaling pathway, insulin signaling pathway, GnRH signaling pathway and Vibrio cholerae infection" [@luanSharedSpecificMechanism2017]
-   - " Histamine-Deficient Mice Are Partially Protected against Type-1 Diabetes" [@alkanHistidineDecarboxylaseDeficiency2015]
+- Histidine-rich loop in ZnT8 antibody [@lampasonaIsletAutoantibodies2016]
+- Histidylphenylalanine, higher in T1D than T2D and higher in CKD progressors among T1D, is a competitive inhibitor of histidine decarboxylase, the enzyme responsible for histamine formation.[@mancaDifferentialMetabolomicSignatures2020]
+- Our group has previously found nominal histidine is associated with the progression from IA to T1D.[@johnsonMetabolomicsrelatedNutrientPatterns2020]
+- "A particularly strong class II contributor to T1D in humans is the DQ8 variant characterized by histidine and serine, rather than the more common proline and aspartic acid residues at positions 56 and 57 of the chain".
+- "The pathways that are corrected by good glycemic control include nucleotide metabolism, lysine, histidine-glutamate-glutamine, propionate, urea cycle, cortisol, and aldosterone metabolism." [@duttaImpactLongTermPoor2016]
+- "There are 9 pathways related with T1D including histidine metabolism, glutathione metabolism, other glycan degradation, spliceosome, endocytosis, TGF-beta signaling pathway, insulin signaling pathway, GnRH signaling pathway and Vibrio cholerae infection" [@luanSharedSpecificMechanism2017]
+- " Histamine-Deficient Mice Are Partially Protected against Type-1 Diabetes" [@alkanHistidineDecarboxylaseDeficiency2015]
+
+- PC 
+- "The lysoPC PC(18:0/0:0) was increased 1.5-fold within 9–18 mo before seroconversion (P = 0.03) and 1.3-fold within the succeeding 9 mo (P = 0.005; Fig. 5 B)." [@oresicDysregulationLipidAmino2008a]
+- Our group has previously found PC associated with reversion to IA.[@carryPhospholipidLevelsSeroconversion2021]
+- The elevated levels of lysophosphatidylcholines are thought to be a marker for increased oxidative stress before the appearance of islet autoantibodies.[@nokoffPathogenesisTypeDiabetes2013]
+
+- SM
+- Associated with kidney disease in T1D [@makinenSphingomyelinAssociatedKidney2012]
+- sphingomyelin is associated with the fastest eGFR decline[@onbehalfofthefinndianestudygroupSphingomyelinProgressionRenal2020]
+- Lipidomic analysis reveals sphingomyelin and phosphatidylcholine species associated with renal impairment and all-cause mortality in type 1 diabetes.[@tofteLipidomicAnalysisReveals2019]
+- reduction of SM expression through IC2 staining, which ran in parallel with the reduced insulin production.[@https://doi.org/10.1369/0022155413502792]
+
+- Genes
+- HLA-DQB1 is widely considered to be the major histocompatibility complex (MHC) susceptibility gene for type 1 diabetes (T1D). The literature on HLA-DQB3,HLA-DQA2andHLA-DQB2is contradictory.[@husainMHCTypeDiabetes2008]
+- GALNT9 has been linked to T2DM [@liuKeyGenesAssociated2019]
+- We also demonstrate that 5 days of a high-fat high-energy diet changes the expression of more than 3,000
+in SAT from young men with or without a LBW. These changes may contribute to development of the insulin resistance seen in these men.[@gillbergAdiposeTissueTranscriptomics2016]
 
 
-Why is there a negative indirect effect when histidine is positively associated with T1D? Is it because all of the probes are protective?
-
-
+```{r}
+apply(results,1,function(r){
+  methyl= as.character(r[1])
+  methyl = as.numeric(scale(psv[,methyl]))
+  metab = as.character(r[2])
+  metab = as.numeric(scale(sv[,metab]))
+  df = as.data.frame(cbind(methyl,metab,covariates))
+  df = df[complete.cases(df),]
+  d = df
+  regmedint_obj = 
+    regmedint(data = d,
+              ## Variables
+              yvar = "ia",
+              avar = "methyl",
+              mvar = "metab",
+              cvar = c("SEX","dr34","age","age_delta"),
+              ## Values at which effects are evaluated
+              a0 = 0,
+              a1 = 1,
+              m_cde = 1,
+              c_cond = c(1,1,1,1),
+              ## Model types
+              mreg = "linear",
+              yreg = "logistic",
+              ## Additional specification
+              interaction = T,
+              casecontrol = T)
+})
+```
 
 
 - Limitations:
-  - Non-fasting plasma samples for metabolomics, and these analyses did not account for dietary patterns.
-  - Potential bias in our selection process.
-  - Is censoring a problem (i.e. we don't know exactly when seroconversion happens)?
+- Non-fasting plasma samples for metabolomics, and these analyses did not account for dietary patterns.
+- Potential bias in our selection process.
+- Is censoring a problem (i.e. we don't know exactly when seroconversion happens)?
 
 - Future directions
-  - Look at DCMP instead of individual probes
+- Look at DCMP instead of individual probes
 
 \newpage
 
