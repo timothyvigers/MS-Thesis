@@ -22,15 +22,21 @@ library(tidyr)
 options(knitr.kable.NA = '')
 ```
 
+```{r}
+# Results data
+load("./data/mediation/methyl_psv_results.Rdata")
+load("./data/mediation/methyl_psv_candidates_p_01.Rdata")
+load("./data/mediation/metab_psv_candidates_p_01.Rdata")
+load("./data/raw_data/all_metabolite_anno.RData")
+load("./data/raw_data/annotation.850K.Rdata")
+anno = as.data.frame(anno)
+unknowns = read.csv("./data/raw_data/unknown_metabs.csv")
+unknowns = unknowns$metab
+```
+
 # Abstract
 
-## Objective:
-
-## Methods:
-
-## Results:
-
-## Conclusion:
+Environmental factors including viruses, diet, and the metabolome have been linked with islet autoimmunity (IA) prior to progression to type 1 diabetes (T1D). We measured global DNA methylation (DNAm) and untargeted metabolomics prior to seroconversion (PSV) and at serconversion (SV) in 92 IA cases and 91 controls from the Diabetes Autoimmunity Study in the Young (DAISY) study. Causal mediation models were used to identify seven DNAm probe-metabolite pairs in which the metabolite measured at SV mediated the protective effect of the DNAm probe against IA. These pairs included histidine, a metabolite known to affect T1D risk, and DNAm probes mapped to protein coding and antisense RNA genes. The top 100 DNAm probes were over-represented in six reactome pathways at the FDR < 0.1 level (q = 0.071), including transport of small molecules and inositol phosphate metabolism, and nominally enriched in Bioplanet pathways including eosinophil response to allergy (p = 0.024), and cytochrome P450 metabolism of vitamins (p = 0.018). However, the biological mechanisms underlying these causal pathways requires additional investigation.
 
 \newpage
 
@@ -139,20 +145,15 @@ med2 = grViz("
 
 ![Study Design](/Users/timvigers/Dropbox/School/MS Thesis/images/flow.png) ![Candidate Selection Criteria](/Users/timvigers/Dropbox/School/MS Thesis/images/med1.png) ![](/Users/timvigers/Dropbox/School/MS Thesis/images/med1.png)
 
+Top: A flowchart depicted progression from birth to IA to development of T1D and the DAISY study visits.
+
+Bottom: The simple linear regression filtering step identified `r nrow(methyl_psv_candidates)` with methylation measured at PSV and metabolite measured at SV, where metabolite and methylation probe were significantly associated with one another, and both associated with IA at the p < 0.01 level. An additional `r nrow(metab_psv_candidates)` pairs with metabolite measured at PSV and methylation measured at SV also continued to the mediation analysis step.
+
 \newpage
 
 # Results
 
 ```{r results functions}
-# Results data
-load("./data/mediation/methyl_psv_results.Rdata")
-load("./data/mediation/methyl_psv_candidates_p_01.Rdata")
-load("./data/mediation/metab_psv_candidates_p_01.Rdata")
-load("./data/raw_data/all_metabolite_anno.RData")
-load("./data/raw_data/annotation.850K.Rdata")
-anno = as.data.frame(anno)
-unknowns = read.csv("./data/raw_data/unknown_metabs.csv")
-unknowns = unknowns$metab
 # Results functions
 get_results = function(mod_list,q = 0.05,conf.m = "perc"){
   # Count number of significant parameters (at nominal 95% CI level)
@@ -204,7 +205,7 @@ annotate_results = function(r){
 }
 ```
 
-A total of 183 participants had both metabolite and methylation data at their PSV and SV study visits. articipant characteristics are shown in Table 1, and there were no statistically significant differences between IA cases and controls with respect to age, sex, race/ethnicity, DR3/4 status, and first-degree relative (FDR) status.
+A total of 183 participants had both metabolite and methylation data at their PSV and SV study visits. Participant characteristics are shown in Table 1, and there were no statistically significant differences between IA cases and controls with respect to age, sex, race/ethnicity, DR3/4 status, and first-degree relative (FDR) status.
 
 ## Table 1: Participant Characteristics at PSV
 
@@ -229,7 +230,7 @@ summary(t1,labelTranslations = new_labels,pfootnote = T)
 
 Out of a total 379,557,915 possible pairs, our simple linear regression filtering step identified `r nrow(methyl_psv_candidates)` with methylation measured at PSV and metabolite measured at SV, where metabolite and methylation probe were significantly associated with one another and both associated with IA at the p < 0.01 level. We also identified `r nrow(metab_psv_candidates)` pairs with metabolite measured at PSV and methylation measured at SV for mediation analysis. After FCR adjustment, 7 pairs had a confidence interval for the estimate of NIE that did not contain 0 (Table 2). Each pair contained a unique probe, but the metabolite histidine was the mediator in five of the pairs. No pairs in which metabolite was measured at PSV and methylation was measured at SV were significant after FCR adjustment.
 
-## Table 2: Methylation-Metabolite Pairs With Significant Natural Indirect Effects
+## Table 2: Methylation-Metabolite Pairs with Significant Natural Indirect Effects
 
 ```{r results='asis'}
 # Mediation results
@@ -291,38 +292,28 @@ kable(head(bioplanet,10))
 
 # Discussion
 
-We found seven unique pairs of DNAm probes and metabolites with significant natural indirect mediation effects. The natural indirect effect is interpreted on the odds scale, and represents the average change in outcome if the exposure $a$ (methylation at PSV) was fixed at 1, but the mediator $t$ (metabolite at SV) were changed from the level it would take if $a^*=0$ to the level it would take if $a=1$."[@vanderweeleExplanationCausalInference2015] In other words, it is the effect of the exposure on the outcome that operates through changing the mediator. For all seven pairs, metabolite was positively associated with IA, and DNAm was negatively associated with both the metabolite and IA. Thus, an indirect effect less than one suggests that the protective effect of the DNAm probe is reduced by the metabolite. 
+We found seven unique pairs of DNAm probes and metabolites with significant natural indirect mediation effects. The natural indirect effect is interpreted on the odds scale, and represents the average change in outcome if the exposure $a$ (methylation at PSV) was fixed at 1, but the mediator $t$ (metabolite at SV) were changed from the level it would take if $a^*=0$ to the level it would take if $a=1$."[@vanderweeleExplanationCausalInference2015] In other words, it is the effect of the exposure on the outcome that operates through changing the mediator. For all seven pairs, metabolite was positively associated with IA, and DNAm was negatively associated with both the metabolite and IA. Thus, an indirect effect less than one suggests that some of the protective effect of the DNAm probe is via reduction of the metabolite. 
 
-Our group has previously discovered nominally significant positive associations between histidine and the risk of progression from IA to T1D.[@johnsonMetabolomicsrelatedNutrientPatterns2020]
+Our group has previously discovered nominally significant positive associations between histidine and the risk of progression from IA to T1D[@johnsonMetabolomicsrelatedNutrientPatterns2020], and other studies have indicated that the histidine-glutamate-glutamine pathway can be corrected by improving glycemic control.[@duttaImpactLongTermPoor2016] Also, histidine is a precursor to histamine, a monoamine that plays an important role in inflammation and has been strongly linked to the development of T1D and other immune responses.[@alkanHistidineDecarboxylaseDeficiency2015;@mancaDifferentialMetabolomicSignatures2020] An experiment in mice knocked out for the gene encoding histidine decarboxylase (the enzyme that converts histidine to histamine) showed that decreased histamine levels were associated with a lower incidence of T1D and decreased levels of circulating IL-12 and IFN-$\gamma$.[@alkanHistidineDecarboxylaseDeficiency2015]
 
+While the connection between histamine and T1D is relatively well-studied, it remains unclear how it might mediate the protective effects of the DNAm probes we identified, and how some of those DNAm probes might affect T1D etiology. Probe cg19939773 was mediated by histidine and is associated with the HLA-DQB2 gene. HLA-DQB1 is generally understood to an important risk gene in development of T1D, but the literature on HLA-DQB2 is less clear.[@husainMHCTypeDiabetes2008] Interestingly, methylation of the KIF26A gene, which was also mediated by histidine, was found to be affected by a 5-day high-fat high-energy diet in young men, and these changes could potentially contribute to insulin resistance seen in some of the study participants with T2D.[@gillbergAdiposeTissueTranscriptomics2016] However, the connection to T1D has yet to be explored. 
 
-- Histidine:
-- Histidine-rich loop in ZnT8 antibody [@lampasonaIsletAutoantibodies2016]
-- Histidylphenylalanine, higher in T1D than T2D and higher in CKD progressors among T1D, is a competitive inhibitor of histidine decarboxylase, the enzyme responsible for histamine formation.[@mancaDifferentialMetabolomicSignatures2020]
-- "A particularly strong class II contributor to T1D in humans is the DQ8 variant characterized by histidine and serine, rather than the more common proline and aspartic acid residues at positions 56 and 57 of the chain".
-- "The pathways that are corrected by good glycemic control include nucleotide metabolism, lysine, histidine-glutamate-glutamine, propionate, urea cycle, cortisol, and aldosterone metabolism." [@duttaImpactLongTermPoor2016]
-- "There are 9 pathways related with T1D including histidine metabolism, glutathione metabolism, other glycan degradation, spliceosome, endocytosis, TGF-beta signaling pathway, insulin signaling pathway, GnRH signaling pathway and Vibrio cholerae infection" [@luanSharedSpecificMechanism2017]
-- " Histamine-Deficient Mice Are Partially Protected against Type-1 Diabetes" [@alkanHistidineDecarboxylaseDeficiency2015]
+Das et al. found using whole exome sequencing (WES) that the COL18A gene is protective against diabetic retinopathy, but the sample size was small and these results warrant replication. A relatively large study also found that polymorphisms in the collagen protein encoded by COL18A may be related to increased obesity in patients with T2D, but again the connection to T1D is unclear.[@erreraCOL18A1HighlyExpressed2008] COL18A antisense RNA is also not well understood, but mouse models have provided some evidence that other antisense RNAs, namely GLUT-2, can increase risk of diabetes,[@valeraExpressionGLUT2Antisense1994] so it is possible that increased methylation results in lower expression of risk-increasing antisense RNA.
 
-- PC 
-- "The lysoPC PC(18:0/0:0) was increased 1.5-fold within 9–18 mo before seroconversion (P = 0.03) and 1.3-fold within the succeeding 9 mo (P = 0.005; Fig. 5 B)." [@oresicDysregulationLipidAmino2008a]
-- Our group has previously found PC associated with reversion to IA.[@carryPhospholipidLevelsSeroconversion2021]
-- The elevated levels of lysophosphatidylcholines are thought to be a marker for increased oxidative stress before the appearance of islet autoantibodies.[@nokoffPathogenesisTypeDiabetes2013]
+The literature on phosphatidyl cholines (PCs) and their connection to T1D is somewhat less clear than the research on histidine. A study by Oresic et al. found that participants who went on to develop T1D had lower levels of PC at birth, but that "the lysoPC PC(18:0/0:0) was increased 1.5-fold within 9–18 mo before seroconversion."[@oresicDysregulationLipidAmino2008a] Elevated lysoPCs are believed to be a marker of oxidative stress prior to the development of islet autoantibodies[@nokoffPathogenesisTypeDiabetes2013], but our group has also found that phosphatidylcholine (16:0_18:1(9Z)) was the strongest single metabolite predictor of IA reversion. The SH3TC2 gene, which is associated with CpG site cg01604946 and mediated by the compound we identified as PC (p-32:0) or PC (o-32:1), is generally associated with demyelinating motor and sensory neuropathy, and its connection to T1D requires significantly more research. A single study by Senderek et al. reported diabetes mellitus in participants with SH3TC2 mutations, but the these are likely unrelated phenomena.[@senderekMutationsGeneEncoding2003]
 
-- SM
-- Associated with kidney disease in T1D [@makinenSphingomyelinAssociatedKidney2012]
-- sphingomyelin is associated with the fastest eGFR decline[@onbehalfofthefinndianestudygroupSphingomyelinProgressionRenal2020]
-- Lipidomic analysis reveals sphingomyelin and phosphatidylcholine species associated with renal impairment and all-cause mortality in type 1 diabetes.[@tofteLipidomicAnalysisReveals2019]
-- reduction of SM expression through IC2 staining, which ran in parallel with the reduced insulin production.[@https://doi.org/10.1369/0022155413502792]
+Like PCs, the research regarding sphingomyelins (SMs) generally suggests that they have a protective effect against developing T1D[@carryPhospholipidLevelsSeroconversion2021;@oresicDysregulationLipidAmino2008a] and mouse models have shown that SM patches on pancreatic $\beta$ cells correlate well with insulin production capacity.[@kavishwarSphingomyelinPatchesPancreatic2013] However, SMs are also strongly associated with rapid eGFR decline[@onbehalfofthefinndianestudygroupSphingomyelinProgressionRenal2020] and general nephropathy[@makinenSphingomyelinAssociatedKidney2012] in those who already have T1D. Both SMs and PCs have also been linked to renal impairment and all-cause mortality in T1D,[@tofteLipidomicAnalysisReveals2019] which indicates that understanding of their role in T1D etiology remains incomplete and specific SMs and PCs may not be protective. Like the COL18A and KIF26A genes, which were mediated by histidine, the CpG cg00390143 was associated with the GALNT9 gene which has been implicated in T2D but remains under-studied.[@liuKeyGenesAssociated2019]
 
-- Genes
-- HLA-DQB1 is widely considered to be the major histocompatibility complex (MHC) susceptibility gene for type 1 diabetes (T1D). The literature on HLA-DQB3,HLA-DQA2andHLA-DQB2is contradictory.[@husainMHCTypeDiabetes2008]
-- GALNT9 has been linked to T2DM [@liuKeyGenesAssociated2019]
-- We also demonstrate that 5 days of a high-fat high-energy diet changes the expression of more than 3,000
-in SAT from young men with or without a LBW. These changes may contribute to development of the insulin resistance seen in these men.[@gillbergAdiposeTissueTranscriptomics2016]
+This study has identified several potential causal pathways in the etiology of IA. The seven methylation sites that were significantly mediated by metabolites are potentially interesting candidates for better understanding epigenetic protection against T1D. However, the current literature does not suggest any immediately obvious biological mechanisms for these mediation effects. While the causal pathways in our mediation models are temporally reasonable in the sense that the exposure was measured prior to the mediator, a better understanding of the biological pathways is necessary to confirm these exploratory analyses.
+
+# Limitations
+
+Metabolites were measured in non-fasting samples, and these analyses did not account for dietary intake, which is the single biggest source of exposure to chemicals and nutrients.[@jonesNutritionalMetabolomicsProgress2012] Methylation of CpG sites may also affect adjacent positions, meaning that nearby differentially methylated positions (DMPs) are likely correlated with one another. Our analyses assumed independence between CpG sites, but it would be interesting to apply these techniques to differentially methylated regions (DMRs) instead. 
+
+Enrichment and over-representation tools are not designed for the integration of methylation and metabolomics data and are likely not an ideal guide for biological interpretation of our results. Also, we did not adjust the candidate selection step for multiple testing, and only adjusted p values at the second stage, which could potentially bias the results.
 
 
-```{r}
+```{r eval=FALSE}
 apply(results,1,function(r){
   methyl= as.character(r[1])
   methyl = as.numeric(scale(psv[,methyl]))
@@ -351,15 +342,6 @@ apply(results,1,function(r){
               casecontrol = T)
 })
 ```
-
-
-- Limitations:
-- Non-fasting plasma samples for metabolomics, and these analyses did not account for dietary patterns.
-- Potential bias in our selection process.
-- Is censoring a problem (i.e. we don't know exactly when seroconversion happens)?
-
-- Future directions
-- Look at DCMP instead of individual probes
 
 \newpage
 
