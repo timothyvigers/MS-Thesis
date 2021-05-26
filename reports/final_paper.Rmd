@@ -285,13 +285,15 @@ kable(t[t$`FDR q value` < 0.1,],digits = 3)
 
 \newpage
 
-None of the Biopathways were significant after p value adjustment. However, several immune system-related pathways were significant at an unadjusted p < 0.05 level, including interleukin signaling and eosinophil response to allergy. Cytochrome P450 metabolism of vitamins was also nominally significant.
+None of the Biopathways were significant after p value adjustment. However, several immune system-related pathways were significant at an unadjusted p < 0.05 level, including interleukin signaling and transmembrane transport of small molecules.
 
 ## Table 4: Bioplanet Enrichment (Top Ten)
 
 ```{r}
 bioplanet = read.delim("./results/BioPlanet_2019_table.txt")
-kable(head(bioplanet,10))
+bioplanet = bioplanet %>% separate(Overlap,c('Ref','Background'),sep = "/") %>%
+  filter(Ref >= 2)
+kable(bioplanet[bioplanet$P.value < 0.05,])
 ```
 
 \newpage
