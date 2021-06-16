@@ -2,7 +2,7 @@
 title: "A Mediation Approach to Discovering Causal Relationships Between the Metabolome and DNA Methylation in Type 1 Diabetes"
 date: ""
 author:
-- Timothy Vigers, B.A.^[UCD], Lauren A. Vanderlinden, M.S., Randi K. Johnson, Ph.D., Patrick M. Carry, M.S., Alexander M. Kaizer, Ph.D., Jill M. Norris, Ph.D., Katerina Kechris, Ph.D.
+- Timothy Vigers, B.A.^[UCD], Lauren A. Vanderlinden, M.S., Randi K. Johnson, Ph.D., Patrick M. Carry, M.S., Ivana Yang, Ph.D. Brian C. Defelice, Ph.D., Alexander M. Kaizer, Ph.D., Marian Rewers, M.D., Ph.D., Oliver Fiehn, Ph.D., Jill M. Norris, Ph.D., Katerina Kechris, Ph.D.
 bibliography: "/Users/timvigers/Dropbox/Miscellaneous/references.bib"
 csl: "/Users/timvigers/Dropbox/Miscellaneous/american-medical-association.csl"
 output: word_document
@@ -11,12 +11,16 @@ output: word_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 knitr::opts_knit$set(root.dir = "~/Dropbox/School/MS Thesis")
+library(DiagrammeRsvg)
+library(rsvg)
 library(GeneBook)
 library(arsenal)
 library(DiagrammeR)
 library(broom)
 library(data.table)
 library(knitr)
+library(regmedint)
+library(mediation)
 library(dplyr)
 library(tidyr)
 options(knitr.kable.NA = '')
@@ -24,6 +28,7 @@ options(knitr.kable.NA = '')
 
 ```{r}
 # Results data
+load("./data/raw_data/psv_sv_dataset.Rdata")
 load("./data/mediation/methyl_psv_results.Rdata")
 load("./data/mediation/methyl_psv_candidates_p_01.Rdata")
 load("./data/mediation/metab_psv_candidates_p_01.Rdata")
@@ -44,9 +49,9 @@ Environmental factors including viruses, diet, and the metabolome have been link
 
 Type 1 diabetes (T1D) is an autoimmune disease characterized by the production of antibodies which target pancreatic $\beta$-cells. This leads to both micro and macrovascular complications, and individuals with T1D are at an increased risk of experiencing a major cardiac event (e.g. stroke, angina, and myocardial infarction) and are less likely to have satisfactory outcomes after a coronary event.[@atkinsonTypeDiabetes2014] The disease currently affects over 30 million people worldwide,[@rakyanIdentificationTypeDiabetes2011] and is increasing by 3-4% per year on average.[@tuomilehtoEmergingGlobalEpidemic2013] However, the global burden of disease is difficult to estimate due to geographic variation in incidence.[@atkinsonTypeDiabetes2014;@rakyanIdentificationTypeDiabetes2011]
 
-Genetic predisposition accounts for some of the etiology of T1D (sibling relative risk has been estimated at 15)[@polychronakosUnderstandingTypeDiabetes2011] and explains some geographic variation in incidence.[@tuomilehtoEmergingGlobalEpidemic2013] Human leukocyte antigen (HLA) genes were the first to be linked to T1D and account for much of the genetic predisposition to the disease, but genome-wide association studies (GWAS) have also identified more than 40 other loci associated with increased relative risk of T1D. However, it is still unclear how these multiple loci interact with one another and the environment to produce a T1D diagnosis. In addition to the complex genetics of T1D, low monozygotic (MZ) twin concordance (approximately 50%) and studies of migrant populations support the theory that non-genetic factors play an important role in T1D development.[@rakyanIdentificationTypeDiabetes2011] 
+Genetic predisposition accounts for some of the etiology of T1D (sibling relative risk has been estimated at 15)[@polychronakosUnderstandingTypeDiabetes2011] and explains some geographic variation in incidence.[@tuomilehtoEmergingGlobalEpidemic2013] Human leukocyte antigen (HLA) genes were the first to be linked to T1D and account for much of the genetic predisposition to the disease, but genome-wide association studies (GWAS) have also identified more than 40 other T1D-associated loci.[@atkinsonTypeDiabetes2014] However, it is still unclear how these multiple loci interact with one another and the environment to produce a T1D diagnosis. In addition to the complex genetics of T1D, low monozygotic (MZ) twin concordance (approximately 50%) and studies of migrant populations support the theory that non-genetic factors play an important role in T1D development.[@rakyanIdentificationTypeDiabetes2011] 
 
-Epigenetic differences may be important contributors to T1D etiology. Changes in methylation have been associated with other autoimmune conditions, and monozygotic twins can be epigenetically heterogeneous despite sharing identical genetic code.[@rakyanIdentificationTypeDiabetes2011]  Rakyan et al. and Stefan et al. performed epigenome-wide association studies (EWAS) in discordant and concordant twin pairs and found that methylation profiles were more similar among participants with T1D than to unaffected twins. Epigenetics profiles were also combined with GWAS data and differentially expressed methylation sites were mapped to 6 well known T1D susceptibility genes, including two major histocompatibility complex (MHC) genes and several HLA loci.[@stefanDNAMethylationProfiles2014;@rakyanIdentificationTypeDiabetes2011] Finally, the Norris group has found that T1D cases had different longitudinal methylation patterns compared to controls prior to diagnosis.[@johnsonLongitudinalDNAMethylation2020] 
+Epigenetic differences may be important contributors to T1D etiology. Changes in methylation have been associated with other autoimmune conditions, and monozygotic twins can be epigenetically heterogeneous despite sharing identical genetic code.[@rakyanIdentificationTypeDiabetes2011]  Rakyan et al. and Stefan et al. performed epigenome-wide association studies (EWAS) in discordant and concordant twin pairs and found that methylation profiles were more similar among participants with T1D than to unaffected twins. Epigenetics profiles were also combined with GWAS data and differentially expressed methylation sites were mapped to 6 well known T1D susceptibility genes, including two major histocompatibility complex (MHC) genes and several HLA loci.[@stefanDNAMethylationProfiles2014;@rakyanIdentificationTypeDiabetes2011] Finally, Johnson et al. found that T1D cases had different longitudinal methylation patterns compared to controls prior to diagnosis.[@johnsonLongitudinalDNAMethylation2020] 
 
 Environmental factors including viruses, diet, and the metabolome have also been linked with islet autoimmunity (IA)[@oresicDysregulationLipidAmino2008] and T1D etiology.[@atkinsonTypeDiabetes2014] Previous studies have found associations between T1D and differentially expressed phospholipids and sphingolipids, excretion of modified amino acids, and vitamin D (and related compounds on its metabolic pathway).[@frohnertMetabolomicsChildhoodDiabetes2016;@atkinsonTypeDiabetes2014] Branched chain amino acids (BCAAs) have also been associated with insulin resistance.[@guasch-ferreMetabolomicsPrediabetesDiabetes2016]
 
@@ -54,7 +59,7 @@ Although the effects of the metabolome and DNA methylation have been studied sep
 
 Causal interpretations are of particular interest when integrating epigenetic and metabolomics data. The counterfactual framework for mediation analyses is widely used in statistics and epidemiology because it can allow for causal interpretations of observational data. Also, it provides a relatively intuitive interpretation of mediation effects by quantifying how much an outcome of interest would likely differ given a change in either the exposure or mediator.[@vanderweeleExplanationCausalInference2015] Because mediation is defined based on an assumed causal model and is not defined statistically, it is important that causality assumptions are reasonable.[@fiskeHandbookSocialPsychology2010] It is difficult to evaluate causal assumptions across the epigenome due to the lack of literature in this area, but longitudinal study designs allow for mediation models in which the exposure variable was measured prior to the mediator.
 
-The Diabetes Autoimmunity Study in the Young (DAISY) cohort follows 2547 high-risk children in Colorado for the development of IA and T1D. The study follows participants prospectively and includes blood sample collection at 9, 15, and 24 months, then annual collection until islet autoimmunity (IA) is detected. IA seroconversion (SV) is defined as the second consecutive visit at which a confirmed autoantibody to insulin, GAD65, IA-2, or ZnT8 was detected (Figure 1).[@johnsonMetaboliterelatedDietaryPatterns2019] Participants who develop IA are asked to follow an accelerated protocol with visits and blood sample collection every 3-6 months, until they are diagnosed with diabetes by a physician. Thus, DAISY's study design allows us to include exposure and mediator variables that are temporally separated in our mediation models because methylation was measured prior to seroconversion [PSV] and metabolite was measured at seroconversion [SV] (and vice versa). This aids in interpretation of the results and in theory does not violate the assumptions of a mediation analysis. 
+The Diabetes Autoimmunity Study in the Young (DAISY) follows 2547 high-risk children in Colorado for the development of IA and T1D. Follow-up includes blood sample collection at 9, 15, and 24 months, then annual collection until one or more autoantibodies are detected. Participants who test positive for one or more autoantibodies are asked to follow an accelerated protocol with visits and blood sample collection every 3-6 months. IA  is defined as two consecutive visits at which a confirmed autoantibody to insulin, GAD65, IA-2, or ZnT8 was detected (Figure 1).[@johnsonMetaboliterelatedDietaryPatterns2019] The children are followed over time, until they are diagnosed with T1D by a physician using American Diabetes Association criteria. Thus, DAISY’s study design allows us to include exposure and mediator variables that are temporally separated in our mediation models because methylation was measured prior to seroconversion [PSV] and metabolite was measured at seroconversion [SV] (and vice versa). This aids in interpretation of the results and in theory does not violate the assumptions of a mediation analysis.
 
 We discovered seven DNAm probe-metabolite pairs with significant indirect mediation effects, all of which included methylation measured prior to metabolite. Mediation models do not provide insight into biological mechanisms, but these probes are interesting candidates to improve our understanding of epigenetic protection against T1D as mediated by the metabolome.
 
@@ -64,11 +69,11 @@ We discovered seven DNAm probe-metabolite pairs with significant indirect mediat
 
 ## Study Design and Participants
 
-Study participants were recruited via newborn screening at St. Joseph's Hospital in Denver, CO, USA and from unaffected first-degree relatives (FDR) of type 1 diabetes patients. T1D cases were matched to controls by age at SV, race/ethnicity, and sample availability. The majority of participants were Non-Hispanic White (NHW), and race/ethnicity was categorized into NHW and Other for matching and analysis. All DAISY protocols were approved by the Colorado Multiple Institutional Review Board (COMIRB 92-080), and informed consent was obtained from all participants. All research was performed in accordance with relevant guidelines and regulations.[@johnsonLongitudinalDNAMethylation2020] Participants with both methylation and metabolomic measures at the visit at PSV and SV were selected for these analyses.
+Study participants were recruited via newborn screening at St. Joseph's Hospital in Denver, CO, USA and from unaffected first-degree relatives (FDR) of type 1 diabetes patients. For the DAISY nested case control study, IA cases were frequency-matched to controls by age at SV, race/ethnicity, and sample availability. The majority of participants were Non-Hispanic White (NHW), and race/ethnicity was categorized into NHW and Other for matching and analysis. All DAISY protocols were approved by the Colorado Multiple Institutional Review Board (COMIRB 92-080), and informed consent was obtained from all participants. All research was performed in accordance with relevant guidelines and regulations.[@johnsonLongitudinalDNAMethylation2020] Participants with both methylation and metabolomic measures at the visit at PSV and SV were selected for these analyses.
 
 ## DNA Methylation
 
-T1D cases and matched controls were randomly assigned to either the 450 K group (which included duplicate samples for quality control) or EPIC group (which included replicates from the 450 K set for quality control). DNA methylation was profiled in peripheral whole blood using the Infinium HumanMethylation450K Beadchip (Illumina, San Diego, CA, USA, "450 K") for the 450 K set, and the Infinium HumanMethylation EPIC Beadchip ("EPIC") was used for the EPIC set. Both sets underwent identical pre-processing using the SeSAMe pipeline[@zhouSeSAMeReducingArtifactual2018], and measurement platform was included as a covariate in all statistical models in order to account for technological batch effects. Johnson and colleagues performed quality control and removed poor quality samples and DNAm probes.  For details see Johnson et al.[@johnsonLongitudinalDNAMethylation2020]  This resulted in 199,243 quality DNA methylation probes and  183 subjects having DNAm at both PSV and SV timepoints. Normalized M values were used in all statistical analyses.
+IA cases and frequency-matched controls were randomly assigned to either the 450 K group (which included duplicate samples for quality control) or EPIC group (which included replicates from the 450 K set for quality control). DNA methylation was profiled in peripheral whole blood using the Infinium HumanMethylation450K Beadchip (Illumina, San Diego, CA, USA, "450 K") for the 450 K set, and the Infinium HumanMethylation EPIC Beadchip ("EPIC") was used for the EPIC set. Both sets underwent identical pre-processing using the SeSAMe pipeline[@zhouSeSAMeReducingArtifactual2018], and measurement platform was included as a covariate in all statistical models in order to account for technological batch effects. Johnson and colleagues performed quality control and removed poor quality samples and DNAm probes.  For details see Johnson et al.[@johnsonLongitudinalDNAMethylation2020]  This resulted in 199,243 quality DNA methylation probes and  183 subjects having DNAm at both PSV and SV timepoints. Normalized M values were used in all statistical analyses.
 
 ## Metabolomics
 
@@ -76,19 +81,19 @@ Untargeted metabolomics were obtained using gas chromatography-time of flight ma
 
 For GC-TOF data, peak picking and annotation was performed using BinBase.[@skogersonVolatileCompoundBinBase2011] CSH-QTOF MS and HILIC-QTOF MS were processed using MS-Dial[@tsugawaMSDIALDataindependentMS2015] and complex lipids were annotated with LipidBlast[@kindLipidBlastSilicoTandem2013] and Massbank of North America (http://mona.fiehnlab.ucdavis.edu/), and erroneous peaks were removed using MSFLO.[@defeliceMassSpectralFeature2017]
 
-After collection, annotation, and post-processing, metabolomics data were normalized using SERRF[@fanSystematicErrorRemoval2019],a QC-based method designed to account for batch effects. Samples with low abundance (n = 2) and metabolites with a coefficient of variation more than two absolute deviations from the median (n = 344) were excluded, and data were transformed using the box-cox method.[@boxAnalysisTransformations1964] After processing and quality checks, 2457 untargeted metabolites remained.[@johnsonMetabolomicsrelatedNutrientPatterns2020] Of these, only the 1,905 annotated metabolites were considered for these analyses.
+After collection, annotation, and post-processing, metabolomics data were normalized using SERRF[@fanSystematicErrorRemoval2019],a QC-based method designed to account for batch effects. Samples with low abundance (n = 2) and metabolites with a coefficient of variation more than two absolute deviations from the median (n = 344) were excluded, and data were transformed using the box-cox method.[@boxAnalysisTransformations1964] After processing and quality checks, 2457 untargeted metabolites remained, of which 1,905 metabolites were annotated.[@johnsonMetabolomicsrelatedNutrientPatterns2020] Only annotated metabolites were considered for these analyses.
 
 ## Statistical Analysis
 
 All analyses were performed using the R programming environment[@rcoreteamLanguageEnvironmentStatistical2021] and included only participants with methylation and metabolomics data at both their SV and PSV study visits (n = 183). To reduce the number of methylation probe-metabolite pairs examined in the mediation analysis, we performed simple linear regression to find probes and metabolites that are correlated at a nominal p < 0.01 level. Next, we performed independent logistic regression on all significantly correlated pairs to determine those that were significantly associated with the IA outcome, again at a nominal 0.01 level. Pairs in which both metabolite and probe were correlated with one another, and both variables were associated with the outcome were selected for the mediation analysis. These p values were not adjusted for multiple comparisons because this was simply a candidate filtering step intended to save computing time later on. 
 
-Model-based mediation analyses were performed using the regmedint package[@yoshidaRegmedintRegressionbasedCausal2020], an R implementation of Valeri and VanderWeele's SAS macros.[@valeriMediationAnalysisAllowing2013] We report the natural indirect effect (NIE), which can be interpreted as the effect of the exposure on the outcome that operates through changing the mediator.[@vanderweeleExplanationCausalInference2015] All regression models were adjusted for HLA-DR3/4 haplotype, age at PSV, time from PSV to SV, and sex. Confidence intervals for the NIE were calculated based on 10,000 bootstrap simulations using the percentile method and adjusted using Benjamini and Yekutieli's False Coverage–Statement Rate (FCR) method [@benjaminiFalseDiscoveryRate2005] at the q = 0.05 level (equivalent selection based on a false discovery rate-adjusted p value < 0.05).
+Model-based mediation analyses were performed using the regmedint package[@yoshidaRegmedintRegressionbasedCausal2020], an R implementation of Valeri and VanderWeele's SAS macros.[@valeriMediationAnalysisAllowing2013] We report the natural indirect effect (NIE), which can be interpreted as the effect of the exposure on the outcome that operates through changing the mediator.[@vanderweeleExplanationCausalInference2015] All regression models were adjusted for HLA-DR3/4 haplotype, age at PSV, time from PSV to SV, and sex, and included exposure mediator interaction terms as recommended by VanderWeele.[@vanderweeleExplanationCausalInference2015] Confidence intervals for the NIE were calculated based on 10,000 bootstrap simulations using the percentile method and adjusted using Benjamini and Yekutieli's False Coverage–Statement Rate (FCR) method [@benjaminiFalseDiscoveryRate2005] at the q = 0.05 level (equivalent selection based on a false discovery rate-adjusted p value < 0.05). Because DAISY is a case-control study, cases are oversampled relative to the general population. To account for this, the regmedint package fits the mediator model using only the control participants, which approximates the results from a cohort study when the outcome is rare.[@vanderweeleExplanationCausalInference2015]
 
 The natural indirect effect is interpreted on the odds scale, and represents the average change in outcome if the exposure $a$ (methylation at PSV) was fixed at 1, but the mediator $t$ (metabolite at SV) were changed from the level it would take if $a^*=0$ to the level it would take if $a=1$."[@vanderweeleExplanationCausalInference2015] In other words, it is the effect of the exposure on the outcome that operates through changing the mediator.
 
 ##  Biological Interpretation
 
-Pathway over-representation was examined the top 100 probes using PANTHER's[@miPANTHERVersion162021] implementation of Reactome pathways[@fabregatReactomePathwayKnowledgebase2018]. These p values were based on standard error of NIE estimated using the multivariate delta method.[@vanderweeleExplanationCausalInference2015] CpG sites were converted to Entrez IDs using the missMethyl R package[@phipsonMissMethylPackageAnalyzing2016a] and the 199,243 original probes were used as the reference list. Pathways with less than 5 genes in the reference list and less than two genes in analysis list were excluded.
+Pathway over-representation was examined using the top 100 probes using PANTHER's[@miPANTHERVersion162021] implementation of Reactome pathways[@fabregatReactomePathwayKnowledgebase2018]. These p values were based on standard error of NIE estimated using the multivariate delta method.[@vanderweeleExplanationCausalInference2015] CpG sites were converted to Entrez IDs using the missMethyl R package[@phipsonMissMethylPackageAnalyzing2016a] and the 199,243 original probes were used as the reference list. Pathways with less than 5 genes in the reference list and less than two genes in analysis list were excluded.
 
 Pathway enrichment analysis was performed using the Enrichr (https://maayanlab.cloud/Enrichr/)[@xieGeneSetKnowledge2021] Biopathways 2019 module[@huangNCATSBioPlanetIntegrated2019], again with the top 100 candidate probes. 
 
@@ -106,11 +111,11 @@ graph [layout = dot, rankdir = LR]
 node [shape = rectangle]
 
 birth [label = 'Birth']
+none [label = 'Abx- \n Visits']
 first [label = 'First Abx+ \n Visit']
 second [label = 'Second Abx+ \n Visit (IA)']
 psv [label = 'PSV']
 sv [label = 'SV']
-t1d [label = 'T1D']
 
 age9 [label =  '9 Month Visit']
 age15 [label =  '15 Month Visit']
@@ -119,11 +124,10 @@ annual [label =  'Annual Visits']
 accelerated [label =  'Accelerated Protocol']
 
 # edge definitions with the node IDs
-birth -> first -> second -> t1d;
+birth -> none -> first -> second -> accelerated;
 birth -> age9 -> age15 -> age24 -> annual;
 {rank=same; second -> sv}
-{rank=same; first -> psv}
-sv -> accelerated
+{rank=same; none -> psv}
 }")
 med1 = grViz("
   graph{
@@ -147,13 +151,16 @@ med2 = grViz("
   {rank = same;b -- c [label = 'p< 0.01',fontsize = 9]}
   }
 ")
+flow %>% export_svg(.) %>% charToRaw(.) %>% rsvg_png("./images/flow.png")
+med1 %>% export_svg(.) %>% charToRaw(.) %>% rsvg_png("./images/med1.png")
+med2 %>% export_svg(.) %>% charToRaw(.) %>% rsvg_png("./images/med2.png")
 ```
 
-![](/Users/timvigers/Dropbox/School/MS Thesis/images/fig1.png)
+![](/Users/timvigers/Dropbox/School/MS Thesis/images/fig1.jpg)
 
 Figure legend:
 
-A flowchart depicting progression from birth to IA to development of T1D and the DAISY study visits (a). To reduce computation time, we performed simple linear regression without covariate adjustment to identify pairs of DNAm probes and metabolites for mediation analysis. Candidate pairs were significantly associated at the p < 0.01 level, and both DNAm probe and metabolite were associated with development of IA at the p < 0.01 level. We examined pairs with DNAm measured at PSV and metabolite measured at SV (b) and pairs with metabolite measured at PSV and DNAm measured at SV (c) in separate analyses.
+A flowchart depicting progression from birth to IA and the DAISY study visits (a). To reduce computation time, we performed simple linear regression without covariate adjustment to identify pairs of DNAm probes and metabolites for mediation analysis. Candidate pairs were significantly associated at the p < 0.01 level, and both DNAm probe and metabolite were associated with development of IA at the p < 0.01 level. We examined pairs with DNAm measured at PSV and metabolite measured at SV (b) and pairs with metabolite measured at PSV and DNAm measured at SV (c) in separate analyses.
 
 \newpage
 
@@ -223,9 +230,9 @@ demo$NHW = factor(demo$NHW,levels = c(0,1),labels = c("No","Yes"))
 demo$dr34 = factor(demo$dr34,levels = c(0,1),labels = c("No","Yes"))
 demo$SEX = factor(demo$SEX)
 demo$cohortgrp2 = factor(demo$cohortgrp2,levels = c("FDR","GP"),
-                         labels = c("First-Degree Relative","General Population"))
+                         labels = c("First-Degree Relative with T1D","General Population (no first degree relative with T1D)"))
 # Table
-t1 = tableby(IAgroup2 ~ clinage+NHW+dr34+SEX+cohortgrp2,
+t1 = tableby(IAgroup2 ~ anova(clinage,digits=1)+NHW+dr34+SEX+cohortgrp2,
              data = demo)
 new_labels = list(clinage = "Age",NHW = "Non-Hispanic White",dr34 = "DR3/4",
                   SEX = "Sex",cohortgrp2 = "FDR Status")
@@ -234,7 +241,7 @@ summary(t1,labelTranslations = new_labels,pfootnote = T)
 
 \newpage
 
-Out of a total 379,557,915 possible pairs, our simple linear regression filtering step identified `r nrow(methyl_psv_candidates)` with methylation measured at PSV and metabolite measured at SV, where metabolite and methylation probe were significantly associated with one another and both associated with IA at the p < 0.01 level (Figure 1b). We also identified `r nrow(metab_psv_candidates)` pairs with metabolite measured at PSV and methylation measured at SV for mediation analysis (Figure 1c). After FCR adjustment, 7 pairs had a confidence interval for the estimate of NIE that did not contain 0 (Table 2). Each pair contained a unique probe, but the metabolite histidine was the mediator in five of the pairs. No pairs in which metabolite was measured at PSV and methylation was measured at SV were significant after FCR adjustment.
+Out of a total 379,557,915 possible pairs, our simple linear regression filtering step identified `r nrow(methyl_psv_candidates)` pairs with methylation measured at PSV and metabolite measured at SV where metabolite and methylation probe were significantly associated with one another and both associated with IA at the p < 0.01 level (Figure 1b). We also identified `r nrow(metab_psv_candidates)` pairs with metabolite measured at PSV and methylation measured at SV for mediation analysis (Figure 1c). After FCR adjustment, 7 pairs had a confidence interval for the estimate of NIE that did not contain 0 (Table 2). Each pair contained a unique probe, but the metabolite histidine was the mediator in five of the pairs. No pairs in which metabolite was measured at PSV and methylation was measured at SV were significant after FCR adjustment.
 
 ## Table 2: Methylation-Metabolite Pairs with Significant Natural Indirect Effects
 
@@ -269,7 +276,7 @@ kable(res,digits = 3)
 
 Six pathways were enriched (FDR q-value < 0.10) (Table 3), including plasma lipoprotein assembly, remodeling, and clearance and inositol phosphate metabolism. All pathways were enriched at least 2-fold.
 
-## Table 3: Reactome Pathways
+## Table 3: Reactome Pathway Enrichment
 
 ```{r}
 t = read.delim("./results/reactome_probe_background_top_100.txt")
@@ -277,8 +284,8 @@ t = t %>% arrange(final_probes_entrez_ids.csv..raw.P.value.) %>%
   select(Reactome.pathways,background_entrez_ids.csv...REFLIST..16495.,
          final_probes_entrez_ids.csv..51.,final_probes_entrez_ids.csv..expected.,
          final_probes_entrez_ids.csv..fold.Enrichment.,final_probes_entrez_ids.csv..raw.P.value.)
-colnames(t) = c("Pathway","# in Reference","# in Top 100","Expected","Fold Enrichment","p value")
-t = t %>% filter(`# in Reference` >= 5 & `# in Top 100` >= 2)
+colnames(t) = c("Pathway","# in Reference List","# in Top 100 Probes","Expected","Fold Enrichment","p value")
+t = t %>% filter(`# in Reference List` >= 5 & `# in Top 100 Probes` >= 2)
 t[,"FDR q value"] = p.adjust(t$`p value`,"fdr")
 kable(t[t$`FDR q value` < 0.1,],digits = 3)
 ```
@@ -291,39 +298,97 @@ None of the Biopathways were significant after p value adjustment. However, seve
 
 ```{r}
 bioplanet = read.delim("./results/BioPlanet_2019_table.txt")
-bioplanet = bioplanet %>% separate(Overlap,c('Ref','Background'),sep = "/") %>%
-  filter(Ref >= 2)
-kable(bioplanet[bioplanet$P.value < 0.05,])
+bioplanet = bioplanet %>% 
+  separate(Overlap,c('Background','Ref'),sep = "/") %>%
+  filter(Ref >= 2) %>%
+  rename(`# in Reference List` = Ref,`# in Top 100 Probes` = Background,
+         `p value`=P.value, `FDR q value`=Adjusted.P.value,
+         `Odds Ratio`=Odds.Ratio)
+bioplanet$Old.P.value = NULL
+bioplanet$Combined.Score = NULL
+bioplanet$Old.Adjusted.P.value = NULL
+kable(bioplanet[bioplanet$`p value` < 0.05,])
 ```
 
 \newpage
 
 # Discussion
 
-We found seven unique pairs of DNAm probes and metabolites with significant natural indirect mediation effects. For all seven pairs, metabolite was positively associated with IA, and DNAm was negatively associated with both the metabolite and IA. Thus, an indirect effect less than one suggests that some of the protective effect of the DNAm probe is via reduction of the metabolite.
+We found seven unique pairs of DNAm probes and metabolites with significant natural indirect mediation effects. For all seven pairs, metabolite was positively associated with IA, and DNAm was negatively associated with both the metabolite and IA. Thus, an indirect effect less than one suggests that some of the protective effect of the DNAm probe is via reduction of the metabolite. Because the regmedint package accounts for case-control study designs, these results would applicable to a cohort study.
 
-Our group has previously discovered nominally significant positive associations between histidine and the risk of progression from IA to T1D[@johnsonMetabolomicsrelatedNutrientPatterns2020], and other studies have indicated that the histidine-glutamate-glutamine pathway can be corrected by improving glycemic control.[@duttaImpactLongTermPoor2016] Also, histidine is a precursor to histamine, a monoamine that plays an important role in inflammation and has been strongly linked to the development of T1D and other immune responses.[@alkanHistidineDecarboxylaseDeficiency2015;@mancaDifferentialMetabolomicSignatures2020] A knock-out mouse experiment for the gene encoding histidine decarboxylase (the enzyme that converts histidine to histamine) showed that decreased histamine levels were associated with a lower incidence of T1D and decreased levels of circulating IL-12 and IFN-$\gamma$.[@alkanHistidineDecarboxylaseDeficiency2015]
+We have previously discovered nominally significant positive associations between histidine and the risk of progression from IA to T1D[@johnsonMetabolomicsrelatedNutrientPatterns2020], and other studies have indicated that the histidine-glutamate-glutamine pathway can be corrected by improving glycemic control.[@duttaImpactLongTermPoor2016] Also, histidine is a precursor to histamine, a monoamine that plays an important role in inflammation and has been strongly linked to the development of T1D and other immune responses.[@alkanHistidineDecarboxylaseDeficiency2015;@mancaDifferentialMetabolomicSignatures2020] A knock-out mouse experiment for the gene encoding histidine decarboxylase (the enzyme that converts histidine to histamine) showed that decreased histamine levels were associated with a lower incidence of T1D and decreased levels of circulating IL-12 and IFN-$\gamma$.[@alkanHistidineDecarboxylaseDeficiency2015]
 
-While the connection between histamine and T1D is relatively well-studied, it remains unclear how it might mediate the protective effects of the DNAm probes we identified, and how some of those DNAm probes might affect T1D etiology. Probe cg19939773 was mediated by histidine and is associated with the HLA-DQB2 gene. HLA-DQB1 is generally understood to an important risk gene in development of T1D, but the literature on HLA-DQB2 is less clear.[@husainMHCTypeDiabetes2008] Interestingly, methylation of the KIF26A gene, which was also mediated by histidine, was found to be affected by a 5-day high-fat high-energy diet in young men, and these changes could potentially contribute to insulin resistance seen in some of the study participants with T2D.[@gillbergAdiposeTissueTranscriptomics2016]
+While the connection between histamine and T1D is relatively well-studied, it remains unclear how it might mediate the protective effects of the DNAm probes we identified, and how some of those DNAm probes might affect T1D etiology. Probe cg19939773 was mediated by histidine and is located near the HLA-DQB2 gene. HLA-DQB1 is generally understood to be an important risk gene in development of T1D, but the literature on HLA-DQB2 is less clear.[@husainMHCTypeDiabetes2008] Interestingly, methylation of the KIF26A gene, which was also mediated by histidine, was found to be affected by a 5-day high-fat high-energy diet in young men, and these changes could potentially contribute to insulin resistance seen in some of the study participants with T2D.[@gillbergAdiposeTissueTranscriptomics2016]
 
-Das et al. found using whole exome sequencing (WES) that the COL18A gene is protective against diabetic retinopathy, but the sample size was small and these results warrant replication. A relatively large study also found that polymorphisms in the collagen protein encoded by COL18A may be related to increased obesity in patients with T2D.[@erreraCOL18A1HighlyExpressed2008] COL18A antisense RNA is also not well understood, but mouse models have provided some evidence that other antisense RNAs, namely GLUT-2, can increase risk of diabetes,[@valeraExpressionGLUT2Antisense1994] so it is possible that increased methylation results in lower expression of risk-increasing antisense RNA.
+Das et al. found using whole exome sequencing (WES) that the *COL18A* gene is protective against diabetic retinopathy, but the sample size was small and these results warrant replication.[@dasNovelGeneticVariants2018] A relatively large study also found that polymorphisms in the collagen protein encoded by COL18A may be related to increased obesity in patients with T2D.[@erreraCOL18A1HighlyExpressed2008] COL18A antisense RNA is also not well understood, but mouse models have provided some evidence that other antisense RNAs, namely GLUT-2, can increase risk of diabetes,[@valeraExpressionGLUT2Antisense1994] so it is possible that increased methylation results in lower expression of risk-increasing antisense RNA.
 
-For the other metabolites, a study by Oresic et al. found that participants who went on to develop T1D had lower levels of phosphatidyl cholines (PCs) at birth, but that "the lysoPC PC(18:0/0:0) was increased 1.5-fold within 9–18 mo before seroconversion."[@oresicDysregulationLipidAmino2008a] Elevated lysoPCs are believed to be a marker of oxidative stress prior to the development of islet autoantibodies[@nokoffPathogenesisTypeDiabetes2013], but our group has also found that phosphatidylcholine (16:0_18:1(9Z)) was the strongest single metabolite predictor of IA reversion. The SH3TC2 gene, which is associated with CpG site cg01604946 and mediated by the compound we identified as PC (p-32:0) or PC (o-32:1), is generally associated with demyelinating motor and sensory neuropathy, and its connection to T1D requires significantly more research. A single study by Senderek et al. reported diabetes mellitus in participants with SH3TC2 mutations, but these are likely unrelated phenomena.[@senderekMutationsGeneEncoding2003]
+For the other metabolites, a study by Oresic et al. found that participants who went on to develop T1D had lower levels of phosphatidyl cholines (PCs) at birth, but that "the lysoPC PC(18:0/0:0) was increased 1.5-fold within 9–18 mo before seroconversion."[@oresicDysregulationLipidAmino2008a] Elevated lysoPCs are believed to be a marker of oxidative stress prior to the development of islet autoantibodies[@nokoffPathogenesisTypeDiabetes2013], but our group has also found that phosphatidylcholine (16:0_18:1(9Z)) was the strongest single metabolite predictor of IA reversion. The SH3TC2 gene, which contains the CpG site cg01604946 and is mediated by the compound we identified as PC (p-32:0) or PC (o-32:1), is generally associated with demyelinating motor and sensory neuropathy, and its connection to T1D requires significantly more research. A single study by Senderek et al. reported diabetes mellitus in participants with SH3TC2 mutations, but these are likely unrelated phenomena.[@senderekMutationsGeneEncoding2003]
 
 Like PCs, the research regarding sphingomyelins (SMs) generally suggests that they have a protective effect against developing T1D[@carryPhospholipidLevelsSeroconversion2021;@oresicDysregulationLipidAmino2008a] and mouse models have shown that SM patches on pancreatic $\beta$ cells correlate well with insulin production capacity.[@kavishwarSphingomyelinPatchesPancreatic2013] However, SMs are also strongly associated with rapid eGFR decline[@onbehalfofthefinndianestudygroupSphingomyelinProgressionRenal2020] and general nephropathy[@makinenSphingomyelinAssociatedKidney2012] in those who already have T1D. Both SMs and PCs have also been linked to renal impairment and all-cause mortality in T1D,[@tofteLipidomicAnalysisReveals2019] which indicates that understanding of their role in T1D etiology remains incomplete and specific SMs and PCs may not be protective. Like the COL18A and KIF26A genes, which were mediated by histidine, the CpG cg00390143 was associated with the GALNT9 gene which has been implicated in T2D but remains under-studied.[@liuKeyGenesAssociated2019]
 
-This study has identified several potential causal pathways in the etiology of IA. The seven methylation sites that were significantly mediated by metabolites are potentially interesting candidates for better understanding epigenetic protection against T1D. While the causal pathways in our mediation models are temporally reasonable in the sense that the exposure was measured prior to the mediator, a better understanding of the biological pathways is necessary to confirm these exploratory analyses.
+This study has identified several potential causal pathways in the etiology of IA. The seven methylation sites that were significantly mediated by metabolites are potentially interesting candidates for elucidating epigenetic protection against T1D. While the causal pathways in our mediation models are temporally reasonable in the sense that the exposure was measured prior to the mediator, a better understanding of the biological pathways is necessary to confirm these exploratory analyses.
 
 # Limitations
 
-Metabolites were measured in non-fasting samples, and these analyses did not account for dietary intake, which is the single biggest source of exposure to chemicals and nutrients.[@jonesNutritionalMetabolomicsProgress2012] Enrichment and over-representation tools are not designed for the integration of methylation and metabolomics data and are likely not an ideal guide for biological interpretation of our results. Also, we did not adjust the candidate selection step for multiple testing, and only adjusted p values at the second stage, which could potentially bias the results. However, the best approach to p value adjustment for correlated variables in this filtering step remains an active area of statistical research and we suggest that this approach is unlikely to result in many false positives due to the adjustments used in the later stages.[@rudraPredictiveModelingMiRNAmediated2018]
+Metabolites were measured in non-fasting samples, and these analyses did not account for dietary intake, which is the single biggest source of exposure to chemicals and nutrients.[@jonesNutritionalMetabolomicsProgress2012] Thus, we were unable to adjust the statistical models for differences in dietray intake between IA cases and controls. Enrichment and over-representation tools are not designed for the integration of methylation and metabolomics data and are likely not an ideal guide for biological interpretation of our results. To our knowledge, there are no integrated enrichment or over-representation tools that are able to incorporate multiple omics datasets, so our biological interpretation relied on a somewhat ad-hoc choice of the 100 most significant DNAm probes.  
+
+Also, we did not adjust the candidate selection step for multiple testing, and only adjusted p values at the second stage, which could potentially lead to false positives. However, the best approach to p value adjustment for correlated variables in this filtering step remains an active area of statistical research and we suggest that this approach is unlikely to result in many false positives due to the adjustments used in the later stages.[@rudraPredictiveModelingMiRNAmediated2018]
 
 
 ```{r eval=FALSE}
-apply(results,1,function(r){
-  methyl= as.character(r[1])
+# Outcome and adjustment variables
+ia = as.numeric(factor(psv$IAgroup2)) - 1
+SEX = as.numeric(factor(psv$SEX)) - 1
+dr34 = psv$dr34
+age_delta = as.numeric(sv$clinage) - as.numeric(psv$clinage)
+age = as.numeric(psv$clinage)
+covariates = as.data.frame(cbind(ia,SEX,dr34,age,age_delta))
+# Results
+get_results = function(mod_list,q = 0.05,conf.m = "perc"){
+  # Count number of significant parameters (at nominal 95% CI level)
+  sig = lapply(names(mod_list),function(m){
+    mod = mod_list[[m]]
+    mod = tidy(mod,conf.int = T,conf.method = conf.m)
+    if (mod[mod$term == "tnie","conf.low"] <= 0 & mod[mod$term == "tnie","conf.high"] >= 0){
+      return(NA)
+    } else {
+      return(m)
+    }
+  })
+  sig = sig[!is.na(sig)]
+  k = length(sig)
+  m = length(mod_list)
+  BYci = 1-(k*q/m)
+  # Recalculate CIs 
+  r = lapply(sig, function(m){
+    mod = mod_list[[m]]
+    mod = tidy(mod,conf.int = T,conf.level = BYci,conf.method = conf.m)
+    if (mod[mod$term == "tnie","conf.low"] <= 0 & mod[mod$term == "tnie","conf.high"] >= 0){
+      return(NA)
+    } else {
+      return(c(strsplit(m," & ")[[1]],exp(mod[mod$term == "tnie","statistic"]),
+               exp(mod[mod$term == "tnie","conf.low"]),
+               exp(mod[mod$term == "tnie","conf.high"])))
+    }
+  })
+  r = as.data.frame(rbindlist(r[!is.na(r)]))
+  if (nrow(r)>0){
+    colnames(r) = c("Probe","Metabolite","NIE","NIE CI Low","NIE CI High")
+    r = r[order(r$NIE,decreasing = T),]
+    rownames(r) = 1: nrow(r)
+  } else {
+    r = matrix(nrow = 0,ncol = 4)
+    colnames(r) = c("Probe","Metabolite","NIE","NIE CI Low","NIE CI High")
+  }
+  r = r %>% select(Metabolite,everything())
+  return(r)
+}
+res = get_results(methyl_psv_no_unknowns)
+# Models
+models = apply(res,1,function(r){
+  methyl= as.character(r["Probe"])
   methyl = as.numeric(scale(psv[,methyl]))
-  metab = as.character(r[2])
+  metab = as.character(r["Metabolite"])
   metab = as.numeric(scale(sv[,metab]))
   df = as.data.frame(cbind(methyl,metab,covariates))
   df = df[complete.cases(df),]
@@ -346,6 +411,18 @@ apply(results,1,function(r){
               ## Additional specification
               interaction = T,
               casecontrol = T)
+})
+med_package = apply(res,1,function(r){
+  methyl= as.character(r["Probe"])
+  methyl = as.numeric(scale(psv[,methyl]))
+  metab = as.character(r["Metabolite"])
+  metab = as.numeric(scale(sv[,metab]))
+  df = as.data.frame(cbind(methyl,metab,covariates))
+  df = df[complete.cases(df),]
+  ymod = glm(formula = ia ~ methyl * metab + SEX + dr34 + age + age_delta, 
+    family = binomial(link = "logit"), data = df)
+  mmod = lm(formula = metab ~ methyl + SEX + dr34 + age + age_delta, data = df)
+  med = mediate(mmod,ymod,10000,treat = "methyl",mediator = "metab")
 })
 ```
 
