@@ -23,6 +23,8 @@ library(regmedint)
 library(mediation)
 library(dplyr)
 library(tidyr)
+library(rjson)
+library(biomaRt)
 options(knitr.kable.NA = '')
 ```
 
@@ -212,7 +214,7 @@ annotate_results = function(r){
 
 A total of 183 participants had both metabolite and methylation data at their PSV and SV study visits. Figure 1 outlines DAISY study visits. Participant characteristics are shown in Table 1, and there were no statistically significant differences between IA cases and controls with respect to age, sex, race/ethnicity, DR3/4 status, and first-degree relative (FDR) status.
 
-## Table 1: Participant Characteristics at 
+## Table 1: Participant Characteristics at First Visit
 
 ```{r results='asis'}
 demo = read.csv("./data/raw_data/demographics.csv")
@@ -271,15 +273,15 @@ Six Reactome pathways were enriched (FDR q-value < 0.10) (Table 3), including pl
 ## Table 3: Reactome Pathway Enrichment
 
 ```{r}
-t = read.delim("./results/reactome_probe_background_top_100.txt")
-t = t %>% arrange(final_probes_entrez_ids.csv..raw.P.value.) %>% 
+reactome = read.delim("./results/reactome_probe_background_top_100.txt")
+reactome = reactome %>% arrange(final_probes_entrez_ids.csv..raw.P.value.) %>% 
   select(Reactome.pathways,background_entrez_ids.csv...REFLIST..16495.,
          final_probes_entrez_ids.csv..51.,final_probes_entrez_ids.csv..expected.,
          final_probes_entrez_ids.csv..fold.Enrichment.,final_probes_entrez_ids.csv..raw.P.value.)
-colnames(t) = c("Pathway","# in Reference List","# Genes in Top 100 Probes","Expected","Fold Enrichment","p value")
-t = t %>% filter(`# in Reference List` >= 5 & `# Genes in Top 100 Probes` >= 2)
-t[,"FDR q value"] = p.adjust(t$`p value`,"fdr")
-kable(t[t$`FDR q value` < 0.1,],digits = 3)
+colnames(reactome) = c("Pathway","# in Reference List","# Genes in Top 100 Probes","Expected","Fold Enrichment","p value")
+reactome = reactome %>% filter(`# in Reference List` >= 5 & `# Genes in Top 100 Probes` >= 2)
+reactome[,"FDR q value"] = p.adjust(reactome$`p value`,"fdr")
+kable(reactome[reactome$`FDR q value` < 0.1,],digits = 3)
 ```
 
 \newpage
@@ -325,6 +327,19 @@ This study has identified several potential causal pathways in the etiology of I
 Metabolites were measured in non-fasting samples, and these analyses did not account for dietary intake, which is the single biggest source of exposure to chemicals and nutrients.59 Thus, we were unable to adjust the statistical models for differences in dietary intake between IA cases and controls. Enrichment and over-representation tools are not designed for the integration of methylation and metabolomics data. To our knowledge, there are no integrated enrichment or over-representation tools that are able to incorporate multiple omics datasets, so our biological interpretation relied on an ad-hoc choice of the 100 most significant DNAm probes.
 
 Also, we did not adjust the candidate selection step for multiple testing, and only adjusted p values at the second stage, which could potentially lead to false positives. However, the best approach to p value adjustment for correlated variables in this filtering step remains an active area of statistical research and we suggest that this approach is unlikely to result in many false positives due to the adjustments used in the later stages.[@rudraPredictiveModelingMiRNAmediated2018]
+
+## Supplemental Table 2
+
+```{r}
+# Import reactome results
+react_results <- fromJSON(file='./results/reactome_results.json')
+# For each pathway, grep genes
+entrez_ids = lapply(reactome$Pathway, function(g){
+  i = grep(sub(" \\(R-HSA-.*","",g),react_results$overrepresentation$result)[1]
+  react_results$overrepresentation$result[[i]]$input_list$mapped_id_list$mapped_id
+})
+# Get probe IDs
+```
 
 ```{r eval=FALSE}
 # Outcome and adjustment variables
