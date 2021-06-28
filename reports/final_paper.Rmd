@@ -2,7 +2,7 @@
 title: "A Mediation Approach to Discovering Causal Relationships Between the Metabolome and DNA Methylation in Type 1 Diabetes"
 date: ""
 author:
-- Timothy Vigers, B.A.^[UCD], Lauren A. Vanderlinden, M.S., Randi K. Johnson, Ph.D., Patrick M. Carry, M.S., Ivana Yang, Ph.D. Brian C. DeFelice, Ph.D., Alexander M. Kaizer, Ph.D., Marian Rewers, M.D., Ph.D., Oliver Fiehn, Ph.D., Jill M. Norris, Ph.D., Katerina Kechris, Ph.D.
+- Timothy Vigers, B.A.^[Department of Biostatistics and Informatics, Colorado School of Public Health, Aurora, Colorado, USA], Lauren A. Vanderlinden, M.S.^[Department of Biostatistics and Informatics, Colorado School of Public Health, Aurora, Colorado, USA], Randi K. Johnson, Ph.D.^[University of Colorado School of Medicine, Division of Biomedical Informatics and Personalized Medicine], Patrick M. Carry, M.S., Ivana Yang, Ph.D.^[University of Colorado School of Medicine, Division of Biomedical Informatics and Personalized Medicine], Brian C. DeFelice, Ph.D., Alexander M. Kaizer, Ph.D.^[Department of Biostatistics and Informatics, Colorado School of Public Health, Aurora, Colorado, USA], Marian Rewers, M.D., Ph.D., Oliver Fiehn, Ph.D., Jill M. Norris, Ph.D., Katerina Kechris, Ph.D.^[Department of Biostatistics and Informatics, Colorado School of Public Health, Aurora, Colorado, USA]
 bibliography: "/Users/timvigers/Dropbox/Miscellaneous/references.bib"
 csl: "/Users/timvigers/Dropbox/Miscellaneous/american-medical-association.csl"
 output: word_document
@@ -11,6 +11,9 @@ output: word_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 knitr::opts_knit$set(root.dir = "~/Dropbox/School/MS Thesis")
+library(rjson)
+library(org.Hs.eg.db)
+library(annotate)
 library(DiagrammeRsvg)
 library(rsvg)
 library(GeneBook)
@@ -23,8 +26,8 @@ library(regmedint)
 library(mediation)
 library(dplyr)
 library(tidyr)
-library(rjson)
-library(biomaRt)
+library(pheatmap)
+library(gridExtra)
 options(knitr.kable.NA = '')
 ```
 
@@ -69,7 +72,7 @@ The Diabetes Autoimmunity Study in the Young (DAISY) follows 2547 high-risk chil
 
 ## Study Design and Participants
 
-Study participants were recruited via newborn screening at St. Joseph's Hospital in Denver, CO, USA and from unaffected first-degree relatives (FDR) of type 1 diabetes patients. For the DAISY nested case control study, IA cases were frequency-matched to controls by age at SV, race/ethnicity, and sample availability. The majority of participants were Non-Hispanic White (NHW), and race/ethnicity was categorized into NHW and Other for matching and analysis. All DAISY protocols were approved by the Colorado Multiple Institutional Review Board (COMIRB 92-080), and informed consent was obtained from all participants. All research was performed in accordance with relevant guidelines and regulations.[@johnsonLongitudinalDNAMethylation2020;@rewersBetaCellAutoantibodiesInfants1996;@rewersNewbornScreeningHLA1996a] Participants with both methylation and metabolomic measures at the visit at PSV and SV were selected for these analyses (n=183).
+Study participants were recruited via newborn screening at St. Joseph's Hospital in Denver, CO, USA and from unaffected first-degree relatives (FDR) of type 1 diabetes patients. For the DAISY nested case control study, IA cases were frequency-matched to controls by age at SV, race/ethnicity, and sample availability. The majority of participants were Non-Hispanic White (NHW), and race/ethnicity was categorized into NHW and Other for matching and analysis. All DAISY protocols were approved by the Colorado Multiple Institutional Review Board (COMIRB 92-080), and informed consent was obtained from all participants. All research was performed in accordance with relevant guidelines and regulations.[@johnsonLongitudinalDNAMethylation2020;@rewersBetaCellAutoantibodiesInfants1996;@rewersNewbornScreeningHLA1996] Participants with both methylation and metabolomic measures at the visit at PSV and SV were selected for these analyses (n=183).
 
 ## DNA Methylation
 
@@ -93,7 +96,7 @@ All regression models were adjusted for HLA-DR3/4 haplotype, age at PSV, time fr
 
 ##  Biological Interpretation
 
-Pathway over-representation was performed using PANTHER's[@miPANTHERVersion162021] implementation of Reactome pathways[@fabregatReactomePathwayKnowledgebase2018] and included 60 unique genes associated with the top 100 probes from the mediation step of the analysis. These p values were based on standard error of the NIE estimated using the multivariate delta method, as opposed to being converted from bootstrap confidence intervals.[@vanderweeleExplanationCausalInference2015] CpG sites were converted to Entrez IDs using the missMethyl R package[@phipsonMissMethylPackageAnalyzing2016a] and the 199,243 original probes were used as the reference list. Pathways with less than 5 genes in the reference list and less than two genes in analysis list were excluded.
+Pathway over-representation was performed using PANTHER's[@miPANTHERVersion162021] implementation of Reactome pathways[@fabregatReactomePathwayKnowledgebase2018] and included 60 unique genes associated with the top 100 probes from the mediation step of the analysis. These p values were based on standard error of the NIE estimated using the multivariate delta method, as opposed to being converted from bootstrap confidence intervals.[@vanderweeleExplanationCausalInference2015] CpG sites were converted to Entrez IDs using the missMethyl R package[@phipsonMissMethylPackageAnalyzing2016] and the 199,243 original probes were used as the reference list. Pathways with less than 5 genes in the reference list and less than two genes in analysis list were excluded.
 
 Pathway enrichment analysis was performed using the Enrichr (https://maayanlab.cloud/Enrichr/)[@xieGeneSetKnowledge2021] Biopathways 2019 module[@huangNCATSBioPlanetIntegrated2019], again with the 60 unique genes associated with the top 100 candidate probes. 
 
@@ -140,6 +143,7 @@ med2 = grViz("
   a[label= 'Methylation at SV']
   b[label= 'Metabolite at PSV']
   c[label= 'IA']
+  d[label= 'IA']
   a -- b [label = 'p < 0.01',fontsize = 9]
   a -- c [label = 'p< 0.01',fontsize = 9]
   {rank = same;b -- c [label = 'p< 0.01',fontsize = 9]}
@@ -239,7 +243,7 @@ Out of a total 379,557,915 possible pairs, our linear regression filtering step 
 
 ## Table 2: Methylation-Metabolite Pairs with Significant Natural Indirect Effects
 
-```{r results='asis'}
+```{r results='asis',warning=FALSE}
 # Mediation results
 metab = sapply(strsplit(names(methyl_psv_results)," & "),"[",2)
 methyl_psv_no_unknowns = methyl_psv_results[-which(metab %in% unknowns)]
@@ -262,6 +266,10 @@ res = res %>%
          Type,Description,NIE,`NIE CI Low`,`NIE CI High`) %>% 
   arrange(as.numeric(sub("chr","",chr))) %>% unite(Position,chr,pos,sep = ":") %>% 
   rename(Gene = "UCSC_RefGene_Name",`Relation to Island` = "Relation_to_Island")
+# One row per pair
+t = res %>% pivot_wider(values_from = c("Type","Description"),
+                    values_fn = list(Type = ~paste(., collapse = "; "),
+                                     Description = ~paste(., collapse = "; ")))
 # Print
 kable(res,digits = 3)
 ```
@@ -278,10 +286,24 @@ reactome = reactome %>% arrange(final_probes_entrez_ids.csv..raw.P.value.) %>%
   select(Reactome.pathways,background_entrez_ids.csv...REFLIST..16495.,
          final_probes_entrez_ids.csv..51.,final_probes_entrez_ids.csv..expected.,
          final_probes_entrez_ids.csv..fold.Enrichment.,final_probes_entrez_ids.csv..raw.P.value.)
-colnames(reactome) = c("Pathway","# in Reference List","# Genes in Top 100 Probes","Expected","Fold Enrichment","p value")
-reactome = reactome %>% filter(`# in Reference List` >= 5 & `# Genes in Top 100 Probes` >= 2)
+colnames(reactome) = c("Term","# Genes in Reference List","# Genes in Top 100 Probes","Expected","Fold Enrichment","p value")
+reactome = reactome %>% filter(`# Genes in Reference List` >= 5 & `# Genes in Top 100 Probes` >= 2)
 reactome[,"FDR q value"] = p.adjust(reactome$`p value`,"fdr")
-kable(reactome[reactome$`FDR q value` < 0.1,],digits = 3)
+reactome = reactome[reactome$`FDR q value` < 0.1,]
+# Import full reactome results
+react_results <- fromJSON(file='./results/reactome_results.json')
+# For each pathway, get gene IDs
+genes = lapply(reactome$Pathway, function(g){
+  i = agrep(sub(" \\(R-HSA-.*","",g),react_results$overrepresentation$result)[1]
+  ids = react_results$overrepresentation$result[[i]]$input_list$mapped_id_list$mapped_id
+  paste(as.character(lookUp(sub("GeneID:","",ids),'org.Hs.eg', 'SYMBOL')),collapse = ";")
+})
+reactome$Genes = unlist(genes)
+# Order columns
+reactome = reactome %>% select(Term,`# Genes in Top 100 Probes`,`# Genes in Reference List`,
+                               Expected,`Fold Enrichment`,`p value`,`FDR q value`)
+# Print
+kable(reactome,digits = 3)
 ```
 
 \newpage
@@ -295,7 +317,7 @@ bioplanet = read.delim("./results/BioPlanet_2019_table.txt")
 bioplanet = bioplanet %>% 
   separate(Overlap,c('Background','Ref'),sep = "/") %>%
   filter(Ref >= 2) %>%
-  rename(`# in Reference List` = Ref,`# Genes in Top 100 Probes` = Background,
+  rename(`# Genes in Reference List` = Ref,`# Genes in Top 100 Probes` = Background,
          `p value`=P.value, `FDR q value`=Adjusted.P.value,
          `Fold Enrichment`=Odds.Ratio)
 bioplanet$Old.P.value = NULL
@@ -308,37 +330,41 @@ kable(bioplanet[bioplanet$`p value` < 0.05,])
 
 # Discussion
 
-We found seven unique pairs of CpG sites and metabolites with significant natural indirect mediation effects. For all seven pairs, the metabolite was positively associated with IA, and the methylation of the CpG site was negatively associated with both the metabolite and IA. Thus, an indirect effect less than one suggests that some of the protective effect of the CpG site is via reduction in the  metabolite levels. 
+We found seven unique pairs of CpG sites and metabolites with significant natural indirect mediation effects. These pairs included five DNAm probes mediated by histidine (a metabolite known to affect T1D risk), one probe (cg01604946) mediated by phostidyl choline p-32:0 or o-32:1, and one probe (cg00390143) mediated by sphingomyelin d34:2. For all seven pairs, the metabolite was positively associated with IA, and the methylation of the CpG site was negatively associated with both the metabolite and IA. Thus, an indirect effect less than one suggests that some of the protective effect of the CpG site is via reduction in the  metabolite levels. 
 
 We have previously discovered nominally significant positive associations between histidine and the risk of progression from IA to T1D[@johnsonMetabolomicsrelatedNutrientPatterns2020], and other studies have indicated that the histidine-glutamate-glutamine pathway can be corrected by improving glycemic control.[@duttaImpactLongTermPoor2016] Also, histidine is a precursor to histamine, a monoamine that plays an important role in inflammation and has been linked to the development of T1D and other immune responses.[@alkanHistidineDecarboxylaseDeficiency2015;@mancaDifferentialMetabolomicSignatures2020] A knock-out mouse experiment for the gene encoding histidine decarboxylase (the enzyme that converts histidine to histamine) showed that decreased histamine levels were associated with a lower incidence of T1D and decreased levels of circulating IL-12 and IFN-$\gamma$.[@alkanHistidineDecarboxylaseDeficiency2015]
 
 While the connection between histamine and T1D is relatively well-studied, it remains unclear how it might mediate the protective effects of the CpG sites we identified, and how the methylation of those CpG sites might affect T1D etiology. The association of IA and the CpG site profiled by probe cg19939773, located approximately 1.4 kb upstream of the second exon of the HLA-DQB2 gene, was mediated by histidine. HLA-DQB1 is an important risk gene in development of T1D, but the literature on HLA-DQB2 is less clear.[@husainMHCTypeDiabetes2008] Interestingly, methylation of the KIF26A gene (probe cg01172082), which was also mediated by histidine, was found to be affected by a 5-day high-fat high-energy diet in young men, and these changes could potentially contribute to insulin resistance seen in some of the study participants with T2D.[@gillbergAdiposeTissueTranscriptomics2016]
 
-Das et al. found using whole exome sequencing (WES) that the *COL18A* gene is protective against diabetic retinopathy, but the sample size was small and these results warrant replication.[@dasNovelGeneticVariants2018] A relatively large study also found that polymorphisms in the collagen protein encoded by COL18A may be related to increased obesity in patients with T2D.[@erreraCOL18A1HighlyExpressed2008] COL18A antisense RNA is also not well understood, but mouse models have provided some evidence that other antisense RNAs, namely GLUT-2, can increase risk of diabetes,[@valeraExpressionGLUT2Antisense1994] so it is possible that increased methylation results in lower expression of risk-increasing antisense RNA.
+Das et al. found using whole exome sequencing (WES) that the *COL18A* gene (which we found was mediated by histidine) is protective against diabetic retinopathy, but the sample size was small and these results warrant replication.[@dasNovelGeneticVariants2018] A relatively large study also found that polymorphisms in the collagen protein encoded by COL18A may be related to increased obesity in patients with T2D.[@erreraCOL18A1HighlyExpressed2008] COL18A antisense RNA is also not well understood, but mouse models have provided some evidence that other antisense RNAs, namely GLUT-2, can increase risk of diabetes,[@valeraExpressionGLUT2Antisense1994] so it is possible that increased methylation results in lower expression of risk-increasing antisense RNA.
 
-For the other metabolites, a study by Oresic et al. found that participants who went on to develop T1D had lower levels of phosphatidyl cholines (PCs) at birth, but that "the lysoPC PC(18:0/0:0) was increased 1.5-fold within 9–18 mo before seroconversion."[@oresicDysregulationLipidAmino2008a] Elevated lysoPCs are believed to be a marker of oxidative stress prior to the development of islet autoantibodies[@nokoffPathogenesisTypeDiabetes2013], but our group has also found that phosphatidylcholine (16:0_18:1(9Z)) was the strongest single metabolite predictor of IA reversion. The CpG site profiled by the cg01604946 probe is located within the SH3TC2 gene and its association with IA is mediated by the compound identified as PC (p-32:0) or PC (o-32:1). This phosphatidyl choline is generally associated with demyelinating motor and sensory neuropathy, and its connection to T1D requires more research.[@senderekMutationsGeneEncoding2003]
+For PC (p-32:0) or PC (o-32:1) and SM (d34:2), a study by Oresic et al. found that participants who went on to develop T1D had lower levels of phosphatidyl cholines (PCs) at birth, but that "the lysoPC PC(18:0/0:0) was increased 1.5-fold within 9–18 mo before seroconversion."[@oresicDysregulationLipidAmino2008] Elevated lysoPCs are believed to be a marker of oxidative stress prior to the development of islet autoantibodies[@nokoffPathogenesisTypeDiabetes2013], but our group has also found that phosphatidylcholine (16:0_18:1(9Z)) was the strongest single metabolite predictor of IA reversion. The CpG site profiled by the cg01604946 probe is located within the SH3TC2 gene and its association with IA is mediated by the compound identified as PC (p-32:0) or PC (o-32:1). This phosphatidyl choline is generally associated with demyelinating motor and sensory neuropathy, and its connection to T1D requires more research.[@senderekMutationsGeneEncoding2003]
 
-Like PCs, the research regarding sphingomyelins (SMs) generally suggests that they have a protective effect against developing T1D[@carryPhospholipidLevelsSeroconversion2021;@oresicDysregulationLipidAmino2008a] and mouse models have shown that SM patches on pancreatic $\beta$ cells correlate well with insulin production capacity.[@kavishwarSphingomyelinPatchesPancreatic2013] However, SMs are also strongly associated with rapid eGFR decline[@onbehalfofthefinndianestudygroupSphingomyelinProgressionRenal2020] and general nephropathy[@makinenSphingomyelinAssociatedKidney2012] in those who already have T1D. Both SMs and PCs have also been linked to renal impairment and all-cause mortality in T1D,[@tofteLipidomicAnalysisReveals2019] which indicates that understanding of their role in T1D etiology remains incomplete and specific SMs and PCs may not be protective. Like the COL18A and KIF26A genes, which were mediated by histidine, the CpG probed by cg00390143 was associated with the GALNT9 gene which has been implicated in T2D but remains under-studied.[@liuKeyGenesAssociated2019]
+Like PCs, the research regarding sphingomyelins (SMs) generally suggests that they have a protective effect against developing T1D[@carryPhospholipidLevelsSeroconversion2021;@oresicDysregulationLipidAmino2008] and mouse models have shown that SM patches on pancreatic $\beta$ cells correlate well with insulin production capacity.[@kavishwarSphingomyelinPatchesPancreatic2013] However, SMs are also strongly associated with rapid eGFR decline[@onbehalfofthefinndianestudygroupSphingomyelinProgressionRenal2020] and general nephropathy[@makinenSphingomyelinAssociatedKidney2012] in those who already have T1D. Both SMs and PCs have also been linked to renal impairment and all-cause mortality in T1D,[@tofteLipidomicAnalysisReveals2019] which indicates that understanding of their role in T1D etiology remains incomplete and specific SMs and PCs may not be protective. Like the COL18A and KIF26A genes, which were mediated by histidine, the CpG probed by cg00390143 was associated with the GALNT9 gene which has been implicated in T2D but remains under-studied.[@liuKeyGenesAssociated2019]
 
 This study has identified several potential causal pathways in the etiology of IA. The seven methylation sites that were significantly mediated by metabolites are potentially interesting candidates for elucidating epigenetic protection against T1D. While the causal pathways in our mediation models are temporally reasonable in the sense that the exposure was measured prior to the mediator, a better understanding of the biological pathways is necessary to confirm these exploratory analyses.
 
-# Limitations
+# Strengths and Limitations
 
-Metabolites were measured in non-fasting samples, and these analyses did not account for dietary intake, which is the single biggest source of exposure to chemicals and nutrients.59 Thus, we were unable to adjust the statistical models for differences in dietary intake between IA cases and controls. Enrichment and over-representation tools are not designed for the integration of methylation and metabolomics data. To our knowledge, there are no integrated enrichment or over-representation tools that are able to incorporate multiple omics datasets, so our biological interpretation relied on an ad-hoc choice of the 100 most significant DNAm probes.
+Metabolites were measured in non-fasting samples, and these analyses did not account for dietary intake, which is the single biggest source of exposure to chemicals and nutrients.[@jonesNutritionalMetabolomicsProgress2012] However, we do not expect dietary intake to differ significantly between IA cases and controls. Enrichment and over-representation tools are not designed for the integration of methylation and metabolomics data. To our knowledge, there are no integrated enrichment or over-representation tools that are able to incorporate multiple omics datasets, so our biological interpretation relied on an ad-hoc choice of the 100 most significant DNAm probes.
 
 Also, we did not adjust the candidate selection step for multiple testing, and only adjusted p values at the second stage, which could potentially lead to false positives. However, the best approach to p value adjustment for correlated variables in this filtering step remains an active area of statistical research and we suggest that this approach is unlikely to result in many false positives due to the adjustments used in the later stages.[@rudraPredictiveModelingMiRNAmediated2018]
 
-## Supplemental Table 2
+However, despite these limitations we believe that our approach is a novel method for integration of omics data in epidemiological studies. The combination of a longitudinal study design and mediation analysis allows for causal interpretation of our results, which will hopefully guide additional research into biological mechanisms. Also, this approach is not limited to DNAm and metabolite studies, and could in theory be applied to any longitudinal study with multiple omics datasets.
+
+## Supplemental Figure 1: Correlation Heatmaps
 
 ```{r}
-# Import reactome results
-react_results <- fromJSON(file='./results/reactome_results.json')
-# For each pathway, grep genes
-entrez_ids = lapply(reactome$Pathway, function(g){
-  i = grep(sub(" \\(R-HSA-.*","",g),react_results$overrepresentation$result)[1]
-  react_results$overrepresentation$result[[i]]$input_list$mapped_id_list$mapped_id
-})
-# Get probe IDs
+# First plots
+m = cor(psv[,unique(methyl_psv_candidates[,1])],sv[,unique(methyl_psv_candidates[,2])],
+        use = "pairwise.complete.obs")
+methyl_psv_heat = pheatmap(m,show_rownames = F,show_colnames = F,
+         main = "DNAm at PSV and Metabolite at SV")
+# Second
+m = cor(sv[,unique(metab_psv_candidates[,1])],psv[,unique(metab_psv_candidates[,2])],
+        use = "pairwise.complete.obs")
+metab_psv_heat = pheatmap(m,show_rownames = F,show_colnames = F,
+         main = "Metabolite at PSV and DNAm at SV")
 ```
 
 ```{r eval=FALSE}
