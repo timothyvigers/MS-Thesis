@@ -62,6 +62,28 @@ names(methyl_psv_results) = apply(methyl_psv_candidates,1,paste,collapse = " & "
 # Save
 save(methyl_psv_results,file = "./data/mediation/methyl_psv_results.Rdata")
 # Same again for metab at PSV
+# Bootstrap function
+regmed_boot = function(d,i){
+  regmedint_obj = 
+    regmedint(data = d[i,],
+              ## Variables
+              yvar = "ia",
+              avar = "metab",
+              mvar = "methyl",
+              cvar = c("SEX","dr34","age","age_delta"),
+              ## Values at which effects are evaluated
+              a0 = 0,
+              a1 = 1,
+              m_cde = 1,
+              c_cond = c(1,1,1,1),
+              ## Model types
+              mreg = "linear",
+              yreg = "logistic",
+              ## Additional specification
+              interaction = T,
+              casecontrol = T)
+  summary(regmedint_obj)$summary_myreg[,1]
+}
 # Iterate through all
 metab_psv_results = apply(metab_psv_candidates,1,function(r){
   metab = as.character(r["Var2"])
