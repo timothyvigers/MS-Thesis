@@ -3,14 +3,14 @@ title: "A Mediation Approach to Discovering Causal Relationships Between the Met
 date: ""
 author:
 - Timothy Vigers, B.A.^[Department of Biostatistics and Informatics, Colorado School of Public Health, Aurora, Colorado, USA], Lauren A. Vanderlinden, M.S.^[Department of Biostatistics and Informatics, Colorado School of Public Health, Aurora, Colorado, USA], Randi K. Johnson, Ph.D.^[University of Colorado School of Medicine, Division of Biomedical Informatics and Personalized Medicine], Patrick M. Carry, M.S., Ivana Yang, Ph.D.^[University of Colorado School of Medicine, Division of Biomedical Informatics and Personalized Medicine], Brian C. DeFelice, Ph.D., Alexander M. Kaizer, Ph.D.^[Department of Biostatistics and Informatics, Colorado School of Public Health, Aurora, Colorado, USA], Marian Rewers, M.D., Ph.D., Oliver Fiehn, Ph.D., Jill M. Norris, Ph.D., Katerina Kechris, Ph.D.^[Department of Biostatistics and Informatics, Colorado School of Public Health, Aurora, Colorado, USA]
-bibliography: "/Volumes/Vault/Miscellaneous/references.bib"
-csl: "/Volumes/Vault/Miscellaneous/american-medical-association.csl"
+bibliography: "~/Documents/Miscellaneous/references.bib"
+csl: "~/Documents/Miscellaneous/american-medical-association.csl"
 output: word_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,dpi = 600)
-knitr::opts_knit$set(root.dir = "~/Dropbox/School/MS Thesis")
+knitr::opts_knit$set(root.dir = "~/Documents/School/MS Thesis")
 library(rjson)
 library(org.Hs.eg.db)
 library(annotate)
@@ -120,7 +120,7 @@ med1 %>% export_svg(.) %>% charToRaw(.) %>% rsvg_png("./images/med1.png")
 med2 %>% export_svg(.) %>% charToRaw(.) %>% rsvg_png("./images/med2.png")
 ```
 
-![](/Users/timvigers/Dropbox/School/MS Thesis/images/fig1.jpg)
+![](/Users/timvigers/Documents/School/MS Thesis/images/fig1.jpg)
 
 Figure legend:
 
@@ -134,15 +134,15 @@ Figure legend:
 # First plots
 m = cor(psv[,unique(methyl_psv_candidates[,1])],sv[,unique(methyl_psv_candidates[,2])],
         use = "pairwise.complete.obs")
-methyl_psv_heat = pheatmap(m,show_rownames = F,show_colnames = F,
+methyl_psv_heat = pheatmap(m,show_rownames = T,show_colnames = T,
          main = "a")
-ggsave(file="/Users/timvigers/Dropbox/School/MS Thesis/images/heatmapa.tiff",plot = methyl_psv_heat,dpi = 600)
+ggsave(file="/Users/timvigers/Documents/School/MS Thesis/images/heatmapa.tiff",plot = methyl_psv_heat,dpi = 600)
 # Second
 m = cor(sv[,unique(metab_psv_candidates[,1])],psv[,unique(metab_psv_candidates[,2])],
         use = "pairwise.complete.obs")
 metab_psv_heat = pheatmap(m,show_rownames = F,show_colnames = F,
          main = "b")
-ggsave(file="/Users/timvigers/Dropbox/School/MS Thesis/images/heatmapb.tiff",plot = metab_psv_heat,dpi = 600)
+ggsave(file="/Users/timvigers/Documents/School/MS Thesis/images/heatmapb.tiff",plot = metab_psv_heat,dpi = 600)
 ```
 
 Figure legend:
@@ -467,6 +467,11 @@ med_package = apply(res,1,function(r){
   mmod = lm(formula = metab ~ methyl + SEX + dr34 + age + age_delta, data = df)
   med = mediate(mmod,ymod,10000,treat = "methyl",mediator = "metab")
 })
+# Find the probes from enrichment
+load('~/Documents/School/MS Thesis/data/mediation/methyl_psv_candidate_pvalues.Rdata')
+probes = sapply(strsplit(rownames(methyl_psv_pvalues)," & "),"[[",1)[order(methyl_psv_pvalues$methyl_psv_pvalues)]
+entrez = getMappedEntrezIDs(probes[1:100])$sig.eg
+probes[grep('3988',entrez)]
 ```
 
 \newpage
