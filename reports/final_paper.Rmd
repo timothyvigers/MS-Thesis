@@ -3,14 +3,14 @@ title: "A Mediation Approach to Discovering Causal Relationships Between the Met
 date: ""
 author:
 - Timothy Vigers, B.A.^[Department of Biostatistics and Informatics, Colorado School of Public Health, Aurora, Colorado, USA], Lauren A. Vanderlinden, M.S.^[Department of Biostatistics and Informatics, Colorado School of Public Health, Aurora, Colorado, USA], Randi K. Johnson, Ph.D.^[University of Colorado School of Medicine, Division of Biomedical Informatics and Personalized Medicine], Patrick M. Carry, M.S., Ivana Yang, Ph.D.^[University of Colorado School of Medicine, Division of Biomedical Informatics and Personalized Medicine], Brian C. DeFelice, Ph.D., Alexander M. Kaizer, Ph.D.^[Department of Biostatistics and Informatics, Colorado School of Public Health, Aurora, Colorado, USA], Marian Rewers, M.D., Ph.D., Oliver Fiehn, Ph.D., Jill M. Norris, Ph.D., Katerina Kechris, Ph.D.^[Department of Biostatistics and Informatics, Colorado School of Public Health, Aurora, Colorado, USA]
-bibliography: "~/Documents/Miscellaneous/references.bib"
-csl: "~/Documents/Miscellaneous/american-medical-association.csl"
+bibliography: "/home/tim/.local/share/Cryptomator/mnt/Vault/Miscellaneous/references.bib"
+csl: "/home/tim/.local/share/Cryptomator/mnt/Vault/Miscellaneous/multidisciplinary-digital-publishing-institute.csl"
 output: word_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,dpi = 600)
-knitr::opts_knit$set(root.dir = "~/Documents/School/MS Thesis")
+knitr::opts_knit$set(root.dir = "/home/tim/.local/share/Cryptomator/mnt/Vault/School/MS Thesis")
 library(rjson)
 library(org.Hs.eg.db)
 library(annotate)
@@ -120,7 +120,7 @@ med1 %>% export_svg(.) %>% charToRaw(.) %>% rsvg_png("./images/med1.png")
 med2 %>% export_svg(.) %>% charToRaw(.) %>% rsvg_png("./images/med2.png")
 ```
 
-![](/Users/timvigers/Documents/School/MS Thesis/images/fig1.jpg)
+![](/home/tim/.local/share/Cryptomator/mnt/Vault/School/MS Thesis/images/fig1.jpg)
 
 Figure legend:
 
@@ -134,15 +134,19 @@ Figure legend:
 # First plots
 m = cor(psv[,unique(methyl_psv_candidates[,1])],sv[,unique(methyl_psv_candidates[,2])],
         use = "pairwise.complete.obs")
-methyl_psv_heat = pheatmap(m,show_rownames = T,show_colnames = T,
-         main = "a")
-ggsave(file="/Users/timvigers/Documents/School/MS Thesis/images/heatmapa.tiff",plot = methyl_psv_heat,dpi = 600)
+methyl_psv_heat = pheatmap(m,show_rownames = F,show_colnames = F,main = "a",
+                           legend_labels = c("0.3","0.2","0.1","0","–0.1","–0.2","–0.3"),
+                           legend_breaks = c(0.3,0.2,0.1,0,-0.1,-0.2,-0.3))
+ggsave(file="/home/tim/.local/share/Cryptomator/mnt/Vault/School/MS Thesis/images/heatmapa.tiff",
+       plot = methyl_psv_heat,dpi = 600)
 # Second
 m = cor(sv[,unique(metab_psv_candidates[,1])],psv[,unique(metab_psv_candidates[,2])],
         use = "pairwise.complete.obs")
-metab_psv_heat = pheatmap(m,show_rownames = F,show_colnames = F,
-         main = "b")
-ggsave(file="/Users/timvigers/Documents/School/MS Thesis/images/heatmapb.tiff",plot = metab_psv_heat,dpi = 600)
+metab_psv_heat = pheatmap(m,show_rownames = F,show_colnames = F,main = "b",
+                          legend_labels = c("0.3","0.2","0.1","0","–0.1","–0.2","–0.3"),
+                          legend_breaks = c(0.3,0.2,0.1,0,-0.1,-0.2,-0.3))
+ggsave(file="/home/tim/.local/share/Cryptomator/mnt/Vault/School/MS Thesis/images/heatmapb.tiff",
+       plot = metab_psv_heat,dpi = 600)
 ```
 
 Figure legend:
@@ -257,8 +261,8 @@ res = res %>%
   rename(Gene = "UCSC_RefGene_Name",`Relation to Island` = "Relation_to_Island")
 # One row per pair
 res = res %>% pivot_wider(values_from = c("Type","Description"),
-                    values_fn = list(Type = ~paste(., collapse = "; "),
-                                     Description = ~paste(., collapse = "; ")))
+                          values_fn = list(Type = ~paste(., collapse = "; "),
+                                           Description = ~paste(., collapse = "; ")))
 res[res=="NA"] = ""
 # Print
 kable(res,digits = 3)
@@ -463,7 +467,7 @@ med_package = apply(res,1,function(r){
   df = as.data.frame(cbind(methyl,metab,covariates))
   df = df[complete.cases(df),]
   ymod = glm(formula = ia ~ methyl * metab + SEX + dr34 + age + age_delta, 
-    family = binomial(link = "logit"), data = df)
+             family = binomial(link = "logit"), data = df)
   mmod = lm(formula = metab ~ methyl + SEX + dr34 + age + age_delta, data = df)
   med = mediate(mmod,ymod,10000,treat = "methyl",mediator = "metab")
 })
