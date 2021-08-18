@@ -2,18 +2,13 @@
 title: "Figures for Elizabeth"
 author: "Tim Vigers"
 date: "`r format(Sys.time(), '%d %B %Y')`"
-output:
-  html_document:
-    number_sections: yes
-    toc: yes
-    toc_depth: 2
-    toc_float: yes
+output: word_document
 ---
 
 ```{r setup, include=FALSE}
 library(qqman)
 library(patchwork)
-knitr::opts_chunk$set(echo = FALSE,message = FALSE)
+knitr::opts_chunk$set(echo = FALSE,message = FALSE,dpi = 600)
 knitr::opts_knit$set(root.dir = "/home/tim/.local/share/Cryptomator/mnt/Vault/School/Statistical Genomics/EWAS/results/late_infancy")
 ```
 
@@ -31,8 +26,7 @@ wbr = read.csv("id_wbr_candidates.csv",na.strings = "")
 # Prepare for Manhattan plot
 man = bfdur[,c("probe","chr","pos","bfdur.P")]
 man$chr = as.numeric(sub("chr","",man$chr))
-manhattan(man,chr = "chr",bp = "pos",p = "bfdur.P",snp = "probe",
-                     annotatePval = 8,annotateTop = T)
+manhattan(man,chr = "chr",bp = "pos",p = "bfdur.P",snp = "probe")
 ```
 
 ## QQ Plot
@@ -43,22 +37,21 @@ qq(bfdur$bfdur.P)
 
 # WBR
 
-## 4-5 Months
+## < 4 Months
 
 ### Manhattan Plot
 
 ```{r}
 # Prepare for Manhattan plot
-man = wbr[,c("probe","chr","pos","id_wbr4.5.months.P")]
+man = wbr[,c("probe","chr","pos","id_wbr.4.months.P")]
 man$chr = as.numeric(sub("chr","",man$chr))
-manhattan(man,chr = "chr",bp = "pos",p = "id_wbr4.5.months.P",snp = "probe",
-                     annotatePval = 8,annotateTop = T)
+manhattan(man,chr = "chr",bp = "pos",p = "id_wbr.4.months.P",snp = "probe")
 ```
 
 ### QQ Plot
 
 ```{r}
-qq(wbr$id_wbr4.5.months.P)
+qq(wbr$id_wbr.4.months.P)
 ```
 
 ## 6+ Months
@@ -69,12 +62,11 @@ qq(wbr$id_wbr4.5.months.P)
 # Prepare for Manhattan plot
 man = wbr[,c("probe","chr","pos","id_wbr6..months.P")]
 man$chr = as.numeric(sub("chr","",man$chr))
-manhattan(man,chr = "chr",bp = "pos",p = "id_wbr6..months.P",snp = "probe",
-                     annotatePval = 8,annotateTop = T)
+manhattan(man,chr = "chr",bp = "pos",p = "id_wbr6..months.P",snp = "probe")
 ```
 
 ### QQ Plot
 
 ```{r}
-qq(wbrid_wbr6..months.P)
+qq(wbr$id_wbr6..months.P)
 ```
