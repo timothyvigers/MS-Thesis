@@ -16,7 +16,6 @@ load("./data/probesFromPipeline.Rdata")
 analysis_vars = c("exbf","bfdur","bfwhbar","frstdairy","id_solidfood","id_cereal",
                   "id_wbr","id_wbr6mon","id_riceoat","id_solidfruit","id_veg",
                   "id_meat","id_meat6mon")
-analysis_vars = c("bfdur","id_wbr")
 # Format function
 format_mods = function(t,v){
   t = t[,c("Estimate","Pr(>|t|)")]
