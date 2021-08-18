@@ -44,6 +44,10 @@ format_candidates = function(timepoint,variables){
     } else {
       candidates$min.P.FDR = candidates[,ps]
     }
+    # Save all
+    save_obj = paste0(var,"_candidates")
+    save_path = paste0("./results/",timepoint,"/",save_obj,".csv")
+    write.csv(candidates,file = save_path,row.names = F,na="")
     # Filter
     candidates = candidates[candidates$min.P.FDR < 0.1,]
     candidates$min.P.FDR = NULL
@@ -51,7 +55,6 @@ format_candidates = function(timepoint,variables){
     candidate_anno = anno[match(candidates$probe,rownames(anno)),]
     candidates = cbind(candidates,candidate_anno)
     # Save
-    save_obj = paste0(var,"_candidates")
     save_path = paste0("./results/",timepoint,"/",save_obj,"_FDR_only.csv")
     write.csv(candidates,file = save_path,row.names = F,na="")
   }
