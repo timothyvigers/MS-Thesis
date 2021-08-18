@@ -16,6 +16,7 @@ load("./data/probesFromPipeline.Rdata")
 analysis_vars = c("exbf","bfdur","bfwhbar","frstdairy","id_solidfood","id_cereal",
                   "id_wbr","id_wbr6mon","id_riceoat","id_solidfruit","id_veg",
                   "id_meat","id_meat6mon")
+analysis_vars = c("bfdur","id_wbr")
 # Format function
 format_mods = function(t,v){
   t = t[,c("Estimate","Pr(>|t|)")]
@@ -44,6 +45,9 @@ format_candidates = function(timepoint,variables){
     } else {
       candidates$min.P.FDR = candidates[,ps]
     }
+    # Annotate
+    candidate_anno = anno[match(candidates$probe,rownames(anno)),]
+    candidates = cbind(candidates,candidate_anno)
     # Save all
     save_obj = paste0(var,"_candidates")
     save_path = paste0("./results/",timepoint,"/",save_obj,".csv")
@@ -51,9 +55,6 @@ format_candidates = function(timepoint,variables){
     # Filter
     candidates = candidates[candidates$min.P.FDR < 0.1,]
     candidates$min.P.FDR = NULL
-    # Annotate
-    candidate_anno = anno[match(candidates$probe,rownames(anno)),]
-    candidates = cbind(candidates,candidate_anno)
     # Save
     save_path = paste0("./results/",timepoint,"/",save_obj,"_FDR_only.csv")
     write.csv(candidates,file = save_path,row.names = F,na="")
