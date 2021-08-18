@@ -1,0 +1,80 @@
+---
+title: "Figures for Elizabeth"
+author: "Tim Vigers"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_depth: 2
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+library(qqman)
+library(patchwork)
+knitr::opts_chunk$set(echo = FALSE,message = FALSE)
+knitr::opts_knit$set(root.dir = "/home/tim/.local/share/Cryptomator/mnt/Vault/School/Statistical Genomics/EWAS/results/late_infancy")
+```
+
+```{r}
+# Import data
+bfdur = read.csv("bfdur_candidates.csv",na.strings = "")
+wbr = read.csv("id_wbr_candidates.csv",na.strings = "")
+```
+
+# Breastfeeding Duration
+
+## Manhattan Plot
+
+```{r}
+# Prepare for Manhattan plot
+man = bfdur[,c("probe","chr","pos","bfdur.P")]
+man$chr = as.numeric(sub("chr","",man$chr))
+manhattan(man,chr = "chr",bp = "pos",p = "bfdur.P",snp = "probe",
+                     annotatePval = 8,annotateTop = T)
+```
+
+## QQ Plot
+
+```{r}
+qq(bfdur$bfdur.P)
+```
+
+# WBR
+
+## 4-5 Months
+
+### Manhattan Plot
+
+```{r}
+# Prepare for Manhattan plot
+man = wbr[,c("probe","chr","pos","id_wbr4.5.months.P")]
+man$chr = as.numeric(sub("chr","",man$chr))
+manhattan(man,chr = "chr",bp = "pos",p = "id_wbr4.5.months.P",snp = "probe",
+                     annotatePval = 8,annotateTop = T)
+```
+
+### QQ Plot
+
+```{r}
+qq(wbr$id_wbr4.5.months.P)
+```
+
+## 6+ Months
+
+### Manhattan Plot
+
+```{r}
+# Prepare for Manhattan plot
+man = wbr[,c("probe","chr","pos","id_wbr6..months.P")]
+man$chr = as.numeric(sub("chr","",man$chr))
+manhattan(man,chr = "chr",bp = "pos",p = "id_wbr6..months.P",snp = "probe",
+                     annotatePval = 8,annotateTop = T)
+```
+
+### QQ Plot
+
+```{r}
+qq(wbrid_wbr6..months.P)
+```
