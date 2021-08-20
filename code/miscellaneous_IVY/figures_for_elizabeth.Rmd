@@ -6,8 +6,8 @@ output: word_document
 ---
 
 ```{r setup, include=FALSE}
-library(qqman)
-library(patchwork)
+library(ggplot2)
+library(RColorBrewer)
 knitr::opts_chunk$set(echo = FALSE,message = FALSE,dpi = 600)
 knitr::opts_knit$set(root.dir = "/home/tim/.local/share/Cryptomator/mnt/Vault/School/Statistical Genomics/EWAS/results/late_infancy")
 ```
@@ -23,16 +23,37 @@ wbr = read.csv("id_wbr_candidates.csv",na.strings = "")
 ## Manhattan Plot
 
 ```{r}
+manhattan_plot = function(df,p){
+  y = sym(p)
+  ggplot(df,aes(x = factor(chr),y = -log10(!!y))) + 
+    geom_jitter(aes(color = (chr %% 2 == 0))) + 
+    geom_hline(yintercept = -log10(1e-5)) +
+    geom_hline(yintercept = -log10(5e-8),linetype = "dashed") + 
+    xlab("Chromosome") + ylab(expression(-log[10](p))) +
+    theme_bw() + scale_color_discrete(guide="none")
+}
+qq_plot = function(df,p){
+  expected = -log10(ppoints(nrow(df)))
+  ps = -log10(sort(df[,p],decreasing = F))
+  ggplot(data = NULL, aes(x = expected,y = ps)) + 
+    geom_point() + geom_abline(intercept = 0,slope = 1,color = "red") +
+    xlab(expression("Expected" -log[10](p))) +
+    ylab(expression("Observed" -log[10](p))) +
+    theme_bw()
+}
+```
+
+```{r}
 # Prepare for Manhattan plot
 man = bfdur[,c("probe","chr","pos","bfdur.P")]
 man$chr = as.numeric(sub("chr","",man$chr))
-manhattan(man,chr = "chr",bp = "pos",p = "bfdur.P",snp = "probe")
+manhattan_plot(man, p = "bfdur.P")
 ```
 
 ## QQ Plot
 
 ```{r}
-qq(bfdur$bfdur.P)
+qq_plot(bfdur,"bfdur.P")
 ```
 
 # WBR
@@ -45,13 +66,13 @@ qq(bfdur$bfdur.P)
 # Prepare for Manhattan plot
 man = wbr[,c("probe","chr","pos","id_wbr.4.months.P")]
 man$chr = as.numeric(sub("chr","",man$chr))
-manhattan(man,chr = "chr",bp = "pos",p = "id_wbr.4.months.P",snp = "probe")
+manhattan_plot(man,p = "id_wbr.4.months.P")
 ```
 
 ### QQ Plot
 
 ```{r}
-qq(wbr$id_wbr.4.months.P)
+qq_plot(wbr,"id_wbr.4.months.P")
 ```
 
 ## 6+ Months
@@ -62,11 +83,11 @@ qq(wbr$id_wbr.4.months.P)
 # Prepare for Manhattan plot
 man = wbr[,c("probe","chr","pos","id_wbr6..months.P")]
 man$chr = as.numeric(sub("chr","",man$chr))
-manhattan(man,chr = "chr",bp = "pos",p = "id_wbr6..months.P",snp = "probe")
+manhattan_plot(man,p = "id_wbr6..months.P")
 ```
 
 ### QQ Plot
 
 ```{r}
-qq(wbr$id_wbr6..months.P)
+qq_plot(wbr,"id_wbr6..months.P")
 ```
