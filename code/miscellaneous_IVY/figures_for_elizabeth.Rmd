@@ -22,12 +22,10 @@ wbr = read.csv("id_wbr_candidates.csv",na.strings = "")
 ```
 
 ```{r plot functions}
-manhattan_plot = function(df,p,annotate = NULL){
+manhattan_plot = function(df,p,annotate = NULL,solid_pval = 1e-5,dashed_pval = 5e-8){
   y = sym(p)
   plot = ggplot(df,aes(x = factor(chr),y = -log10(!!y))) + 
     geom_jitter(aes(color = (chr %% 2 == 0))) + 
-    geom_hline(yintercept = -log10(1e-5)) +
-    geom_hline(yintercept = -log10(5e-8),linetype = "dashed") + 
     xlab("Chromosome") + ylab(expression(-log[10](p))) +
     theme_bw() + scale_color_discrete(guide="none")
   if(!is.null(annotate)){
@@ -35,6 +33,12 @@ manhattan_plot = function(df,p,annotate = NULL){
     df$anno[df$probe %in% annotate] = "Yes"
     plot = plot + geom_label_repel(data = df[df$anno == "Yes",],aes(label = probe),
                                    segment.colour="black")
+  }
+  if (!is.null(solid_pval)) {
+    plot = plot + geom_hline(yintercept = -log10(solid_pval))
+  }
+  if (!is.null(dashed_pval)){
+    plot = plot + geom_hline(yintercept = -log10(dashed_pval),linetype = "dashed")
   }
   return(plot)
 }
@@ -57,12 +61,12 @@ qq_plot = function(df,p){
 # Prepare for Manhattan plot
 man = bfdur[,c("probe","chr","pos","bfdur.P")]
 man$chr = as.numeric(sub("chr","",man$chr))
-# manhattan_plot(man,p = "bfdur.P",
-#                annotate = c("cg00574958","cg19693031","cg22369607","cg23307264",
-#                             "cg24092000","cg27173510"))
-manhattan(man,chr = "chr",bp = "pos",p = "bfdur.P",snp = "probe",
-          highlight = c("cg00574958","cg19693031","cg22369607","cg23307264",
-                        "cg24092000","cg27173510"))
+manhattan_plot(man,p = "bfdur.P", solid_pval = NULL, dashed_pval = NULL,
+               annotate = c("cg00574958","cg19693031","cg22369607","cg23307264",
+                            "cg24092000","cg27173510"))
+# manhattan(man,chr = "chr",bp = "pos",p = "bfdur.P",snp = "probe",
+#           highlight = c("cg00574958","cg19693031","cg22369607","cg23307264",
+#                         "cg24092000","cg27173510"))
 ```
 
 ## QQ Plot
@@ -81,9 +85,10 @@ qq_plot(bfdur,"bfdur.P")
 # Prepare for Manhattan plot
 man = wbr[,c("probe","chr","pos","id_wbr.4.months.P")]
 man$chr = as.numeric(sub("chr","",man$chr))
-# manhattan_plot(man,p = "id_wbr.4.months.P",annotate = "cg26245086")
-manhattan(man,chr = "chr",bp = "pos",p = "id_wbr.4.months.P",snp = "probe",
-          highlight = "cg26245086")
+manhattan_plot(man,p = "id_wbr.4.months.P",solid_pval = NULL, dashed_pval = NULL,
+               annotate = "cg26245086")
+# manhattan(man,chr = "chr",bp = "pos",p = "id_wbr.4.months.P",snp = "probe",
+#           highlight = "cg26245086")
 ```
 
 ### QQ Plot
@@ -100,8 +105,8 @@ qq_plot(wbr,"id_wbr.4.months.P")
 # Prepare for Manhattan plot
 man = wbr[,c("probe","chr","pos","id_wbr6..months.P")]
 man$chr = as.numeric(sub("chr","",man$chr))
-# manhattan_plot(man,p = "id_wbr6..months.P")
-manhattan(man,chr = "chr",bp = "pos",p = "id_wbr6..months.P",snp = "probe")
+manhattan_plot(man,p = "id_wbr6..months.P",solid_pval = NULL, dashed_pval = NULL,)
+# manhattan(man,chr = "chr",bp = "pos",p = "id_wbr6..months.P",snp = "probe")
 ```
 
 ### QQ Plot
