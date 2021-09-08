@@ -12,7 +12,7 @@ library(RColorBrewer)
 library(qqman)
 knitr::opts_chunk$set(echo = FALSE,message = FALSE,dpi = 600,
                       fig.width = 8,fig.height = 8)
-knitr::opts_knit$set(root.dir = "~/Documents/School/Statistical Genomics/EWAS/results/late_infancy")
+knitr::opts_knit$set(root.dir = "C:/Users/timvigers/Dropbox/School/Statistical Genomics/EWAS/results/late_infancy")
 ```
 
 ```{r}
@@ -73,6 +73,12 @@ manhattan_plot(man,p = "bfdur.P", solid_pval = NULL, dashed_pval = NULL,
 
 ```{r}
 qq_plot(bfdur,"bfdur.P")
+```
+
+```{r}
+# Calculate genomic inflation factor
+chisq = qchisq(bfdur$bfdur.P,1,lower.tail = F)
+lambda = median(chisq)/qchisq(0.5,1)
 ```
 
 # WBR
