@@ -10,6 +10,7 @@ library(ggplot2)
 library(ggrepel)
 library(RColorBrewer)
 library(qqman)
+library(bacon)
 knitr::opts_chunk$set(echo = FALSE,message = FALSE,dpi = 600,
                       fig.width = 8,fig.height = 8)
 knitr::opts_knit$set(root.dir = "C:/Users/timvigers/Dropbox/School/Statistical Genomics/EWAS/results/late_infancy")
@@ -120,3 +121,21 @@ manhattan_plot(man,p = "id_wbr6..months.P",solid_pval = NULL, dashed_pval = NULL
 ```{r}
 qq_plot(wbr,"id_wbr6..months.P")
 ```
+
+# Inflation with the bacon package
+
+```{r}
+# Get model results
+load("bfdur_mods.RData")
+ts = sapply(mods, function(m){m["var","t value"]})
+all_es = t(sapply(mods, function(m){m[,"Estimate"]}))
+all_se = t(sapply(mods, function(m){m[,"Std. Error"]}))
+# Bacon
+bc1 = bacon(ts)
+bc2 = bacon(NULL,all_es,all_se)
+# Plot
+traces(bc1)
+fit(bc1)
+```
+
+The bacon package estimates the inflation factor for breastfeeding duration at 1.1.
