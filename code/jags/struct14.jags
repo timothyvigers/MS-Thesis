@@ -11,4 +11,4 @@ model{
 
   tau ~ dgamma(0.0001, 0.0001)
   sigma2 <- 1/tau
-  }
+  } 
